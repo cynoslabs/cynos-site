@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYNOS | TITAN V2.3.9.2</title>
+    <title>CYNOS | TITAN V2.4.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,108 +13,118 @@
             --accent: #ff003c; 
             --text: #e0e0e0;
             --success: #00ff9d;
+            --glow: rgba(255, 0, 60, 0.3);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        
         body { 
             background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; 
             margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+            transition: box-shadow 0.5s ease, background 0.5s ease;
         }
-        .hud { padding: 20px 20px 10px; background: var(--panel); border-bottom: 1px solid var(--border); z-index: 10; }
+
+        /* EFEITOS DE STATUS NEURAL */
+        body.status-critical { box-shadow: inset 0 0 100px rgba(255, 0, 0, 0.2); background: #0a0505; }
+        body.status-overclock { box-shadow: inset 0 0 100px rgba(0, 255, 157, 0.15); background: #050a08; }
+
+        body::after {
+            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;
+        }
+
+        .hud { padding: 20px 20px 10px; background: var(--panel); border-bottom: 1px solid var(--border); z-index: 10; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
         .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .logo-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 15px rgba(255,0,60,0.3); }
-        .status-badge { font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); font-weight: 800; cursor: pointer; color: var(--accent); }
+        .logo-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 15px var(--glow); cursor: pointer; transition: 0.2s; }
+        .logo-img:active { transform: scale(0.9); }
         
-        .xp-container { height: 4px; background: #222; margin: 15px 0; overflow: hidden; }
-        .xp-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.5s; }
+        .status-badge { font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .status-badge.stable { color: #fff; border-color: #555; }
+        .status-badge.critical { color: #ff4444; border-color: #ff4444; box-shadow: 0 0 10px rgba(255,68,68,0.3); }
+        .status-badge.overclock { color: var(--success); border-color: var(--success); box-shadow: 0 0 10px var(--success); }
+
+        .xp-container { height: 4px; background: #222; margin: 15px 0; overflow: hidden; border-radius: 2px; }
+        .xp-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.6s cubic-bezier(0.17, 0.67, 0.83, 0.67); box-shadow: 0 0 10px var(--accent); }
+        
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 8px; border-radius: 6px; text-align: center; }
         .stat-val { font-family: 'Space Grotesk'; font-size: 1.1rem; font-weight: 700; color: #fff; display: block; }
-        .stat-label { font-size: 0.55rem; color: var(--accent); text-transform: uppercase; }
+        .stat-label { font-size: 0.55rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
 
         .tabs { display: flex; background: var(--bg); border-bottom: 1px solid var(--border); }
-        .tab-btn { background: none; border: none; color: #555; font-family: 'Space Grotesk'; font-weight: 700; font-size: 0.8rem; padding: 15px; flex: 1; cursor: pointer; }
-        .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        .tab-btn { background: none; border: none; color: #555; font-family: 'Space Grotesk'; font-weight: 700; font-size: 0.8rem; padding: 15px; flex: 1; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); text-shadow: 0 0 10px var(--accent); }
 
         .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
 
-        /* GRID LAYOUT PARA MISSÕES (2 COLUNAS) */
-        .grid-input-missions {
-            display: grid;
-            grid-template-columns: 1fr 60px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            height: 50px;
-        }
+        /* GRID SYSTEM PARA INPUTS (O FIX) */
+        .input-box { display: grid; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 20px; height: 50px; }
+        .input-box.mission { grid-template-columns: 1fr 60px; }
+        .input-box.armory { grid-template-columns: 1fr 80px 60px; }
 
-        /* GRID LAYOUT PARA ARMORY (3 COLUNAS) */
-        .grid-input-armory {
-            display: grid;
-            grid-template-columns: 1fr 80px 60px;
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            height: 50px;
-        }
-
-        input {
-            background: transparent; border: none; color: #fff; 
-            padding: 0 15px; font-family: 'JetBrains Mono'; font-size: 0.85rem;
-            width: 100%; height: 100%;
-        }
+        input { background: transparent; border: none; color: #fff; padding: 0 15px; font-family: 'JetBrains Mono'; font-size: 0.85rem; height: 100%; width: 100%; }
         input:not(:last-child) { border-right: 1px solid var(--border); }
 
-        .btn-action {
-            background: var(--accent); color: #fff; border: none;
-            width: 60px; height: 100%; font-weight: 900; font-size: 1.4rem;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-        .btn-action:active { background: #b3002a; }
+        .btn-add { background: var(--accent); color: #fff; border: none; font-weight: 900; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-add:active { background: #b3002a; }
 
-        .card { background: var(--panel); border-left: 3px solid var(--border); padding: 15px; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
-        .card.done { border-left-color: var(--success); opacity: 0.5; }
-        .check-circle { width: 22px; height: 22px; border: 2px solid #444; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
-        .done .check-circle { background: var(--success); border-color: var(--success); }
-        .txt { flex: 1; font-size: 0.85rem; color: #fff; }
+        .card { background: var(--panel); border-left: 3px solid var(--border); padding: 15px; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { opacity:0; transform: translateX(-10px); } to { opacity:1; transform: translateX(0); } }
+        .card.done { border-left-color: var(--success); opacity: 0.4; }
+        .check-circle { width: 22px; height: 22px; border: 2px solid #444; border-radius: 50%; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+        .done .check-circle { background: var(--success); border-color: var(--success); box-shadow: 0 0 10px var(--success); }
+        
+        .txt { flex: 1; font-size: 0.85rem; color: #eee; }
         .price { color: var(--accent); font-weight: 800; font-size: 0.85rem; }
-        .buy-btn { background: var(--accent); border: none; color: #fff; padding: 8px 15px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; }
-        .del-btn { background: none; border: none; color: #444; font-size: 1.4rem; cursor: pointer; }
+        .buy-btn { background: var(--accent); border: none; color: #fff; padding: 8px 15px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; cursor: pointer; }
+        .del-btn { background: none; border: none; color: #444; font-size: 1.5rem; cursor: pointer; padding: 0 5px; }
+        .del-btn:hover { color: var(--accent); }
 
-        #toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 25px; border-radius: 20px; font-weight: 800; transition: 0.4s; z-index: 2000; }
+        /* MODAIS */
+        #toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 25px; border-radius: 20px; font-weight: 800; transition: 0.4s; z-index: 2000; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         #toast.active { bottom: 20px; }
         
-        #status-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2500; display: none; align-items: center; justify-content: center; }
-        .status-selector { background: var(--panel); padding: 25px; border-radius: 12px; width: 85%; border: 1px solid var(--border); }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2500; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+        .modal-box { background: var(--panel); padding: 25px; border-radius: 12px; width: 85%; border: 1px solid var(--border); }
         .status-option { padding: 15px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; text-align: center; cursor: pointer; font-weight: 800; }
+        
+        .danger-box { border: 2px solid red; }
     </style>
 </head>
 <body>
 
-    <div id="toast">V2.3.9.2 STABILIZED</div>
+    <div id="toast">SYSTEM ONLINE</div>
 
-    <div id="status-modal">
-        <div class="status-selector">
-            <h3 style="text-align:center;">MÓDULO NEURAL</h3>
+    <div id="status-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="text-align:center; font-size: 0.9rem; margin-bottom: 15px; letter-spacing: 2px;">STATUS NEURAL</h3>
             <div class="status-option" style="color: #ff4444;" onclick="setStatus('critical')">🔴 CRÍTICO</div>
             <div class="status-option" style="color: #fff;" onclick="setStatus('stable')">⚪ ESTÁVEL</div>
             <div class="status-option" style="color: #00ff9d;" onclick="setStatus('overclock')">🟢 OVERCLOCK</div>
         </div>
     </div>
 
+    <div id="danger-modal" class="modal-overlay">
+        <div class="modal-box danger-box">
+            <h2 style="color:red; text-align:center; font-size: 1.2rem;">⚠️ WIPE DATA?</h2>
+            <p style="font-size: 0.7rem; text-align:center; color: #666;">Isso apagará todo seu progresso na CYNOS LABS.</p>
+            <div style="display:flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeModals()" style="flex:1; padding:12px; background:#222; color:#fff; border:none; border-radius:5px;">CANCELAR</button>
+                <button onclick="hardReset()" style="flex:1; padding:12px; background:red; color:#fff; border:none; border-radius:5px;">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+
     <div class="hud">
         <div class="brand">
             <div style="display:flex; align-items:center; gap:15px;">
-                <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img">
+                <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img" onclick="secretTrigger()">
                 <div>
-                    <h1 style="margin:0; font-size: 1.1rem;">CYNOS LABS</h1>
-                    <small style="color:#555; font-size: 0.5rem;">TITAN PROTOCOL v2.3.9.2</small>
+                    <h1 style="margin:0; font-size: 1.1rem; letter-spacing:1px;">CYNOS LABS</h1>
+                    <small style="color:#555; font-size: 0.5rem; font-weight:800;">TITAN PROTOCOL v2.4.0</small>
                 </div>
             </div>
-            <div id="current-status-badge" class="status-badge" onclick="openStatus()">ESTÁVEL</div>
+            <div id="current-status-badge" class="status-badge stable" onclick="openStatus()">ESTÁVEL</div>
         </div>
         <div class="xp-container"><div class="xp-bar" id="xp-b"></div></div>
         <div class="stats-grid">
@@ -131,48 +141,82 @@
 
     <div class="content">
         <div id="view-missions">
-            <div class="grid-input-missions">
-                <input type="text" id="input-task" placeholder="Nova missão..." onkeypress="handleEnter(event, addTask)">
-                <button class="btn-action" onclick="addTask()">+</button>
+            <div class="input-box mission">
+                <input type="text" id="input-task" placeholder="Identificar missão..." onkeypress="handleEnter(event, addTask)">
+                <button class="btn-add" onclick="addTask()">+</button>
             </div>
             <div id="list-missions"></div>
         </div>
 
         <div id="view-armory" style="display:none">
-            <div class="grid-input-armory">
-                <input type="text" id="input-reward" placeholder="Item...">
+            <div class="input-box armory">
+                <input type="text" id="input-reward" placeholder="Item de Recompensa...">
                 <input type="number" id="input-cost" placeholder="$">
-                <button class="btn-action" onclick="addReward()">$</button>
+                <button class="btn-add" onclick="addReward()">$</button>
             </div>
             <div id="list-armory"></div>
         </div>
 
         <div id="view-logs" style="display:none">
-            <div class="stat-card" style="margin-bottom: 15px;"><span class="stat-label">Ops Concluídas</span><span class="stat-val" id="total-ops">0</span></div>
-            <div id="log-list" style="font-size: 0.7rem; color: #666;"></div>
+            <div class="stat-card" style="margin-bottom: 15px;"><span class="stat-label">Total de Ops</span><span class="stat-val" id="total-ops">0</span></div>
+            <div id="log-list" style="font-size: 0.65rem; color: #555;"></div>
         </div>
     </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('cynos_v23')) || { 
+    // ENGINE DE ÁUDIO REINSERIDA
+    const AudioEngine = {
+        ctx: null,
+        init() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
+        play(type) {
+            this.init(); if(this.ctx.state === 'suspended') this.ctx.resume();
+            const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
+            osc.connect(gain); gain.connect(this.ctx.destination);
+            if(type === 'click') { 
+                osc.type='sine'; osc.frequency.setValueAtTime(800, this.ctx.currentTime); 
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime); osc.start(); osc.stop(this.ctx.currentTime+0.1); 
+            }
+            if(type === 'up') {
+                osc.type='square'; osc.frequency.setValueAtTime(400, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime+0.3);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime); osc.start(); osc.stop(this.ctx.currentTime+0.4);
+            }
+        }
+    };
+
+    let db = JSON.parse(localStorage.getItem('cynos_v24')) || { 
         lvl: 1, xp: 0, coins: 0, missions: [], armory: [], logs: [], totalOps: 0, status: 'stable' 
     };
 
-    const save = () => { localStorage.setItem('cynos_v23', JSON.stringify(db)); updateHUD(); };
+    const save = () => { localStorage.setItem('cynos_v24', JSON.stringify(db)); updateHUD(); };
     const notify = (msg) => { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('active'); setTimeout(()=>t.classList.remove('active'), 2500); };
 
     function addLog(msg) {
         const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
         db.logs.unshift(`[${time}] ${msg}`);
-        if(db.logs.length > 30) db.logs.pop();
+        if(db.logs.length > 40) db.logs.pop();
     }
 
-    function openStatus() { document.getElementById('status-modal').style.display = 'flex'; }
+    // MODAIS E SEGREDOS
+    let logoClicks = 0; let logoTimer;
+    function secretTrigger() {
+        AudioEngine.play('click');
+        logoClicks++; clearTimeout(logoTimer);
+        logoTimer = setTimeout(() => logoClicks = 0, 1000);
+        if(logoClicks >= 5) document.getElementById('danger-modal').style.display = 'flex';
+    }
+    function openStatus() { AudioEngine.play('click'); document.getElementById('status-modal').style.display = 'flex'; }
+    function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+    function hardReset() { localStorage.removeItem('cynos_v24'); location.reload(); }
+
     function setStatus(s) {
         db.status = s;
-        document.getElementById('current-status-badge').innerText = s.toUpperCase();
-        document.getElementById('status-modal').style.display = 'none';
-        save();
+        document.body.className = 'status-' + s;
+        const b = document.getElementById('current-status-badge');
+        b.className = 'status-badge ' + s;
+        b.innerText = s.toUpperCase();
+        addLog(`NEURAL STATE: ${s.toUpperCase()}`);
+        closeModals(); save();
     }
 
     function updateHUD() {
@@ -181,29 +225,33 @@
         document.getElementById('xp-b').style.width = (db.xp / (db.lvl * 100) * 100) + '%';
     }
 
+    // AÇÕES
     function addTask() {
         const i = document.getElementById('input-task');
         if(!i.value.trim()) return;
+        AudioEngine.play('click');
         db.missions.unshift({ id: Date.now(), txt: i.value, done: false });
-        addLog(`ADD: ${i.value}`);
+        addLog(`MIS-ADD: ${i.value}`);
         i.value = ''; save(); renderMissions();
     }
 
     function toggleTask(id) {
         const t = db.missions.find(x => x.id === id);
         if(!t || t.done) return;
+        AudioEngine.play('click');
         t.done = true;
         let gain = db.status === 'overclock' ? 40 : 25;
         db.xp += gain; db.coins += gain; db.totalOps++;
-        addLog(`DONE: ${t.txt}`);
+        addLog(`MIS-DONE: ${t.txt} (+${gain}CR)`);
         notify(`+${gain} CR | +${gain} XP`);
-        if(db.xp >= db.lvl * 100) { db.xp = 0; db.lvl++; notify("SISTEMA UPGRADED!"); }
+        if(db.xp >= db.lvl * 100) { db.xp = 0; db.lvl++; AudioEngine.play('up'); notify("LEVEL UP!"); }
         save(); renderMissions();
     }
 
     function addReward() {
         const n = document.getElementById('input-reward'), c = document.getElementById('input-cost');
         if(!n.value || !c.value) return;
+        AudioEngine.play('click');
         db.armory.push({ id: Date.now(), txt: n.value, cost: parseInt(c.value) });
         addLog(`ARM-ADD: ${n.value}`);
         n.value=''; c.value=''; save(); renderArmory();
@@ -211,15 +259,19 @@
 
     function buyItem(id) {
         const i = db.armory.find(x => x.id === id);
-        if(db.coins >= i.cost) { db.coins -= i.cost; addLog(`BUY: ${i.txt}`); notify("RECOMPENSA LIBERADA"); save(); renderArmory(); }
-        else notify("SALDO INSUFICIENTE");
+        if(db.coins >= i.cost) { 
+            db.coins -= i.cost; AudioEngine.play('up'); 
+            addLog(`BOUGHT: ${i.txt}`); notify("RECOMPENSA LIBERADA"); save(); renderArmory(); 
+        } else { notify("CRÉDITOS INSUFICIENTES"); }
     }
 
-    function delItem(id, type) {
-        db[type] = db[type].filter(x => x.id !== id); save(); 
-        type==='missions'?renderMissions():renderArmory();
+    function delItem(id, type) { 
+        AudioEngine.play('click');
+        db[type] = db[type].filter(x => x.id !== id); 
+        save(); type==='missions'?renderMissions():renderArmory(); 
     }
 
+    // RENDERS
     function renderMissions() {
         const l = document.getElementById('list-missions'); l.innerHTML = '';
         db.missions.forEach(t => {
@@ -244,6 +296,7 @@
     }
 
     function switchTab(t, b) {
+        AudioEngine.play('click');
         document.getElementById('view-missions').style.display = t==='missions'?'block':'none';
         document.getElementById('view-armory').style.display = t==='armory'?'block':'none';
         document.getElementById('view-logs').style.display = t==='logs'?'block':'none';
@@ -252,7 +305,10 @@
     }
 
     function handleEnter(e, f) { if(e.key === 'Enter') f(); }
-    updateHUD(); renderMissions(); renderArmory();
+    
+    // STARTUP
+    setStatus(db.status); updateHUD(); renderMissions(); renderArmory();
+    document.body.addEventListener('click', () => AudioEngine.init(), {once:true});
 </script>
 </body>
 </html>
