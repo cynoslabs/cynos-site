@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYNOS | TITAN V2.3</title>
+    <title>CYNOS | TITAN V2.3.9</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -13,67 +13,44 @@
             --accent: #ff003c; 
             --text: #e0e0e0;
             --success: #00ff9d;
-            --warning: #ffcc00;
             --glow: rgba(255, 0, 60, 0.3);
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
         body { 
             background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; 
             margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
-            transition: box-shadow 0.5s ease;
         }
-        body.status-critical { box-shadow: inset 0 0 100px rgba(255, 0, 0, 0.2); }
-        body.status-overclock { box-shadow: inset 0 0 100px rgba(0, 255, 157, 0.15); }
-
         body::after {
             content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            z-index: 999; background-size: 100% 2px, 3px 100%; pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
+            z-index: 999; pointer-events: none;
         }
-
-        .hud { 
-            padding: 20px 20px 10px; background: var(--panel); border-bottom: 1px solid var(--border); 
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5); z-index: 10;
-        }
+        .hud { padding: 20px 20px 10px; background: var(--panel); border-bottom: 1px solid var(--border); z-index: 10; }
         .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
-        .brand-left { display: flex; align-items: center; gap: 15px; }
-        .logo-img { 
-            width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent);
-            box-shadow: 0 0 15px var(--glow); transition: 0.3s; cursor: pointer;
-        }
-        .logo-img:active { transform: scale(0.9); }
-        .brand h1 { 
-            font-family: 'Space Grotesk'; font-size: 1.2rem; letter-spacing: 2px; margin: 0; color: #fff; 
-        }
-
-        .status-badge {
-            font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border);
-            cursor: pointer; font-weight: 800; transition: 0.3s;
-        }
-        .status-badge.stable { color: var(--text); }
+        .logo-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 15px var(--glow); cursor: pointer; }
+        .status-badge { font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); font-weight: 800; cursor: pointer; }
+        .status-badge.stable { color: #fff; }
         .status-badge.critical { color: #ff4444; border-color: #ff4444; }
         .status-badge.overclock { color: var(--success); border-color: var(--success); box-shadow: 0 0 10px var(--success); }
-
-        .xp-container { height: 4px; background: #222; border-radius: 2px; margin: 15px 0; overflow: hidden; }
-        .xp-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.5s ease; box-shadow: 0 0 10px var(--accent); }
         
+        .xp-container { height: 4px; background: #222; margin: 15px 0; overflow: hidden; }
+        .xp-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.5s; box-shadow: 0 0 10px var(--accent); }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 8px; border-radius: 6px; text-align: center; }
         .stat-val { font-family: 'Space Grotesk'; font-size: 1.1rem; font-weight: 700; color: #fff; display: block; }
-        .stat-label { font-size: 0.55rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-label { font-size: 0.55rem; color: var(--accent); text-transform: uppercase; }
 
-        .tabs { display: flex; justify-content: space-around; background: var(--bg); border-bottom: 1px solid var(--border); }
-        .tab-btn { 
-            background: none; border: none; color: #555; font-family: 'Space Grotesk'; 
-            font-weight: 700; font-size: 0.8rem; padding: 15px; cursor: pointer; transition: 0.3s; flex: 1;
-        }
+        .tabs { display: flex; background: var(--bg); border-bottom: 1px solid var(--border); }
+        .tab-btn { background: none; border: none; color: #555; font-family: 'Space Grotesk'; font-weight: 700; font-size: 0.8rem; padding: 15px; flex: 1; cursor: pointer; }
         .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
 
         .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
 
+        /* INPUT GROUP CORRIGIDO V2.3.9 */
         .input-group { 
             display: flex; background: var(--panel); border-radius: 10px; 
             border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px;
+            align-items: stretch; /* Garante que o botão tenha a altura do input */
         }
         .input-group input { 
             background: transparent; border: none; color: #fff; flex: 1; 
@@ -82,83 +59,45 @@
         .input-group button { 
             background: var(--accent); color: #fff; border: none; width: 50px; 
             font-weight: 900; font-size: 1.2rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        #incentive-banner { 
-            font-size: 0.7rem; text-align: center; margin-bottom: 15px; padding: 10px;
-            background: rgba(255,0,60,0.05); border-radius: 6px; border-left: 3px solid var(--accent);
-        }
-
-        .card { 
-            background: var(--panel); border-left: 3px solid var(--border); padding: 15px; 
-            border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
-            animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+        .card { background: var(--panel); border-left: 3px solid var(--border); padding: 15px; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
         .card.done { border-left-color: var(--success); opacity: 0.5; }
-        .check-circle { 
-            width: 20px; height: 20px; border: 2px solid #444; border-radius: 50%; 
-            cursor: pointer; flex-shrink: 0; transition: 0.2s;
-        }
+        .check-circle { width: 20px; height: 20px; border: 2px solid #444; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
         .done .check-circle { background: var(--success); border-color: var(--success); }
         .txt { flex: 1; font-size: 0.85rem; }
         .price { color: var(--accent); font-weight: 800; font-size: 0.8rem; }
-        .buy-btn { background: var(--accent); border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; cursor: pointer; }
+        .buy-btn { background: var(--accent); border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; }
 
-        #toast { 
-            position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); 
-            background: #fff; color: #000; padding: 10px 25px; border-radius: 20px; 
-            font-weight: 800; font-size: 0.75rem; transition: 0.4s; z-index: 2000;
-        }
+        #toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 25px; border-radius: 20px; font-weight: 800; transition: 0.4s; z-index: 2000; }
         #toast.active { bottom: 20px; }
-
-        #danger-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 3000;
-            display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
-        }
-        .danger-box { border: 1px solid #ff0000; padding: 25px; background: #050505; text-align: center; border-radius: 8px; width: 85%; }
-
-        #status-modal {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2500;
-            display: none; align-items: center; justify-content: center;
-        }
+        
+        #status-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2500; display: none; align-items: center; justify-content: center; }
         .status-selector { background: var(--panel); padding: 20px; border-radius: 12px; width: 80%; border: 1px solid var(--border); }
-        .status-option { 
-            padding: 15px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; 
-            text-align: center; cursor: pointer; font-weight: 800; font-size: 0.8rem;
-        }
+        .status-option { padding: 15px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; text-align: center; cursor: pointer; font-weight: 800; }
     </style>
 </head>
-<body class="status-stable">
+<body>
 
-    <div id="toast">SYSTEM READY</div>
-
-    <div id="danger-modal">
-        <div class="danger-box">
-            <h2 style="color:red; font-size: 1rem;">⚠️ WIPE ALL DATA?</h2>
-            <div style="display:flex; gap: 10px; margin-top: 20px;">
-                <button onclick="closeDanger()" style="flex:1; padding:10px; background:#222; color:#fff; border:none;">BACK</button>
-                <button onclick="hardReset()" style="flex:1; padding:10px; background:red; color:#fff; border:none;">DELETE</button>
-            </div>
-        </div>
-    </div>
+    <div id="toast">SYSTEM V2.3.9 READY</div>
 
     <div id="status-modal">
         <div class="status-selector">
             <h3 style="text-align:center; font-size: 0.9rem; margin-bottom: 15px;">CONDIÇÃO DO OPERADOR</h3>
-            <div class="status-option" style="color: #ff4444;" onclick="setStatus('critical')">🔴 CRÍTICO (BAIXA ENERGIA)</div>
-            <div class="status-option" style="color: #fff;" onclick="setStatus('stable')">⚪ ESTÁVEL (NORMAL)</div>
-            <div class="status-option" style="color: #00ff9d;" onclick="setStatus('overclock')">🟢 OVERCLOCK (FOCO TOTAL)</div>
+            <div class="status-option" style="color: #ff4444;" onclick="setStatus('critical')">🔴 CRÍTICO</div>
+            <div class="status-option" style="color: #fff;" onclick="setStatus('stable')">⚪ ESTÁVEL</div>
+            <div class="status-option" style="color: #00ff9d;" onclick="setStatus('overclock')">🟢 OVERCLOCK</div>
         </div>
     </div>
 
     <div class="hud">
         <div class="brand">
-            <div class="brand-left">
+            <div style="display:flex; align-items:center; gap:15px;">
                 <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img" onclick="secretTrigger()">
                 <div>
-                    <h1>CYNOS LABS</h1>
-                    <small style="color:#555; font-size: 0.5rem;">TITAN PROTOCOL v2.3</small>
+                    <h1 style="font-family:'Space Grotesk'; font-size:1.2rem; letter-spacing:2px; margin:0;">CYNOS LABS</h1>
+                    <small style="color:#555; font-size: 0.5rem;">TITAN PROTOCOL v2.3.9</small>
                 </div>
             </div>
             <div id="current-status-badge" class="status-badge stable" onclick="openStatus()">ESTÁVEL</div>
@@ -178,7 +117,6 @@
 
     <div class="content">
         <div id="view-missions">
-            <div id="incentive-banner">Inicie uma operação, Operador.</div>
             <div class="input-group">
                 <input type="text" id="input-task" placeholder="Identificar missão..." onkeypress="handleEnter(event, addTask)">
                 <button onclick="addTask()">+</button>
@@ -188,7 +126,7 @@
 
         <div id="view-armory" style="display:none">
             <div class="input-group">
-                <input type="text" id="input-reward" placeholder="Item de recompensa..." style="flex:2">
+                <input type="text" id="input-reward" placeholder="Item..." style="flex:2">
                 <input type="number" id="input-cost" placeholder="$" style="flex:0.8">
                 <button onclick="addReward()">$</button>
             </div>
@@ -197,24 +135,11 @@
 
         <div id="view-logs" style="display:none">
             <div class="stat-card" style="margin-bottom: 15px;"><span class="stat-label">Total de Ops</span><span class="stat-val" id="total-ops">0</span></div>
-            <div id="log-list" style="font-size: 0.65rem; color: #666; font-family: 'JetBrains Mono';"></div>
+            <div id="log-list" style="font-size: 0.65rem; color: #666;"></div>
         </div>
     </div>
 
 <script>
-    const AudioEngine = {
-        ctx: null,
-        init: function() { if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)(); },
-        play: function(type) {
-            this.init(); if(this.ctx.state === 'suspended') this.ctx.resume();
-            const osc = this.ctx.createOscillator(); const gain = this.ctx.createGain();
-            osc.connect(gain); gain.connect(this.ctx.destination);
-            const now = this.ctx.currentTime;
-            if(type === 'click') { osc.type='sine'; osc.frequency.setValueAtTime(800, now); gain.gain.setValueAtTime(0.1, now); osc.start(); osc.stop(now+0.1); }
-            else if(type === 'levelup') { osc.type='square'; osc.frequency.setValueAtTime(200, now); osc.frequency.linearRampToValueAtTime(800, now+0.5); gain.gain.setValueAtTime(0.1, now); osc.start(); osc.stop(now+0.5); }
-        }
-    };
-
     let db = JSON.parse(localStorage.getItem('cynos_v23')) || { 
         lvl: 1, xp: 0, coins: 0, missions: [], armory: [], logs: [], totalOps: 0, status: 'stable' 
     };
@@ -231,38 +156,16 @@
     function openStatus() { document.getElementById('status-modal').style.display = 'flex'; }
     function setStatus(s) {
         db.status = s;
-        document.body.className = 'status-' + s;
-        const b = document.getElementById('current-status-badge');
-        b.className = 'status-badge ' + s;
-        b.innerText = s.toUpperCase();
+        document.getElementById('current-status-badge').className = 'status-badge ' + s;
+        document.getElementById('current-status-badge').innerText = s.toUpperCase();
         document.getElementById('status-modal').style.display = 'none';
-        addLog(`STATUS-CHANGE: ${s.toUpperCase()}`);
         save();
     }
-
-    function updateIncentive() {
-        const banner = document.getElementById('incentive-banner');
-        const total = db.missions.length;
-        const done = db.missions.filter(m => m.done).length;
-        if(total === 0) { banner.style.display = 'none'; return; }
-        banner.style.display = 'block';
-        
-        if(db.status === 'critical') banner.innerText = "🛌 CONDIÇÃO CRÍTICA: Priorize o descanso e tarefas mínimas.";
-        else if(db.status === 'overclock') banner.innerText = "🔥 OVERCLOCK: Bônus de foco ativo. Destrua os alvos!";
-        else if(done === total) banner.innerText = "⭐ EXCELÊNCIA: Todos os alvos eliminados.";
-        else banner.innerText = `🎯 TÁTICO: ${total - done} alvos restantes. Avance.`;
-    }
-
-    let clicks = 0; let timer;
-    function secretTrigger() { clicks++; clearTimeout(timer); timer = setTimeout(()=>clicks=0, 800); if(clicks>=5) document.getElementById('danger-modal').style.display='flex'; }
-    function closeDanger() { document.getElementById('danger-modal').style.display='none'; }
-    function hardReset() { localStorage.removeItem('cynos_v23'); location.reload(); }
 
     function updateHUD() {
         document.getElementById('l-val').innerText = db.lvl;
         document.getElementById('c-val').innerText = db.coins;
         document.getElementById('xp-b').style.width = (db.xp / (db.lvl * 100) * 100) + '%';
-        updateIncentive();
     }
 
     function addTask() {
@@ -281,7 +184,7 @@
         db.xp += gain; db.coins += gain; db.totalOps++;
         addLog(`DONE: ${t.txt} (+${gain}CR)`);
         notify(`+${gain} CR | +${gain} XP`);
-        if(db.xp >= db.lvl * 100) { db.xp = 0; db.lvl++; AudioEngine.play('levelup'); }
+        if(db.xp >= db.lvl * 100) { db.xp = 0; db.lvl++; notify("LEVEL UP!"); }
         save(); renderMissions();
     }
 
@@ -289,13 +192,14 @@
         const n = document.getElementById('input-reward'), c = document.getElementById('input-cost');
         if(!n.value || !c.value) return;
         db.armory.push({ id: Date.now(), txt: n.value, cost: parseInt(c.value) });
-        save(); renderArmory();
+        addLog(`ARM-ADD: ${n.value}`);
+        n.value=''; c.value=''; save(); renderArmory();
     }
 
     function buyItem(id) {
         const i = db.armory.find(x => x.id === id);
         if(db.coins >= i.cost) { db.coins -= i.cost; addLog(`BOUGHT: ${i.txt}`); notify("ADQUIRIDO: " + i.txt); save(); renderArmory(); }
-        else notify("CRÉDITOS INSUFICIENTES");
+        else notify("SEM CRÉDITO");
     }
 
     function delItem(id, type) { if(confirm("Remover?")) { db[type] = db[type].filter(x => x.id !== id); save(); type==='missions'?renderMissions():renderArmory(); } }
@@ -304,17 +208,16 @@
         const l = document.getElementById('list-missions'); l.innerHTML = '';
         db.missions.forEach(t => {
             const el = document.createElement('div'); el.className = `card ${t.done?'done':''}`;
-            el.innerHTML = `<div class="check-circle" onclick="toggleTask(${t.id})"></div><div class="txt">${t.txt}</div><button class="del-btn" onclick="delItem(${t.id}, 'missions')" style="background:none; border:none; color:#444; font-size:1.2rem;">×</button>`;
+            el.innerHTML = `<div class="check-circle" onclick="toggleTask(${t.id})"></div><div class="txt">${t.txt}</div><button onclick="delItem(${t.id}, 'missions')" style="background:none; border:none; color:#444;">×</button>`;
             l.appendChild(el);
         });
-        updateIncentive();
     }
 
     function renderArmory() {
         const l = document.getElementById('list-armory'); l.innerHTML = '';
         db.armory.forEach(i => {
             const el = document.createElement('div'); el.className = 'card';
-            el.innerHTML = `<div style="flex:1"><div style="font-weight:700; font-size:0.8rem">${i.txt}</div><div class="price">$ ${i.cost}</div></div><button class="buy-btn" onclick="buyItem(${i.id})">BUY</button><button class="del-btn" onclick="delItem(${i.id}, 'armory')" style="background:none; border:none; color:#444; font-size:1.2rem;">×</button>`;
+            el.innerHTML = `<div style="flex:1"><div style="font-weight:700">${i.txt}</div><div class="price">$ ${i.cost}</div></div><button class="buy-btn" onclick="buyItem(${i.id})">BUY</button><button onclick="delItem(${i.id}, 'armory')" style="background:none; border:none; color:#444;">×</button>`;
             l.appendChild(el);
         });
     }
@@ -333,8 +236,7 @@
     }
 
     function handleEnter(e, f) { if(e.key === 'Enter') f(); }
-    document.body.addEventListener('click', () => AudioEngine.init(), {once:true});
-    setStatus(db.status); updateHUD(); renderMissions(); renderArmory();
+    updateHUD(); renderMissions(); renderArmory();
 </script>
 </body>
 </html>
