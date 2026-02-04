@@ -3,111 +3,511 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYNOS | TITAN</title>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <title>CYNOS | TITAN V2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #000;
-            --panel: rgba(15, 15, 15, 0.9);
-            --card: rgba(25, 25, 25, 0.7);
-            --border: rgba(255, 255, 255, 0.08);
-            --accent: #ff0000;
-            --text: #fff;
+            --bg: #050505;
+            --panel: #111111;
+            --border: #333;
+            --accent: #ff003c; 
+            --accent-dim: rgba(255, 0, 60, 0.2);
+            --text: #e0e0e0;
+            --success: #00ff9d;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        #celebration { position: fixed; inset: 0; pointer-events: none; z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.4s; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
-        #celebration.active { opacity: 1; }
-        .congrats-text { font-family: 'Space Grotesk'; font-size: 2.5rem; font-weight: 900; color: var(--accent); transform: scale(0.8); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.27); }
-        #celebration.active .congrats-text { transform: scale(1); }
-        .hud { padding: 30px 20px 15px; border-bottom: 1px solid var(--border); background: var(--bg); }
-        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-        .logo-img { width: 40px; height: 40px; object-fit: contain; border-radius: 50%; }
-        .brand h1 { font-family: 'Space Grotesk'; font-size: 1.1rem; letter-spacing: 3px; margin: 0; font-weight: 700; color: #fff; }
-        .xp-container { height: 3px; background: rgba(255,255,255,0.05); border-radius: 2px; margin: 10px 0; }
-        .xp-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.6s ease; box-shadow: 0 0 10px var(--accent); }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 8px; text-align: center; }
-        .stat-val { display: block; font-family: 'Space Grotesk'; font-size: 1.1rem; font-weight: 700; color: var(--accent); }
-        .stat-label { font-size: 0.55rem; color: #555; text-transform: uppercase; letter-spacing: 1px; }
-        .tabs { display: flex; justify-content: center; gap: 30px; padding: 15px 0; }
-        .tab-btn { background: none; border: none; color: #444; font-family: 'Space Grotesk'; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; }
-        .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
-        .content { flex: 1; overflow-y: auto; padding: 20px; }
-        .input-group { display: flex; gap: 8px; margin-bottom: 20px; background: var(--card); padding: 6px; border-radius: 10px; border: 1px solid var(--border); }
-        .input-group input { background: transparent; border: none; color: #fff; flex: 1; padding: 8px; font-size: 0.9rem; }
-        .input-group button { background: var(--accent); color: #fff; border: none; padding: 0 15px; border-radius: 6px; font-weight: 900; cursor: pointer; }
-        .card { background: var(--card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; margin-bottom: 12px; display: flex; align-items: center; gap: 12px; animation: in 0.3s ease; }
-        @keyframes in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card.done { border-color: rgba(255,0,0,0.2); opacity: 0.4; }
-        .circle { width: 20px; height: 20px; border: 2px solid #333; border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex-shrink: 0; }
-        .done .circle { border-color: var(--accent); background: var(--accent); }
-        .done .circle::after { content: '✓'; color: #000; font-weight: 900; font-size: 10px; }
-        .txt { flex: 1; font-size: 0.9rem; }
-        .price { color: #fff; font-family: 'Space Grotesk'; font-weight: 700; font-size: 0.8rem; }
-        .buy { background: #fff; color: #000; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; cursor: pointer; }
-        #toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 25px; border-radius: 20px; font-weight: 800; font-size: 0.75rem; opacity: 0; transition: 0.3s; z-index: 1000; }
-        #toast.active { opacity: 1; bottom: 40px; }
-        footer { padding: 15px; display: flex; justify-content: center; gap: 10px; opacity: 0.3; }
-        .btn-s { background: none; border: 1px solid #222; color: #666; padding: 5px 10px; border-radius: 5px; font-size: 0.55rem; cursor: pointer; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; user-select: none; }
+        
+        body { 
+            background: var(--bg); 
+            color: var(--text); 
+            font-family: 'JetBrains Mono', monospace; 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden;
+        }
+
+        
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 999;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        
+        .hud { 
+            padding: 20px 20px 10px; 
+            background: var(--panel); 
+            border-bottom: 1px solid var(--border); 
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+        
+        .brand { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+        .logo-img { 
+            width: 45px; height: 45px; 
+            border-radius: 50%; 
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 10px var(--accent);
+        }
+        .brand h1 { 
+            font-family: 'Space Grotesk'; 
+            font-size: 1.4rem; 
+            letter-spacing: 2px; 
+            margin: 0; 
+            color: #fff; 
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        
+        .xp-container { 
+            height: 6px; 
+            background: #222; 
+            border-radius: 3px; 
+            margin: 15px 0; 
+            overflow: hidden; 
+            position: relative;
+        }
+        .xp-bar { 
+            height: 100%; 
+            background: var(--accent); 
+            width: 0%; 
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 15px var(--accent); 
+        }
+
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .stat-card { 
+            background: rgba(255,255,255,0.03); 
+            border: 1px solid var(--border); 
+            padding: 10px; 
+            border-radius: 8px; 
+            text-align: center; 
+        }
+        .stat-val { font-family: 'Space Grotesk'; font-size: 1.2rem; font-weight: 700; color: #fff; display: block; }
+        .stat-label { font-size: 0.6rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; }
+
+        
+        .tabs { display: flex; justify-content: space-around; padding: 10px 0; background: var(--bg); }
+        .tab-btn { 
+            background: none; border: none; 
+            color: #555; 
+            font-family: 'Space Grotesk'; 
+            font-weight: 700; font-size: 0.9rem; 
+            padding: 10px 20px;
+            cursor: pointer; 
+            transition: 0.3s;
+        }
+        .tab-btn.active { color: var(--accent); border-bottom: 2px solid var(--accent); text-shadow: 0 0 10px var(--accent); }
+
+        
+        .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; }
+        
+        .input-group { 
+            display: flex; gap: 10px; margin-bottom: 25px; 
+            background: var(--panel); padding: 8px; 
+            border-radius: 12px; border: 1px solid var(--border); 
+        }
+        .input-group input { 
+            background: transparent; border: none; color: #fff; 
+            flex: 1; padding: 5px; font-family: 'JetBrains Mono';
+        }
+        .input-group button { 
+            background: var(--accent); color: #fff; border: none; 
+            width: 40px; border-radius: 8px; font-weight: 900; 
+            font-size: 1.2rem; cursor: pointer;
+        }
+
+        
+        .card { 
+            background: var(--panel); 
+            border-left: 3px solid var(--border); 
+            padding: 15px; 
+            border-radius: 4px; 
+            margin-bottom: 12px; 
+            display: flex; align-items: center; gap: 15px; 
+            animation: slideIn 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        
+        .card.done { border-left-color: var(--success); opacity: 0.6; text-decoration: line-through; }
+        
+        .check-circle { 
+            width: 22px; height: 22px; 
+            border: 2px solid #555; border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0; transition: 0.2s;
+        }
+        .done .check-circle { border-color: var(--success); background: var(--success); box-shadow: 0 0 10px var(--success); }
+        .done .check-circle::after { content: '✓'; color: #000; font-weight: 900; font-size: 12px; }
+
+        .txt { flex: 1; font-size: 0.9rem; font-weight: 500; }
+        .price { color: var(--accent); font-weight: 800; font-size: 0.85rem; }
+        
+        .buy-btn { 
+            background: transparent; border: 1px solid var(--accent); 
+            color: var(--accent); padding: 6px 14px; 
+            border-radius: 4px; font-size: 0.7rem; font-weight: 800; 
+            cursor: pointer; transition: 0.2s; 
+        }
+        .buy-btn:active { background: var(--accent); color: #fff; }
+        
+        .del-btn { color: #555; background: none; border: none; font-size: 1.2rem; padding: 0 10px; }
+
+        
+        #celebration { 
+            position: fixed; inset: 0; pointer-events: none; z-index: 2000; 
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center; 
+            background: rgba(0,0,0,0.9); 
+            opacity: 0; transition: 0.4s; 
+        }
+        #celebration.active { opacity: 1; pointer-events: auto; }
+        .levelup-title { 
+            font-family: 'Space Grotesk'; font-size: 3rem; font-weight: 900; 
+            color: var(--accent); text-transform: uppercase; 
+            text-shadow: 0 0 30px var(--accent);
+            transform: scale(0.5); transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.27);
+        }
+        #celebration.active .levelup-title { transform: scale(1); }
+        
+        
+        #toast { 
+            position: fixed; bottom: -50px; left: 50%; transform: translateX(-50%); 
+            background: var(--text); color: #000; 
+            padding: 12px 30px; border-radius: 30px; 
+            font-weight: 800; font-size: 0.8rem; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            z-index: 2000;
+        }
+        #toast.active { bottom: 30px; }
+
+        
+        footer { 
+            padding: 20px; text-align: center; opacity: 0.5; 
+            font-size: 0.7rem; margin-top: auto;
+        }
+        .danger-zone { margin-top: 10px; }
+        .link-btn { background: none; border: none; color: #666; text-decoration: underline; cursor: pointer; margin: 0 10px; }
+
     </style>
 </head>
 <body>
-    <div id="celebration"><div class="congrats-text">CYNOS SYSTEM</div></div>
-    <div id="toast">BOOTING...</div>
+
+    <div id="celebration">
+        <div class="levelup-title">SYSTEM UPGRADE</div>
+        <p style="color: #fff; letter-spacing: 2px; margin-top: 10px;">NEW LEVEL ACQUIRED</p>
+    </div>
+    
+    <div id="toast">SYSTEM READY</div>
+
     <div class="hud">
         <div class="brand">
-            <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img">
-            <h1>CYNOS LABS</h1>
+            <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img" alt="Cynos">
+            <div>
+                <h1>CYNOS LABS</h1>
+                <small style="color:#666; font-size: 0.6rem;">TITAN PROTOCOL v2.0</small>
+            </div>
         </div>
+        
         <div class="xp-container"><div class="xp-bar" id="xp-b"></div></div>
+        
         <div class="stats-grid">
-            <div class="stat-card"><span class="stat-val" id="c-val">0</span><span class="stat-label">Credits</span></div>
-            <div class="stat-card"><span class="stat-val" id="l-val">1</span><span class="stat-label">Level</span></div>
+            <div class="stat-card">
+                <span class="stat-val" id="c-val">0</span>
+                <span class="stat-label">Créditos ($)</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-val" id="l-val">1</span>
+                <span class="stat-label">Nível de Acesso</span>
+            </div>
         </div>
     </div>
+
     <div class="tabs">
-        <button class="tab-btn active" onclick="tab('t', this)">Missions</button>
-        <button class="tab-btn" onclick="tab('s', this)">Armory</button>
+        <button class="tab-btn active" onclick="switchTab('missions', this)">MISSÕES</button>
+        <button class="tab-btn" onclick="switchTab('armory', this)">ARMORY</button>
     </div>
+
     <div class="content">
-        <div id="v-t">
+        <div id="view-missions">
             <div class="input-group">
-                <input type="text" id="i-t" placeholder="Add Objective...">
-                <button onclick="addT()">+</button>
+                <input type="text" id="input-task" placeholder="Novo objetivo..." onkeypress="handleEnter(event, addTask)">
+                <button onclick="addTask()">+</button>
             </div>
-            <div id="l-t"></div>
+            <div id="list-missions"></div>
         </div>
-        <div id="v-s" style="display:none">
+
+        <div id="view-armory" style="display:none">
             <div class="input-group">
-                <input type="text" id="i-rn" placeholder="Reward...">
-                <input type="number" id="i-rc" placeholder="$" style="flex:0.3">
-                <button onclick="addR()">$</button>
+                <input type="text" id="input-reward" placeholder="Recompensa..." style="flex: 2">
+                <input type="number" id="input-cost" placeholder="$" style="flex: 0.8">
+                <button onclick="addReward()">$</button>
             </div>
-            <div id="l-s"></div>
+            <div id="list-armory"></div>
         </div>
     </div>
+
     <footer>
-        <button class="btn-s" onclick="exp()">BACKUP</button>
-        <button class="btn-s" onclick="reset()">WIPE</button>
+        <div class="danger-zone">
+            <button class="link-btn" onclick="exportData()">Salvar Backup</button>
+            <button class="link-btn" onclick="hardReset()" style="color:#ff003c">Formatar Sistema</button>
+        </div>
     </footer>
+
 <script>
-    let s = JSON.parse(localStorage.getItem('cynos_db')) || { lvl: 1, xp: 0, coins: 0, t: [], r: [] };
-    const save = () => { localStorage.setItem('cynos_db', JSON.stringify(s)); upd(); };
-    const notify = (m) => { const t = document.getElementById('toast'); t.innerText = m; t.classList.add('active'); setTimeout(() => t.classList.remove('active'), 2000); };
-    const celeb = (txt) => { const o = document.getElementById('celebration'); o.querySelector('.congrats-text').innerText = txt; o.classList.add('active'); setTimeout(() => o.classList.remove('active'), 1500); };
-    function addT() { const i = document.getElementById('i-t'); if(!i.value) return; s.t.unshift({id:Date.now(), txt:i.value, d:false, c:false}); i.value=''; save(); renT(); }
-    function toggle(id) { const t = s.t.find(x => x.id === id); if(!t.d) { t.d = true; if(!t.c) { s.xp += 25; s.coins += 25; t.c = true; notify("+25 CR"); } if(s.xp >= s.lvl*100) { s.xp=0; s.lvl++; celeb("LEVEL UP"); } } else t.d = false; save(); renT(); }
-    function addR() { const n = document.getElementById('i-rn'), c = document.getElementById('i-rc'); if(!n.value || !c.value) return; s.r.push({id:Date.now(), txt:n.value, cost:parseInt(c.value)}); n.value=''; c.value=''; save(); renS(); }
-    function buy(id) { const r = s.r.find(x => x.id === id); if(s.coins >= r.cost) { s.coins -= r.cost; celeb("PURCHASED"); save(); renS(); } else notify("LOW CREDITS"); }
-    function tab(v, b) { document.getElementById('v-t').style.display = v==='t'?'block':'none'; document.getElementById('v-s').style.display = v==='s'?'block':'none'; document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); }
-    function renT() { const c = document.getElementById('l-t'); c.innerHTML = ''; s.t.forEach(t => { const d = document.createElement('div'); d.className = `card ${t.d?'done':''}`; d.innerHTML = `<div class="circle" onclick="toggle(${t.id})"></div><div class="txt" onclick="toggle(${t.id})">${t.txt}</div><button onclick="del(${t.id},'t')" style="background:none;border:none;color:#333">×</button>`; c.appendChild(d); }); }
-    function renS() { const c = document.getElementById('l-s'); c.innerHTML = ''; s.r.forEach(r => { const d = document.createElement('div'); d.className = 'card'; d.innerHTML = `<div style="flex:1"><div>${r.txt}</div><div class="price">⛃ ${r.cost}</div></div><button class="buy" onclick="buy(${r.id})">GET</button><button onclick="del(${r.id},'r')" style="background:none;border:none;color:#333;margin-left:5px">×</button>`; c.appendChild(d); }); }
-    function del(id, p) { if(confirm("Del?")) { s[p] = s[p].filter(x => x.id !== id); save(); renT(); renS(); } }
-    function upd() { document.getElementById('l-val').innerText = s.lvl; document.getElementById('c-val').innerText = s.coins; document.getElementById('xp-b').style.width = (s.xp/(s.lvl*100)*100)+'%'; }
-    function exp() { const b = new Blob([JSON.stringify(s)], {type:'application/json'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href=u; a.download='cynos.json'; a.click(); }
-    function reset() { if(confirm("WIPE ALL?")) { localStorage.clear(); location.reload(); } }
-    upd(); renT(); renS();
+    
+    const AudioEngine = {
+        ctx: null,
+        init: function() {
+            if(!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        },
+        play: function(type) {
+            this.init();
+            if(this.ctx.state === 'suspended') this.ctx.resume();
+            
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            const now = this.ctx.currentTime;
+            
+            if(type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(300, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } 
+            else if (type === 'success') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.setValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+            else if (type === 'levelup') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(880, now + 0.5);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 1.5);
+                osc.start(now);
+                osc.stop(now + 1.5);
+            }
+            else if (type === 'error') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            }
+        }
+    };
+
+    
+    let db = JSON.parse(localStorage.getItem('cynos_titan_v2')) || { 
+        lvl: 1, xp: 0, coins: 0, missions: [], armory: [] 
+    };
+
+    const save = () => { localStorage.setItem('cynos_titan_v2', JSON.stringify(db)); updateHUD(); };
+    
+    
+    const notify = (msg) => { 
+        const t = document.getElementById('toast'); 
+        t.innerText = msg; 
+        t.classList.add('active'); 
+        setTimeout(() => t.classList.remove('active'), 2500); 
+    };
+
+    const triggerLevelUp = () => {
+        AudioEngine.play('levelup');
+        const screen = document.getElementById('celebration');
+        screen.classList.add('active');
+        setTimeout(() => screen.classList.remove('active'), 2000);
+    };
+
+    
+    function updateHUD() {
+        document.getElementById('l-val').innerText = db.lvl;
+        document.getElementById('c-val').innerText = db.coins;
+        const reqXp = db.lvl * 100;
+        const pct = (db.xp / reqXp) * 100;
+        document.getElementById('xp-b').style.width = `${pct}%`;
+    }
+
+    
+    function addTask() {
+        const input = document.getElementById('input-task');
+        if(!input.value.trim()) { AudioEngine.play('error'); return; }
+        
+        AudioEngine.play('click');
+        db.missions.unshift({
+            id: Date.now(), 
+            txt: input.value, 
+            done: false, 
+            claimed: false 
+        });
+        input.value = '';
+        save(); renderMissions();
+    }
+
+    function toggleTask(id) {
+        const task = db.missions.find(x => x.id === id);
+        if(!task) return;
+
+        task.done = !task.done;
+        
+        if(task.done) {
+            if(!task.claimed) {
+                
+                AudioEngine.play('success');
+                db.xp += 25;
+                db.coins += 25;
+                task.claimed = true;
+                notify(`+25 CRÉDITOS | +25 XP`);
+                
+                
+                if(db.xp >= db.lvl * 100) {
+                    db.xp = 0;
+                    db.lvl++;
+                    triggerLevelUp();
+                }
+            } else {
+                AudioEngine.play('click');
+            }
+        } else {
+            AudioEngine.play('click');
+        }
+        save(); renderMissions();
+    }
+
+    function renderMissions() {
+        const list = document.getElementById('list-missions');
+        list.innerHTML = '';
+        db.missions.forEach(t => {
+            const el = document.createElement('div');
+            el.className = `card ${t.done ? 'done' : ''}`;
+            el.innerHTML = `
+                <div class="check-circle" onclick="toggleTask(${t.id})"></div>
+                <div class="txt" onclick="toggleTask(${t.id})">${t.txt}</div>
+                <button class="del-btn" onclick="delItem(${t.id}, 'missions')">×</button>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    
+    function addReward() {
+        const name = document.getElementById('input-reward');
+        const cost = document.getElementById('input-cost');
+        if(!name.value || !cost.value) { AudioEngine.play('error'); return; }
+
+        AudioEngine.play('click');
+        db.armory.push({
+            id: Date.now(),
+            txt: name.value,
+            cost: parseInt(cost.value)
+        });
+        name.value = ''; cost.value = '';
+        save(); renderArmory();
+    }
+
+    function buyItem(id) {
+        const item = db.armory.find(x => x.id === id);
+        if(db.coins >= item.cost) {
+            AudioEngine.play('success');
+            db.coins -= item.cost;
+            notify(`ADQUIRIDO: ${item.txt}`);
+            save(); renderArmory();
+        } else {
+            AudioEngine.play('error');
+            notify("SALDO INSUFICIENTE");
+        }
+    }
+
+    function renderArmory() {
+        const list = document.getElementById('list-armory');
+        list.innerHTML = '';
+        db.armory.forEach(r => {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.innerHTML = `
+                <div style="flex:1">
+                    <div style="font-weight:700">${r.txt}</div>
+                    <div class="price">$ ${r.cost}</div>
+                </div>
+                <button class="buy-btn" onclick="buyItem(${r.id})">COMPRAR</button>
+                <button class="del-btn" onclick="delItem(${r.id}, 'armory')">×</button>
+            `;
+            list.appendChild(el);
+        });
+    }
+
+    
+    function delItem(id, type) {
+        if(confirm("Eliminar registro?")) {
+            AudioEngine.play('click');
+            db[type] = db[type].filter(x => x.id !== id);
+            save();
+            type === 'missions' ? renderMissions() : renderArmory();
+        }
+    }
+
+    function switchTab(tab, btn) {
+        AudioEngine.play('click');
+        document.getElementById('view-missions').style.display = tab === 'missions' ? 'block' : 'none';
+        document.getElementById('view-armory').style.display = tab === 'armory' ? 'block' : 'none';
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function handleEnter(e, func) {
+        if(e.key === 'Enter') func();
+    }
+
+    function exportData() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(db));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", "cynos_backup.json");
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+    }
+
+    function hardReset() {
+        if(confirm("ALERTA: ISSO APAGARÁ TODO O SISTEMA. CONFIRMA?")) {
+            localStorage.removeItem('cynos_titan_v2');
+            location.reload();
+        }
+    }
+
+    
+    updateHUD();
+    renderMissions();
+    renderArmory();
+
+
+    document.body.addEventListener('click', () => AudioEngine.init(), {once:true});
+
 </script>
 </body>
 </html>
