@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYNOS | TITAN V2.1</title>
+    <title>CYNOS | TITAN V2.2</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -78,6 +78,13 @@
         .price { color: var(--accent); font-weight: 800; font-size: 0.85rem; }
         .buy-btn { background: transparent; border: 1px solid var(--accent); color: var(--accent); padding: 6px 14px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; cursor: pointer; }
         .del-btn { color: #555; background: none; border: none; font-size: 1.2rem; padding: 0 10px; }
+        
+        #incentive-banner { 
+            background: rgba(255, 0, 60, 0.1); border: 1px solid rgba(255, 0, 60, 0.3);
+            color: var(--accent); padding: 12px; border-radius: 8px; margin-bottom: 20px;
+            font-size: 0.75rem; text-align: center; font-weight: 800; display: none;
+        }
+
         #celebration { 
             position: fixed; inset: 0; pointer-events: none; z-index: 2000; display: flex; flex-direction: column;
             align-items: center; justify-content: center; background: rgba(0,0,0,0.9); opacity: 0; transition: 0.4s; 
@@ -136,7 +143,7 @@
             <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img" alt="Cynos" onclick="secretTrigger()">
             <div>
                 <h1>CYNOS LABS</h1>
-                <small style="color:#666; font-size: 0.6rem;">TITAN PROTOCOL v2.1</small>
+                <small style="color:#666; font-size: 0.6rem;">TITAN PROTOCOL v2.2</small>
             </div>
         </div>
         <div class="xp-container"><div class="xp-bar" id="xp-b"></div></div>
@@ -148,9 +155,11 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('missions', this)">MISSÕES</button>
         <button class="tab-btn" onclick="switchTab('armory', this)">ARMORY</button>
+        <button class="tab-btn" onclick="switchTab('logs', this)">LOGS</button>
     </div>
     <div class="content">
         <div id="view-missions">
+            <div id="incentive-banner"></div>
             <div class="input-group">
                 <input type="text" id="input-task" placeholder="Nova missão..." onkeypress="handleEnter(event, addTask)">
                 <button onclick="addTask()">+</button>
@@ -164,6 +173,13 @@
                 <button onclick="addReward()">$</button>
             </div>
             <div id="list-armory"></div>
+        </div>
+        <div id="view-logs" style="display:none">
+            <div class="stat-card" style="margin-bottom: 20px;">
+                <span class="stat-label">Total de Operações</span>
+                <span class="stat-val" id="total-ops">0</span>
+            </div>
+            <div id="log-list" style="font-size: 0.7rem; color: #888; line-height: 1.8;"></div>
         </div>
     </div>
 <script>
@@ -190,9 +206,35 @@
             }
         }
     };
-    let db = JSON.parse(localStorage.getItem('cynos_titan_v2')) || { lvl: 1, xp: 0, coins: 0, missions: [], armory: [] };
+
+    let db = JSON.parse(localStorage.getItem('cynos_titan_v2')) || { 
+        lvl: 1, xp: 0, coins: 0, missions: [], armory: [], logs: [], totalOps: 0 
+    };
+
     const save = () => { localStorage.setItem('cynos_titan_v2', JSON.stringify(db)); updateHUD(); };
     const notify = (msg) => { const t = document.getElementById('toast'); t.innerText = msg; t.classList.add('active'); setTimeout(() => t.classList.remove('active'), 2500); };
+
+    function addLog(msg) {
+        const time = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+        db.logs.unshift(`[${time}] ${msg}`);
+        if(db.logs.length > 50) db.logs.pop();
+    }
+
+    function updateIncentive() {
+        const total = db.missions.length;
+        const done = db.missions.filter(m => m.done).length;
+        const banner = document.getElementById('incentive-banner');
+        if(total === 0) { banner.style.display = 'none'; return; }
+        
+        banner.style.display = 'block';
+        const perc = (done / total) * 100;
+
+        if(total >= 10 && done <= 2) banner.innerText = "⚠️ CARGA PESADA: 10+ missões. Foco no objetivo!";
+        else if(done === total) banner.innerText = "⭐ EXCELÊNCIA: Tudo limpo por aqui.";
+        else if(perc >= 50) banner.innerText = "⚡ MOMENTUM: Mais da metade pronta. Não pare!";
+        else banner.innerText = `🎯 TÁTICO: ${total - done} alvos restantes. Avance.`;
+    }
+
     let secretClicks = 0;
     let secretTimer;
     function secretTrigger() {
@@ -200,61 +242,73 @@
         AudioEngine.play('click');
         clearTimeout(secretTimer);
         secretTimer = setTimeout(() => { secretClicks = 0; }, 800);
-        if(secretClicks >= 5) {
-            secretClicks = 0;
-            openDanger();
-        }
+        if(secretClicks >= 5) { secretClicks = 0; openDanger(); }
     }
-    function openDanger() {
-        AudioEngine.play('alert');
-        document.getElementById('danger-modal').classList.add('active');
-    }
-    function closeDanger() {
-        document.getElementById('danger-modal').classList.remove('active');
-    }
-    function hardReset() {
-        AudioEngine.play('alert');
-        localStorage.removeItem('cynos_titan_v2');
-        location.reload();
-    }
+    function openDanger() { AudioEngine.play('alert'); document.getElementById('danger-modal').classList.add('active'); }
+    function closeDanger() { document.getElementById('danger-modal').classList.remove('active'); }
+    function hardReset() { AudioEngine.play('alert'); localStorage.removeItem('cynos_titan_v2'); location.reload(); }
+
     function updateHUD() {
         document.getElementById('l-val').innerText = db.lvl;
         document.getElementById('c-val').innerText = db.coins;
         document.getElementById('xp-b').style.width = ((db.xp / (db.lvl * 100)) * 100) + '%';
+        updateIncentive();
     }
+
     function addTask() {
         const input = document.getElementById('input-task');
         if(!input.value.trim()) return;
         AudioEngine.play('click');
         db.missions.unshift({ id: Date.now(), txt: input.value, done: false, claimed: false });
+        addLog(`MIS-NEW: ${input.value}`);
         input.value = ''; save(); renderMissions();
     }
+
     function toggleTask(id) {
         const task = db.missions.find(x => x.id === id);
         if(!task) return;
         task.done = !task.done;
         if(task.done && !task.claimed) {
-            db.xp += 25; db.coins += 25; task.claimed = true; notify("+25 CR | +25 XP");
-            if(db.xp >= db.lvl * 100) { db.xp = 0; db.lvl++; AudioEngine.play('levelup'); document.getElementById('celebration').classList.add('active'); setTimeout(()=>document.getElementById('celebration').classList.remove('active'), 2000); }
+            db.xp += 25; db.coins += 25; db.totalOps++; task.claimed = true;
+            addLog(`MIS-DONE: ${task.txt}`);
+            notify("+25 CR | +25 XP");
+            if(db.xp >= db.lvl * 100) { 
+                db.xp = 0; db.lvl++; 
+                AudioEngine.play('levelup'); 
+                addLog(`SYS-UP: Nível ${db.lvl} alcançado`);
+                document.getElementById('celebration').classList.add('active'); 
+                setTimeout(()=>document.getElementById('celebration').classList.remove('active'), 2000); 
+            }
         }
         save(); renderMissions();
     }
+
     function addReward() {
         const n = document.getElementById('input-reward'), c = document.getElementById('input-cost');
         if(!n.value || !c.value) return;
         AudioEngine.play('click');
         db.armory.push({ id: Date.now(), txt: n.value, cost: parseInt(c.value) });
+        addLog(`ARM-ADD: ${n.value} (${c.value}CR)`);
         n.value=''; c.value=''; save(); renderArmory();
     }
+
     function buyItem(id) {
         const item = db.armory.find(x => x.id === id);
         if(db.coins >= item.cost) {
-            db.coins -= item.cost; notify("COMPRADO: " + item.txt); save(); renderArmory();
+            db.coins -= item.cost; 
+            addLog(`PURCHASE: ${item.txt}`);
+            notify("COMPRADO: " + item.txt); 
+            save(); renderArmory();
         } else notify("SEM CRÉDITO");
     }
+
     function delItem(id, type) {
-        if(confirm("Deletar?")) { db[type] = db[type].filter(x => x.id !== id); save(); type === 'missions' ? renderMissions() : renderArmory(); }
+        if(confirm("Deletar?")) { 
+            db[type] = db[type].filter(x => x.id !== id); 
+            save(); type === 'missions' ? renderMissions() : renderArmory(); 
+        }
     }
+
     function renderMissions() {
         const list = document.getElementById('list-missions'); list.innerHTML = '';
         db.missions.forEach(t => {
@@ -262,7 +316,9 @@
             el.innerHTML = `<div class="check-circle" onclick="toggleTask(${t.id})"></div><div class="txt" onclick="toggleTask(${t.id})">${t.txt}</div><button class="del-btn" onclick="delItem(${t.id}, 'missions')">×</button>`;
             list.appendChild(el);
         });
+        updateIncentive();
     }
+
     function renderArmory() {
         const list = document.getElementById('list-armory'); list.innerHTML = '';
         db.armory.forEach(r => {
@@ -271,11 +327,20 @@
             list.appendChild(el);
         });
     }
+
+    function renderLogs() {
+        document.getElementById('total-ops').innerText = db.totalOps;
+        document.getElementById('log-list').innerHTML = db.logs.map(l => `<div>> ${l}</div>`).join('');
+    }
+
     function switchTab(t, b) {
         document.getElementById('view-missions').style.display = t==='missions'?'block':'none';
         document.getElementById('view-armory').style.display = t==='armory'?'block':'none';
+        document.getElementById('view-logs').style.display = t==='logs'?'block':'none';
         document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active');
+        if(t === 'logs') renderLogs();
     }
+
     function handleEnter(e, f) { if(e.key === 'Enter') f(); }
     document.body.addEventListener('click', () => AudioEngine.init(), {once:true});
     updateHUD(); renderMissions(); renderArmory();
