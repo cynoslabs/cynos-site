@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CYNOS | TITAN V2.3.9</title>
+    <title>CYNOS | TITAN V2.3.9.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;700&family=JetBrains+Mono:wght@400;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -20,18 +20,10 @@
             background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; 
             margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden;
         }
-        body::after {
-            content: " "; display: block; position: absolute; top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 255, 0, 0.03));
-            z-index: 999; pointer-events: none;
-        }
         .hud { padding: 20px 20px 10px; background: var(--panel); border-bottom: 1px solid var(--border); z-index: 10; }
         .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
         .logo-img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 15px var(--glow); cursor: pointer; }
         .status-badge { font-size: 0.6rem; padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); font-weight: 800; cursor: pointer; }
-        .status-badge.stable { color: #fff; }
-        .status-badge.critical { color: #ff4444; border-color: #ff4444; }
-        .status-badge.overclock { color: var(--success); border-color: var(--success); box-shadow: 0 0 10px var(--success); }
         
         .xp-container { height: 4px; background: #222; margin: 15px 0; overflow: hidden; }
         .xp-bar { height: 100%; background: var(--accent); width: 0%; transition: 0.5s; box-shadow: 0 0 10px var(--accent); }
@@ -46,45 +38,49 @@
 
         .content { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 100px; }
 
-        /* INPUT GROUP CORRIGIDO V2.3.9 */
+        /* INPUT GROUP REVISADO - ANTI-SUMIÇO */
         .input-group { 
             display: flex; background: var(--panel); border-radius: 10px; 
             border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px;
-            align-items: stretch; /* Garante que o botão tenha a altura do input */
+            height: 48px; width: 100%; align-items: center;
         }
         .input-group input { 
-            background: transparent; border: none; color: #fff; flex: 1; 
-            padding: 12px 15px; font-family: 'JetBrains Mono'; font-size: 0.85rem;
+            background: transparent; border: none; color: #fff; 
+            padding: 0 15px; font-family: 'JetBrains Mono'; font-size: 0.85rem;
+            height: 100%; min-width: 50px;
         }
         .input-group button { 
-            background: var(--accent); color: #fff; border: none; width: 50px; 
-            font-weight: 900; font-size: 1.2rem; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
+            background: var(--accent); color: #fff; border: none; 
+            width: 55px; min-width: 55px; height: 100%; /* Tamanho fixo garantido */
+            font-weight: 900; font-size: 1.3rem; cursor: pointer;
+            flex-shrink: 0; display: flex; align-items: center; justify-content: center;
         }
 
         .card { background: var(--panel); border-left: 3px solid var(--border); padding: 15px; border-radius: 4px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
         .card.done { border-left-color: var(--success); opacity: 0.5; }
-        .check-circle { width: 20px; height: 20px; border: 2px solid #444; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
+        .check-circle { width: 22px; height: 22px; border: 2px solid #444; border-radius: 50%; cursor: pointer; flex-shrink: 0; }
         .done .check-circle { background: var(--success); border-color: var(--success); }
-        .txt { flex: 1; font-size: 0.85rem; }
-        .price { color: var(--accent); font-weight: 800; font-size: 0.8rem; }
-        .buy-btn { background: var(--accent); border: none; color: #fff; padding: 6px 12px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; }
+        .txt { flex: 1; font-size: 0.85rem; color: #fff; }
+        .price { color: var(--accent); font-weight: 800; font-size: 0.85rem; }
+        .buy-btn { background: var(--accent); border: none; color: #fff; padding: 8px 15px; border-radius: 4px; font-size: 0.7rem; font-weight: 800; cursor: pointer; flex-shrink: 0; }
+        .del-btn { background: none; border: none; color: #444; font-size: 1.4rem; cursor: pointer; padding: 0 5px; }
+        .del-btn:hover { color: var(--accent); }
 
         #toast { position: fixed; bottom: -60px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 10px 25px; border-radius: 20px; font-weight: 800; transition: 0.4s; z-index: 2000; }
         #toast.active { bottom: 20px; }
         
-        #status-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2500; display: none; align-items: center; justify-content: center; }
-        .status-selector { background: var(--panel); padding: 20px; border-radius: 12px; width: 80%; border: 1px solid var(--border); }
+        #status-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 2500; display: none; align-items: center; justify-content: center; }
+        .status-selector { background: var(--panel); padding: 25px; border-radius: 12px; width: 85%; border: 1px solid var(--border); }
         .status-option { padding: 15px; margin: 10px 0; border: 1px solid var(--border); border-radius: 8px; text-align: center; cursor: pointer; font-weight: 800; }
     </style>
 </head>
 <body>
 
-    <div id="toast">SYSTEM V2.3.9 READY</div>
+    <div id="toast">SYSTEM FIXED V2.3.9.1</div>
 
     <div id="status-modal">
         <div class="status-selector">
-            <h3 style="text-align:center; font-size: 0.9rem; margin-bottom: 15px;">CONDIÇÃO DO OPERADOR</h3>
+            <h3 style="text-align:center; font-size: 0.9rem; margin-bottom: 15px;">MÓDULO NEURAL</h3>
             <div class="status-option" style="color: #ff4444;" onclick="setStatus('critical')">🔴 CRÍTICO</div>
             <div class="status-option" style="color: #fff;" onclick="setStatus('stable')">⚪ ESTÁVEL</div>
             <div class="status-option" style="color: #00ff9d;" onclick="setStatus('overclock')">🟢 OVERCLOCK</div>
@@ -94,13 +90,13 @@
     <div class="hud">
         <div class="brand">
             <div style="display:flex; align-items:center; gap:15px;">
-                <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img" onclick="secretTrigger()">
+                <img src="https://i.ibb.co/mrn1JCLP/1000166598.png" class="logo-img">
                 <div>
-                    <h1 style="font-family:'Space Grotesk'; font-size:1.2rem; letter-spacing:2px; margin:0;">CYNOS LABS</h1>
-                    <small style="color:#555; font-size: 0.5rem;">TITAN PROTOCOL v2.3.9</small>
+                    <h1 style="margin:0;">CYNOS LABS</h1>
+                    <small style="color:#555; font-size: 0.5rem;">TITAN PROTOCOL v2.3.9.1</small>
                 </div>
             </div>
-            <div id="current-status-badge" class="status-badge stable" onclick="openStatus()">ESTÁVEL</div>
+            <div id="current-status-badge" class="status-badge" onclick="openStatus()">ESTÁVEL</div>
         </div>
         <div class="xp-container"><div class="xp-bar" id="xp-b"></div></div>
         <div class="stats-grid">
@@ -118,7 +114,7 @@
     <div class="content">
         <div id="view-missions">
             <div class="input-group">
-                <input type="text" id="input-task" placeholder="Identificar missão..." onkeypress="handleEnter(event, addTask)">
+                <input type="text" id="input-task" placeholder="Nova missão..." onkeypress="handleEnter(event, addTask)" style="flex:1">
                 <button onclick="addTask()">+</button>
             </div>
             <div id="list-missions"></div>
@@ -127,15 +123,15 @@
         <div id="view-armory" style="display:none">
             <div class="input-group">
                 <input type="text" id="input-reward" placeholder="Item..." style="flex:2">
-                <input type="number" id="input-cost" placeholder="$" style="flex:0.8">
+                <input type="number" id="input-cost" placeholder="$" style="flex:1">
                 <button onclick="addReward()">$</button>
             </div>
             <div id="list-armory"></div>
         </div>
 
         <div id="view-logs" style="display:none">
-            <div class="stat-card" style="margin-bottom: 15px;"><span class="stat-label">Total de Ops</span><span class="stat-val" id="total-ops">0</span></div>
-            <div id="log-list" style="font-size: 0.65rem; color: #666;"></div>
+            <div class="stat-card" style="margin-bottom: 15px;"><span class="stat-label">Operações Concluídas</span><span class="stat-val" id="total-ops">0</span></div>
+            <div id="log-list" style="font-size: 0.7rem; color: #666;"></div>
         </div>
     </div>
 
@@ -150,13 +146,12 @@
     function addLog(msg) {
         const time = new Date().toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
         db.logs.unshift(`[${time}] ${msg}`);
-        if(db.logs.length > 40) db.logs.pop();
+        if(db.logs.length > 30) db.logs.pop();
     }
 
     function openStatus() { document.getElementById('status-modal').style.display = 'flex'; }
     function setStatus(s) {
         db.status = s;
-        document.getElementById('current-status-badge').className = 'status-badge ' + s;
         document.getElementById('current-status-badge').innerText = s.toUpperCase();
         document.getElementById('status-modal').style.display = 'none';
         save();
@@ -172,7 +167,7 @@
         const i = document.getElementById('input-task');
         if(!i.value.trim()) return;
         db.missions.unshift({ id: Date.now(), txt: i.value, done: false });
-        addLog(`ADD: ${i.value}`);
+        addLog(`MIS-ADD: ${i.value}`);
         i.value = ''; save(); renderMissions();
     }
 
@@ -182,9 +177,9 @@
         t.done = true;
         let gain = db.status === 'overclock' ? 40 : 25;
         db.xp += gain; db.coins += gain; db.totalOps++;
-        addLog(`DONE: ${t.txt} (+${gain}CR)`);
+        addLog(`MIS-DONE: ${t.txt}`);
         notify(`+${gain} CR | +${gain} XP`);
-        if(db.xp >= db.lvl * 100) { db.xp = 0; db.lvl++; notify("LEVEL UP!"); }
+        if(db.xp >= db.lvl * 100) { db.xp = 0; db.lvl++; notify("SISTEMA UPGRADED!"); }
         save(); renderMissions();
     }
 
@@ -198,17 +193,20 @@
 
     function buyItem(id) {
         const i = db.armory.find(x => x.id === id);
-        if(db.coins >= i.cost) { db.coins -= i.cost; addLog(`BOUGHT: ${i.txt}`); notify("ADQUIRIDO: " + i.txt); save(); renderArmory(); }
-        else notify("SEM CRÉDITO");
+        if(db.coins >= i.cost) { db.coins -= i.cost; addLog(`BUY: ${i.txt}`); notify("RECOMPENSA LIBERADA"); save(); renderArmory(); }
+        else notify("SALDO INSUFICIENTE");
     }
 
-    function delItem(id, type) { if(confirm("Remover?")) { db[type] = db[type].filter(x => x.id !== id); save(); type==='missions'?renderMissions():renderArmory(); } }
+    function delItem(id, type) {
+        db[type] = db[type].filter(x => x.id !== id); save(); 
+        type==='missions'?renderMissions():renderArmory();
+    }
 
     function renderMissions() {
         const l = document.getElementById('list-missions'); l.innerHTML = '';
         db.missions.forEach(t => {
             const el = document.createElement('div'); el.className = `card ${t.done?'done':''}`;
-            el.innerHTML = `<div class="check-circle" onclick="toggleTask(${t.id})"></div><div class="txt">${t.txt}</div><button onclick="delItem(${t.id}, 'missions')" style="background:none; border:none; color:#444;">×</button>`;
+            el.innerHTML = `<div class="check-circle" onclick="toggleTask(${t.id})"></div><div class="txt">${t.txt}</div><button class="del-btn" onclick="delItem(${t.id}, 'missions')">×</button>`;
             l.appendChild(el);
         });
     }
@@ -217,7 +215,7 @@
         const l = document.getElementById('list-armory'); l.innerHTML = '';
         db.armory.forEach(i => {
             const el = document.createElement('div'); el.className = 'card';
-            el.innerHTML = `<div style="flex:1"><div style="font-weight:700">${i.txt}</div><div class="price">$ ${i.cost}</div></div><button class="buy-btn" onclick="buyItem(${i.id})">BUY</button><button onclick="delItem(${i.id}, 'armory')" style="background:none; border:none; color:#444;">×</button>`;
+            el.innerHTML = `<div style="flex:1"><div style="font-weight:700">${i.txt}</div><div class="price">$ ${i.cost}</div></div><button class="buy-btn" onclick="buyItem(${i.id})">BUY</button><button class="del-btn" onclick="delItem(${i.id}, 'armory')">×</button>`;
             l.appendChild(el);
         });
     }
