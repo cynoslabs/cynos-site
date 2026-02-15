@@ -1,476 +1,155 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#050505">
-    <meta name="description" content="CYNOS LABS - TITAN PROTOCOL v3.0 | Sistema de Gestão de Alta Performance">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>CYNOS LABS | TITAN PROTOCOL v3.0</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYNOS TITAN - OS v1.0</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{background:#050505;color:#f5f5f5;font-family:'Inter',sans-serif;overflow-x:hidden;min-height:100vh}
-        .font-mono{font-family:'JetBrains Mono',monospace}
-        .glass{background:rgba(17,17,17,.6);backdrop-filter:blur(12px);border:1px solid rgba(220,38,38,.15)}
-        .glass:hover{border-color:rgba(220,38,38,.3)}
-        .cyber-grid{background-image:linear-gradient(rgba(220,38,38,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(220,38,38,.03) 1px,transparent 1px);background-size:50px 50px}
-        .scanline{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,.1) 50%);background-size:100% 4px;pointer-events:none;z-index:9999;opacity:.3}
-        .glow-text{text-shadow:0 0 20px rgba(220,38,38,.5)}
-        .btn-cyber{background:linear-gradient(135deg,#dc2626 0%,#991b1b 100%);position:relative;overflow:hidden;transition:all .3s}
-        .btn-cyber::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transition:left .5s}
-        .btn-cyber:hover::before{left:100%}
-        .btn-cyber:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(220,38,38,.4)}
-        .stat-card{background:linear-gradient(145deg,rgba(17,17,17,.8) 0%,rgba(10,10,10,.9) 100%);border-left:3px solid #dc2626}
-        .progress-cyber{background:#111;border:1px solid #333;position:relative;overflow:hidden}
-        .progress-cyber::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(90deg,transparent,transparent 10px,rgba(0,0,0,.3) 10px,rgba(0,0,0,.3) 20px)}
-        .progress-fill{background:linear-gradient(90deg,#dc2626 0%,#ef4444 50%,#dc2626 100%);background-size:200% 100%;animation:shimmer 2s infinite}
-        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-        .checkbox-cyber{appearance:none;width:24px;height:24px;border:2px solid #333;background:#0a0a0a;cursor:pointer;position:relative;transition:all .2s}
-        .checkbox-cyber:checked{background:#dc2626;border-color:#dc2626}
-        .checkbox-cyber:checked::after{content:'✓';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;font-weight:bold;font-size:14px}
-        .nav-item{position:relative;transition:all .3s}
-        .nav-item::after{content:'';position:absolute;bottom:-4px;left:50%;transform:translateX(-50%);width:0;height:2px;background:#dc2626;transition:width .3s}
-        .nav-item.active::after,.nav-item:hover::after{width:100%}
-        .task-item{transition:all .3s;border-left:2px solid transparent}
-        .task-item:hover{border-left-color:#dc2626;background:rgba(220,38,38,.05)}
-        .task-item.completed{opacity:.5;border-left-color:#22c55e}
-        .task-item.completed .task-title{text-decoration:line-through;color:#737373}
-        .chart-donut{position:relative;filter:drop-shadow(0 0 10px rgba(220,38,38,.3))}
-        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(10px);z-index:1000;align-items:center;justify-content:center;padding:20px}
-        .modal.active{display:flex}
-        .modal-content{background:#0a0a0a;border:1px solid #dc2626;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;position:relative}
-        .modal-content::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#dc2626,transparent);animation:scan 2s linear infinite}
-        @keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
-        .input-cyber{background:#111;border:1px solid #333;color:#f5f5f5;transition:all .3s}
-        .input-cyber:focus{outline:none;border-color:#dc2626;box-shadow:0 0 10px rgba(220,38,38,.2)}
-        .badge{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);font-family:'JetBrains Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em}
-        .scroll-hide::-webkit-scrollbar{display:none}
-        .scroll-hide{-ms-overflow-style:none;scrollbar-width:none}
-        .level-bar{background:linear-gradient(90deg,#111 0%,#1a1a1a 100%);border:1px solid #333;height:8px;position:relative;overflow:hidden}
-        .level-fill{background:linear-gradient(90deg,#dc2626,#f59e0b,#dc2626);background-size:200% 100%;height:100%;animation:shimmer 3s infinite}
-        .toast-container{position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
-        .toast{background:#0a0a0a;border:1px solid #dc2626;padding:16px 20px;min-width:300px;transform:translateX(400px);opacity:0;transition:all .3s;pointer-events:all}
-        .toast.show{transform:translateX(0);opacity:1}
-        .animate-fade-in{animation:fadeIn .5s ease-out forwards}
-        @keyframes fadeIn{0%{opacity:0;transform:translateY(10px)}100%{opacity:1;transform:translateY(0)}}
-        .animate-pulse-slow{animation:pulse 3s cubic-bezier(.4,0,.6,1) infinite}
-        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-        @media(min-width:1024px){.layout-grid{display:grid;grid-template-columns:280px 1fr;gap:2rem;max-width:1400px;margin:0 auto;padding:2rem}.sidebar{position:sticky;top:2rem;height:calc(100vh - 4rem)}.mobile-nav{display:none}}
-        @media(max-width:1023px){.sidebar{display:none}.layout-grid{padding-bottom:80px}}
-        .safe-bottom{padding-bottom:env(safe-area-inset-bottom,20px)}
+        /* DESIGN HACKER MINIMALISTA */
+        body {
+            background-color: #050505;
+            color: #00ff41; /* Verde Matrix clássico */
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            overflow: hidden; /* Para não ter barra de rolagem no fundo */
+            height: 100vh;
+        }
+
+        /* BARRA DE TAREFAS */
+        #taskbar {
+            background: rgba(20, 20, 20, 0.9);
+            height: 40px;
+            display: flex;
+            align-items: center;
+            padding: 0 15px;
+            border-bottom: 1px solid #00ff41;
+            justify-content: space-between;
+        }
+
+        /* ÁREA DE TRABALHO */
+        #desktop {
+            height: calc(100vh - 40px);
+            position: relative;
+            padding: 20px;
+        }
+
+        /* JANELA FLUTUANTE (O Pelo do Gato) */
+        .window {
+            position: absolute;
+            width: 600px;
+            height: 400px;
+            background: #111;
+            border: 2px solid #00ff41;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+            display: none; /* Começa escondida */
+            flex-direction: column;
+        }
+
+        .window-header {
+            background: #00ff41;
+            color: #000;
+            padding: 5px 10px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            cursor: move;
+        }
+
+        .close-btn {
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: bold;
+        }
+
+        .window-content {
+            flex-grow: 1;
+            background: #000;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* TERMINAL DE COMANDO */
+        #terminal-input {
+            background: none;
+            border: none;
+            color: #00ff41;
+            font-family: inherit;
+            font-size: 16px;
+            width: 80%;
+            outline: none;
+        }
     </style>
 </head>
-<body class="cyber-grid">
-    <div class="scanline"></div>
-    <div class="toast-container" id="toastContainer"></div>
+<body>
 
-    <div class="layout-grid">
-        <aside class="sidebar glass rounded-2xl p-6 flex flex-col gap-6">
-            <div class="flex items-center gap-3 pb-6 border-b border-white/10">
-                <div class="w-12 h-12 relative">
-                    <svg viewBox="0 0 100 100" class="w-full h-full animate-pulse-slow">
-                        <circle cx="50" cy="50" r="45" fill="none" stroke="#dc2626" stroke-width="2"/>
-                        <circle cx="50" cy="50" r="35" fill="none" stroke="#991b1b" stroke-width="1" opacity=".5"/>
-                        <path d="M50 15 L85 50 L50 85 L15 50 Z" fill="#dc2626" opacity=".8"/>
-                        <circle cx="50" cy="50" r="8" fill="#050505"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="font-bold text-xl tracking-tighter">CYNOS LABS</h1>
-                    <p class="font-mono text-xs text-red-600">TITAN PROTOCOL v3.0</p>
-                </div>
-            </div>
+<div id="taskbar">
+    <span>CYNOS TITAN | Unidade de Elite</span>
+    <div id="clock">00:00:00</div>
+</div>
 
-            <div class="space-y-4">
-                <div class="stat-card rounded-xl p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-mono text-xs text-gray-500">CRÉDITOS</span>
-                        <span class="badge text-red-600">$</span>
-                    </div>
-                    <p class="text-2xl font-bold font-mono" id="totalCredits">0</p>
-                </div>
-                <div class="stat-card rounded-xl p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-mono text-xs text-gray-500">NÍVEL</span>
-                        <span class="badge text-amber-500">LVL</span>
-                    </div>
-                    <p class="text-2xl font-bold font-mono mb-2" id="userLevel">1</p>
-                    <div class="level-bar rounded-full"><div class="level-fill rounded-full" id="levelProgress" style="width:0%"></div></div>
-                    <p class="font-mono text-xs text-gray-500 mt-1" id="xpText">0 / 100 XP</p>
-                </div>
-                <div class="stat-card rounded-xl p-4 border-l-amber-500">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-mono text-xs text-gray-500">STREAK</span>
-                        <span class="text-amber-500">🔥</span>
-                    </div>
-                    <p class="text-2xl font-bold font-mono" id="streakCount">12</p>
-                    <p class="text-xs text-gray-500">dias consecutivos</p>
-                </div>
-            </div>
-
-            <nav class="flex-1 space-y-2">
-                <button onclick="switchView('dashboard')" id="nav-dashboard" class="nav-item active w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                    <span class="font-medium">Dashboard</span>
-                </button>
-                <button onclick="switchView('routine')" id="nav-routine" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                    <span class="font-medium">Rotina</span>
-                </button>
-                <button onclick="switchView('finance')" id="nav-finance" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    <span class="font-medium">Finanças</span>
-                </button>
-                <button onclick="switchView('system')" id="nav-system" class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 hover:bg-white/5 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span class="font-medium">Sistema</span>
-                </button>
-            </nav>
-
-            <div class="pt-6 border-t border-white/10">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-600 to-amber-600 flex items-center justify-center font-bold text-sm">CT</div>
-                    <div>
-                        <p class="font-medium text-sm">Operador</p>
-                        <p class="font-mono text-xs text-gray-500">ONLINE</p>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <main class="flex-1 p-4 lg:p-0">
-            <div id="view-dashboard" class="view-section space-y-6 animate-fade-in">
-                <div class="glass rounded-2xl p-6 lg:p-8 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-64 h-64 bg-red-600/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                    <div class="relative z-10">
-                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
-                            <div>
-                                <p class="font-mono text-xs text-red-600 mb-2">STATUS DO SISTEMA</p>
-                                <h2 class="text-3xl lg:text-4xl font-bold glow-text">PROTOCOLO ATIVO</h2>
-                                <p class="text-gray-500 mt-1">Disciplina é a nossa única linguagem</p>
-                            </div>
-                            <button onclick="showModal('protocolModal')" class="btn-cyber px-6 py-3 rounded-lg font-bold text-sm uppercase tracking-wider">⚠️ Protocolo Omega</button>
-                        </div>
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div class="glass rounded-xl p-4 text-center">
-                                <p class="font-mono text-xs text-gray-500 mb-1">TAREFAS HOJE</p>
-                                <p class="text-2xl font-bold font-mono" id="dashTasks">0/7</p>
-                                <div class="w-full h-1 bg-gray-800 rounded-full mt-2 overflow-hidden"><div class="h-full bg-red-600 rounded-full" id="dashTaskBar" style="width:0%"></div></div>
-                            </div>
-                            <div class="glass rounded-xl p-4 text-center">
-                                <p class="font-mono text-xs text-gray-500 mb-1">SALDO</p>
-                                <p class="text-2xl font-bold font-mono text-green-500" id="dashBalance">R$ 0</p>
-                            </div>
-                            <div class="glass rounded-xl p-4 text-center">
-                                <p class="font-mono text-xs text-gray-500 mb-1">ECONOMIA</p>
-                                <p class="text-2xl font-bold font-mono text-amber-500" id="dashSavings">0%</p>
-                            </div>
-                            <div class="glass rounded-xl p-4 text-center">
-                                <p class="font-mono text-xs text-gray-500 mb-1">XP HOJE</p>
-                                <p class="text-2xl font-bold font-mono text-red-600" id="dashXP">0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid lg:grid-cols-2 gap-6">
-                    <div class="glass rounded-2xl p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-bold text-lg flex items-center gap-2"><span class="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>Próximas Tarefas</h3>
-                            <button onclick="switchView('routine')" class="text-sm text-red-600 hover:underline font-mono">VER TODAS →</button>
-                        </div>
-                        <div id="dashTaskList" class="space-y-3"></div>
-                    </div>
-                    <div class="glass rounded-2xl p-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <h3 class="font-bold text-lg flex items-center gap-2"><span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>Resumo Financeiro</h3>
-                            <button onclick="switchView('finance')" class="text-sm text-red-600 hover:underline font-mono">DETALHES →</button>
-                        </div>
-                        <div class="space-y-4">
-                            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg></div>
-                                    <div><p class="font-medium">Entradas</p><p class="font-mono text-xs text-gray-500">Este mês</p></div>
-                                </div>
-                                <p class="text-xl font-bold font-mono text-green-500" id="dashIncome">R$ 0</p>
-                            </div>
-                            <div class="flex justify-between items-center p-4 bg-white/5 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-red-600/20 flex items-center justify-center"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg></div>
-                                    <div><p class="font-medium">Saídas</p><p class="font-mono text-xs text-gray-500">Este mês</p></div>
-                                </div>
-                                <p class="text-xl font-bold font-mono text-red-600" id="dashExpense">R$ 0</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-routine" class="view-section hidden space-y-6 animate-fade-in">
-                <div class="glass rounded-2xl p-6">
-                    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-                        <div>
-                            <p class="font-mono text-xs text-red-600 mb-1">ROTINA DIÁRIA</p>
-                            <h2 class="text-2xl font-bold" id="routineDate">DATA_ATUAL</h2>
-                        </div>
-                        <button onclick="showModal('taskModal')" class="btn-cyber px-6 py-3 rounded-lg font-bold text-sm flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Nova Tarefa</button>
-                    </div>
-                    <div class="mb-6">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-mono text-sm text-gray-500">PROGRESSO DO DIA</span>
-                            <span class="font-mono text-sm font-bold" id="routineProgressText">0%</span>
-                        </div>
-                        <div class="progress-cyber h-3 rounded-full"><div class="progress-fill h-full rounded-full" id="routineProgressBar" style="width:0%"></div></div>
-                    </div>
-                    <div id="routineTaskList" class="space-y-2"></div>
-                </div>
-                <div class="grid lg:grid-cols-3 gap-4">
-                    <div class="glass rounded-xl p-4 text-center">
-                        <p class="font-mono text-xs text-gray-500 mb-2">MAIS FEITO</p>
-                        <p class="text-lg font-bold">Treinar</p>
-                        <p class="font-mono text-xs text-gray-500 mt-1">1x hoje</p>
-                    </div>
-                    <div class="glass rounded-xl p-4 text-center">
-                        <p class="font-mono text-xs text-gray-500 mb-2">TAREFAS ATIVAS</p>
-                        <p class="text-lg font-bold" id="activeTasksCount">7</p>
-                        <p class="font-mono text-xs text-gray-500 mt-1">este mês</p>
-                    </div>
-                    <div class="glass rounded-xl p-4 text-center">
-                        <p class="font-mono text-xs text-gray-500 mb-2">XP ACUMULADO</p>
-                        <p class="text-lg font-bold text-red-600" id="routineTotalXP">0</p>
-                        <p class="font-mono text-xs text-gray-500 mt-1">pontos</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="view-finance" class="view-section hidden space-y-6 animate-fade-in">
-                <div class="flex justify-center items-center gap-4 mb-4">
-                    <button onclick="changeMonth(-1)" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg></button>
-                    <h2 class="text-xl font-bold font-mono uppercase tracking-widest" id="financeMonth">JANEIRO 2026</h2>
-                    <button onclick="changeMonth(1)" class="w-10 h-10 rounded-full glass flex items-center justify-center hover:bg-white/10 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></button>
-                </div>
-
-                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="glass rounded-2xl p-5 border-l-4 border-l-green-500">
-                        <div class="flex items-center gap-2 mb-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg><span class="font-mono text-xs text-gray-500">ENTRADAS</span></div>
-                        <p class="text-2xl font-bold font-mono text-green-500">R$ <span id="finIncome">0</span></p>
-                    </div>
-                    <div class="glass rounded-2xl p-5 border-l-4 border-l-red-600">
-                        <div class="flex items-center gap-2 mb-3"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/></svg><span class="font-mono text-xs text-gray-500">SAÍDAS</span></div>
-                        <p class="text-2xl font-bold font-mono text-red-600">R$ <span id="finExpense">0</span></p>
-                    </div>
-                    <div class="glass rounded-2xl p-5 border-l-4 border-l-amber-500">
-                        <div class="flex items-center gap-2 mb-3"><svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg><span class="font-mono text-xs text-gray-500">SALDO</span></div>
-                        <p class="text-2xl font-bold font-mono text-amber-500">R$ <span id="finBalance">0</span></p>
-                    </div>
-                    <div class="glass rounded-2xl p-5 border-l-4 border-l-blue-500">
-                        <div class="flex items-center gap-2 mb-3"><svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="font-mono text-xs text-gray-500">ECONOMIZOU</span></div>
-                        <p class="text-2xl font-bold font-mono text-blue-500"><span id="finSavings">0</span>%</p>
-                    </div>
-                </div>
-
-                <div class="grid lg:grid-cols-2 gap-6">
-                    <div class="glass rounded-2xl p-6">
-                        <h3 class="font-bold text-lg mb-6 font-mono uppercase">Gastos por Categoria</h3>
-                        <div class="flex flex-col items-center">
-                            <div class="chart-donut w-48 h-48 mb-6 relative">
-                                <svg viewBox="0 0 100 100" class="w-full h-full transform -rotate-90">
-                                    <circle cx="50" cy="50" r="40" fill="none" stroke="#111" stroke-width="12"/>
-                                    <circle id="donut1" cx="50" cy="50" r="40" fill="none" stroke="#f97316" stroke-width="12" stroke-dasharray="0 251.2" stroke-linecap="round"/>
-                                    <circle id="donut2" cx="50" cy="50" r="40" fill="none" stroke="#eab308" stroke-width="12" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-linecap="round"/>
-                                    <circle id="donut3" cx="50" cy="50" r="40" fill="none" stroke="#22c55e" stroke-width="12" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-linecap="round"/>
-                                    <circle id="donut4" cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" stroke-width="12" stroke-dasharray="0 251.2" stroke-dashoffset="0" stroke-linecap="round"/>
-                                </svg>
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <button onclick="showModal('transactionModal')" class="btn-cyber px-4 py-2 rounded-full text-xs font-bold uppercase">+ Novo</button>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-x-8 gap-y-2 w-full max-w-xs">
-                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-orange-500"></span><span class="text-sm text-gray-500">Alimentação</span></div>
-                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-green-500"></span><span class="text-sm text-gray-500">Lazer</span></div>
-                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-yellow-500"></span><span class="text-sm text-gray-500">Assinaturas</span></div>
-                                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500"></span><span class="text-sm text-gray-500">Outros</span></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="glass rounded-2xl p-6">
-                        <h3 class="font-bold text-lg mb-6 font-mono uppercase">Evolução 6 Meses</h3>
-                        <div class="h-64 flex items-end justify-between gap-2" id="evolutionChart"></div>
-                    </div>
-                </div>
-
-                <div class="glass rounded-2xl p-6">
-                    <h3 class="font-bold text-lg mb-4 font-mono uppercase">Transações Recentes</h3>
-                    <div id="transactionList" class="space-y-2 max-h-96 overflow-y-auto scroll-hide"></div>
-                </div>
-            </div>
-
-            <div id="view-system" class="view-section hidden space-y-6 animate-fade-in">
-                <div class="glass rounded-2xl p-8 text-center relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-b from-red-600/10 to-transparent"></div>
-                    <div class="relative z-10">
-                        <div class="w-24 h-24 mx-auto mb-6 relative">
-                            <svg viewBox="0 0 100 100" class="w-full h-full animate-pulse-slow">
-                                <circle cx="50" cy="50" r="45" fill="none" stroke="#dc2626" stroke-width="2"/>
-                                <circle cx="50" cy="50" r="35" fill="none" stroke="#991b1b" stroke-width="1" opacity=".5"/>
-                                <path d="M50 15 L85 50 L50 85 L15 50 Z" fill="#dc2626" opacity=".8"/>
-                                <circle cx="50" cy="50" r="8" fill="#050505"/>
-                            </svg>
-                        </div>
-                        <h2 class="text-3xl font-bold mb-2">CYNOS LABS</h2>
-                        <p class="font-mono text-red-600 mb-6">TITAN PROTOCOL v3.0</p>
-                        <div class="grid grid-cols-2 gap-4 max-w-md mx-auto mb-8">
-                            <div class="glass rounded-lg p-4"><p class="font-mono text-xs text-gray-500">STATUS</p><p class="text-green-500 font-bold font-mono">OPERACIONAL</p></div>
-                            <div class="glass rounded-lg p-4"><p class="font-mono text-xs text-gray-500">UPTIME</p><p class="font-bold font-mono" id="systemUptime">00:00:00</p></div>
-                        </div>
-                        <button onclick="resetSystem()" class="btn-cyber px-8 py-4 rounded-lg font-bold text-lg uppercase tracking-widest animate-pulse">⚠️ Reset Total do Sistema</button>
-                        <p class="font-mono text-xs text-gray-500 mt-4">Esta ação limpará todos os dados locais</p>
-                    </div>
-                </div>
-                <div class="grid lg:grid-cols-2 gap-6">
-                    <div class="glass rounded-2xl p-6">
-                        <h3 class="font-bold text-lg mb-4 font-mono uppercase">Exportar Dados</h3>
-                        <div class="space-y-3">
-                            <button onclick="exportData('json')" class="w-full p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-between">
-                                <span class="flex items-center gap-3"><svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Exportar JSON</span><span class="font-mono text-xs text-gray-500">.json</span>
-                            </button>
-                            <button onclick="exportData('csv')" class="w-full p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors flex items-center justify-between">
-                                <span class="flex items-center gap-3"><svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Exportar CSV</span><span class="font-mono text-xs text-gray-500">.csv</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="glass rounded-2xl p-6">
-                        <h3 class="font-bold text-lg mb-4 font-mono uppercase">Informações</h3>
-                        <div class="space-y-3 text-sm text-gray-500">
-                            <p><span class="text-white">Versão:</span> 3.0.0 (Production)</p>
-                            <p><span class="text-white">Build:</span> 2026.02.14</p>
-                            <p><span class="text-white">Storage:</span> LocalStorage</p>
-                            <p><span class="text-white">License:</span> CYNOS TITAN</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
+<div id="desktop">
+    <div>
+        <span>titan@os:~$ </span>
+        <input type="text" id="terminal-input" placeholder="digite um comando..." autofocus>
     </div>
 
-    <nav class="mobile-nav fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-md border-t border-white/10 safe-bottom z-50">
-        <div class="flex justify-around items-center py-3">
-            <button onclick="switchView('dashboard')" class="nav-item flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-white transition-colors" id="mob-nav-dashboard"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg><span class="text-[10px] font-mono">DASH</span></button>
-            <button onclick="switchView('routine')" class="nav-item flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-white transition-colors" id="mob-nav-routine"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg><span class="text-[10px] font-mono">ROTINA</span></button>
-            <button onclick="switchView('finance')" class="nav-item flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-white transition-colors" id="mob-nav-finance"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span class="text-[10px] font-mono">FIN</span></button>
-            <button onclick="switchView('system')" class="nav-item flex flex-col items-center gap-1 p-2 text-gray-500 hover:text-white transition-colors" id="mob-nav-system"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg><span class="text-[10px] font-mono">SYS</span></button>
+    <div id="win-youtube" class="window">
+        <div class="window-header">
+            <span>TITAN VIDEO PLAYER</span>
+            <button class="close-btn" onclick="closeApp('win-youtube')">X</button>
         </div>
-    </nav>
-
-    <div id="taskModal" class="modal">
-        <div class="modal-content rounded-2xl p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold font-mono uppercase">Nova Tarefa</h3>
-                <button onclick="closeModal('taskModal')" class="text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+        <div class="window-content" id="yt-content">
             </div>
-            <form onsubmit="submitTask(event)" class="space-y-4">
-                <div>
-                    <label class="block font-mono text-xs text-gray-500 mb-2 uppercase">Título</label>
-                    <input type="text" id="taskTitle" required class="input-cyber w-full px-4 py-3 rounded-lg" placeholder="Ex: Treinar pernas">
-                </div>
-                <div>
-                    <label class="block font-mono text-xs text-gray-500 mb-2 uppercase">Pontos (XP)</label>
-                    <input type="number" id="taskPoints" required min="5" max="100" value="10" class="input-cyber w-full px-4 py-3 rounded-lg">
-                </div>
-                <div>
-                    <label class="block font-mono text-xs text-gray-500 mb-2 uppercase">Categoria</label>
-                    <select id="taskCategory" class="input-cyber w-full px-4 py-3 rounded-lg">
-                        <option value="fitness">Fitness</option>
-                        <option value="mind">Mental</option>
-                        <option value="work">Trabalho</option>
-                        <option value="health">Saúde</option>
-                        <option value="other">Outro</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-cyber w-full py-4 rounded-lg font-bold uppercase tracking-wider mt-4">Inserir no Sistema</button>
-            </form>
-        </div>
     </div>
+</div>
 
-    <div id="transactionModal" class="modal">
-        <div class="modal-content rounded-2xl p-6 w-full max-w-md">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold font-mono uppercase">Nova Transação</h3>
-                <button onclick="closeModal('transactionModal')" class="text-gray-500 hover:text-white"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
-            </div>
-            <form onsubmit="submitTransaction(event)" class="space-y-4">
-                <div>
-                    <label class="block font-mono text-xs text-gray-500 mb-2 uppercase">Descrição</label>
-                    <input type="text" id="transDesc" required class="input-cyber w-full px-4 py-3 rounded-lg" placeholder="Ex: Mercado">
-                </div>
-                <div>
-                    <label class="block font-mono text-xs text-gray-500 mb-2 uppercase">Valor (R$)</label>
-                    <input type="number" id="transAmount" required min="0.01" step="0.01" class="input-cyber w-full px-4 py-3 rounded-lg" placeholder="0,00">
-                </div>
-                <div>
-                    <label class="block font-mono text-xs text-gray-500 mb-2 uppercase">Tipo</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="cursor-pointer"><input type="radio" name="transType" value="expense" checked class="hidden peer"><div class="input-cyber py-3 rounded-lg text-center peer-checked:bg-red-600 peer-checked:border-red-600 transition-colors">Saída</div></label>
-                        <label class="cursor-pointer"><input type="radio" name="transType" value="income" class="hidden peer"><div class="input-cyber py-3 rounded-lg text-center peer-checked:bg-green-600 peer-checked:border-green-600 transition-colors">Entrada</div></label>
-                    </div>
-                </div>
-                <div>
-                    <label class="block font-mono text-xs text-gray-500 mb-2 uppercase">Categoria</label>
-                    <select id="transCategory" class="input-cyber w-full px-4 py-3 rounded-lg">
-                        <option value="food">Alimentação</option>
-                        <option value="leisure">Lazer</option>
-                        <option value="subscription">Assinaturas</option>
-                        <option value="transport">Transporte</option>
-                        <option value="other">Outros</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn-cyber w-full py-4 rounded-lg font-bold uppercase tracking-wider mt-4">Registrar Transação</button>
-            </form>
-        </div>
-    </div>
+<script>
+    const input = document.getElementById('terminal-input');
+    
+    // LÓGICA DE COMANDOS (O Back-end do OS)
+    input.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            const cmd = this.value.toLowerCase();
+            this.value = ''; // Limpa o terminal
 
-    <div id="protocolModal" class="modal">
-        <div class="modal-content rounded-2xl p-8 w-full max-w-lg text-center border-2 border-red-600">
-            <div class="w-20 h-20 mx-auto mb-6 relative">
-                <div class="absolute inset-0 bg-red-600 rounded-full animate-ping opacity-20"></div>
-                <div class="relative w-full h-full bg-red-600 rounded-full flex items-center justify-center"><svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg></div>
-            </div>
-            <h2 class="text-2xl font-bold mb-2 text-red-600 uppercase tracking-widest">Protocolo Omega</h2>
-            <p class="text-gray-500 mb-6">Modo de alto desempenho ativado. Todas as distrações serão eliminadas.</p>
-            <div class="space-y-3">
-                <button onclick="activateOmega()" class="btn-cyber w-full py-4 rounded-lg font-bold uppercase tracking-wider">ATIVAR PROTOCOLO</button>
-                <button onclick="closeModal('protocolModal')" class="w-full py-4 rounded-lg font-bold uppercase tracking-wider border border-white/20 hover:bg-white/5 transition-colors">CANCELAR</button>
-            </div>
-        </div>
-    </div>
+            if (cmd === 'open youtube') {
+                openYouTube();
+            } else if (cmd === 'status') {
+                alert("CYNOS TITAN OS v1.0 - Restricted Mode Active");
+            } else if (cmd === 'clear') {
+                // Lógica de limpar se quiser
+            } else {
+                alert("Comando não reconhecido pela Unidade.");
+            }
+        }
+    });
 
-    <script>
-        const System={data:{user:{level:1,xp:0,credits:0,streak:12},tasks:[{id:1,title:'Beber 4 litros de água',points:45,completed:false,category:'health'},{id:2,title:'Dieta',points:45,completed:false,category:'health'},{id:3,title:'Ler 10 páginas',points:10,completed:false,category:'mind'},{id:4,title:'Postar 1 vídeo no YouTube',points:10,completed:false,category:'work'},{id:5,title:'Postar 4 reels',points:10,completed:false,category:'work'},{id:6,title:'Treinar',points:35,completed:true,category:'fitness'},{id:7,title:'Meditar 15 min',points:20,completed:false,category:'mind'}],transactions:[{id:1,description:'Salário',amount:15588,type:'income',category:'salary',date:'2026-01-01'},{id:2,description:'Jantar',amount:50,type:'expense',category:'food',date:'2026-01-21'},{id:3,description:'Netflix',amount:39,type:'expense',category:'subscription',date:'2026-01-15'},{id:4,description:'Uber',amount:23,type:'expense',category:'transport',date:'2026-01-20'},{id:5,description:'Café',amount:12,type:'expense',category:'food',date:'2026-01-21'},{id:6,description:'Spotify',amount:19.90,type:'expense',category:'subscription',date:'2026-01-10'},{id:7,description:'Livro',amount:45,type:'expense',category:'leisure',date:'2026-01-18'},{id:8,description:'Cinema',amount:40,type:'expense',category:'leisure',date:'2026-01-12'}],currentMonth:1,currentYear:2026},init(){this.loadData();this.startUptime();this.renderAll();this.updateDate();this.renderEvolutionChart()},loadData(){const saved=localStorage.getItem('cynos_v3');if(saved){const parsed=JSON.parse(saved);this.data={...this.data,...parsed}}},saveData(){localStorage.setItem('cynos_v3',JSON.stringify(this.data))},startUptime(){let s=0;setInterval(()=>{s++;const h=Math.floor(s/3600).toString().padStart(2,'0'),m=Math.floor((s%3600)/60).toString().padStart(2,'0'),e=(s%60).toString().padStart(2,'0');const el=document.getElementById('systemUptime');if(el)el.textContent=`${h}:${m}:${e}`},1000)},updateDate(){const d=new Date(),m=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],a=['Domingo','Segunda-Feira','Terça-Feira','Quarta-Feira','Quinta-Feira','Sexta-Feira','Sábado'];const el=document.getElementById('routineDate');if(el)el.textContent=`${a[d.getDay()]}, ${d.getDate()} De ${m[d.getMonth()]}`},renderAll(){this.renderUserStats();this.renderTasks();this.renderFinance();this.renderDashboard()},renderUserStats(){document.getElementById('totalCredits').textContent=this.data.user.credits;document.getElementById('userLevel').textContent=this.data.user.level;document.getElementById('streakCount').textContent=this.data.user.streak;const n=this.data.user.level*100,p=(this.data.user.xp/n)*100;document.getElementById('levelProgress').style.width=`${p}%`;document.getElementById('xpText').textContent=`${this.data.user.xp} / ${n} XP`},renderTasks(){const c=document.getElementById('routineTaskList'),d=document.getElementById('dashTaskList'),o=this.data.tasks.filter(t=>t.completed).length,t=this.data.tasks.length,p=Math.round((o/t)*100),x=this.data.tasks.filter(t=>t.completed).reduce((a,b)=>a+b.points,0);document.getElementById('routineProgressText').textContent=`${p}%`;document.getElementById('routineProgressBar').style.width=`${p}%`;document.getElementById('routineTotalXP').textContent=x;document.getElementById('activeTasksCount').textContent=t;const h=this.data.tasks.map(k=>`<div class="task-item glass rounded-xl p-4 flex items-center justify-between cursor-pointer ${k.completed?'completed':''}" onclick="System.toggleTask(${k.id})"><div class="flex items-center gap-4"><input type="checkbox" class="checkbox-cyber" ${k.completed?'checked':''} onclick="event.stopPropagation()"><div><p class="task-title font-medium">${k.title}</p><p class="font-mono text-xs text-gray-500 uppercase">${k.category}</p></div></div><span class="font-mono text-sm font-bold ${k.completed?'text-green-500':'text-red-600'}">+${k.points} XP</span></div>`).join('');if(c)c.innerHTML=h;if(d){const u=this.data.tasks.filter(k=>!k.completed).slice(0,3);d.innerHTML=u.length?u.map(k=>`<div class="flex items-center justify-between p-3 bg-white/5 rounded-lg"><div class="flex items-center gap-3"><div class="w-2 h-2 rounded-full bg-red-600 animate-pulse"></div><span class="text-sm">${k.title}</span></div><span class="font-mono text-xs text-red-600">+${k.points}</span></div>`).join(''):'<p class="text-gray-500 text-center py-4">Todas as tarefas concluídas</p>'}},toggleTask(i){const t=this.data.tasks.find(k=>k.id===i);if(!t)return;t.completed=!t.completed;if(t.completed){this.data.user.xp+=t.points;this.data.user.credits+=Math.floor(t.points/2);const n=this.data.user.level*100;if(this.data.user.xp>=n){this.data.user.level++;this.data.user.xp-=n;this.showToast(`LEVEL UP! Nível ${this.data.user.level} alcançado`,'success')}else{this.showToast(`Tarefa concluída: +${t.points} XP`,'success')}}this.saveData();this.renderAll()},renderFinance(){const m=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];document.getElementById('financeMonth').textContent=`${m[this.data.currentMonth]} ${this.data.currentYear}`;const e=this.data.transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0),s=this.data.transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0),b=e-s,l=e>0?Math.round((b/e)*100):0;document.getElementById('finIncome').textContent=e.toLocaleString('pt-BR');document.getElementById('finExpense').textContent=s.toLocaleString('pt-BR');document.getElementById('finBalance').textContent=b.toLocaleString('pt-BR');document.getElementById('finSavings').textContent=l;this.renderDonut();this.renderTransactionList()},renderDonut(){const c={food:0,leisure:0,subscription:0,other:0,transport:0};this.data.transactions.filter(t=>t.type==='expense').forEach(t=>{if(c[t.category]!==undefined)c[t.category]+=t.amount});const t=Object.values(c).reduce((a,b)=>a+b,0);if(t===0)return;let o=0;const r=251.2,a=[{k:'food',c:'#f97316',v:c.food},{k:'subscription',c:'#eab308',v:c.subscription},{k:'leisure',c:'#22c55e',v:c.leisure},{k:'other',c:'#3b82f6',v:c.other}];a.forEach((i,idx)=>{const d=(i.v/t)*r,p=document.getElementById(`donut${idx+1}`);if(p){p.style.strokeDasharray=`${d} ${r}`;p.style.strokeDashoffset=-o;o+=d}})},renderTransactionList(){const c=document.getElementById('transactionList'),r=[...this.data.transactions].reverse();c.innerHTML=r.map(t=>`<div class="flex items-center justify-between p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full ${t.type==='income'?'bg-green-500/20':'bg-red-600/20'} flex items-center justify-center"><svg class="w-5 h-5 ${t.type==='income'?'text-green-500':'text-red-600'}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${t.type==='income'?'M7 11l5-5m0 0l5 5m-5-5v12':'M17 13l-5 5m0 0l-5-5m5 5V6'}"/></svg></div><div><p class="font-medium">${t.description}</p><p class="font-mono text-xs text-gray-500">${t.category}</p></div></div><p class="text-lg font-bold font-mono ${t.type==='income'?'text-green-500':'text-red-600'}">${t.type==='income'?'+':'-'} R$ ${t.amount.toLocaleString('pt-BR')}</p></div>`).join('')},renderDashboard(){const c=this.data.tasks.filter(t=>t.completed).length,o=this.data.tasks.length,p=Math.round((c/o)*100),x=this.data.tasks.filter(t=>t.completed).reduce((a,b)=>a+b.points,0),e=this.data.transactions.filter(t=>t.type==='income').reduce((a,b)=>a+b.amount,0),s=this.data.transactions.filter(t=>t.type==='expense').reduce((a,b)=>a+b.amount,0),b=e-s,l=e>0?Math.round((b/e)*100):0;document.getElementById('dashTasks').textContent=`${c}/${o}`;document.getElementById('dashTaskBar').style.width=`${p}%`;document.getElementById('dashBalance').textContent=`R$ ${b.toLocaleString('pt-BR')}`;document.getElementById('dashSavings').textContent=`${l}%`;document.getElementById('dashXP').textContent=x;document.getElementById('dashIncome').textContent=`R$ ${e.toLocaleString('pt-BR')}`;document.getElementById('dashExpense').textContent=`R$ ${s.toLocaleString('pt-BR')}`},renderEvolutionChart(){const c=document.getElementById('evolutionChart'),d=[40,55,45,70,85,100],m=['Ago','Set','Out','Nov','Dez','Jan'];c.innerHTML=d.map((v,i)=>`<div class="flex-1 flex flex-col items-center gap-1"><div class="w-full bg-gray-800 rounded-t-lg relative h-32 overflow-hidden"><div class="absolute bottom-0 w-full bg-gradient-to-t from-red-900 to-red-600 rounded-t-lg transition-all duration-1000" style="height:${v}%"></div></div><span class="text-xs ${i===5?'font-bold text-red-600':'text-gray-500'}">${m[i]}</span></div>`).join('')},showToast(m,t='info'){const c=document.getElementById('toastContainer'),e=document.createElement('div');e.className='toast';e.innerHTML=`<div class="flex items-start gap-3"><div class="w-8 h-8 rounded-full ${t==='success'?'bg-green-500/20':'bg-red-600/20'} flex items-center justify-center flex-shrink-0"><span class="text-lg">${t==='success'?'✓':'⚠'}</span></div><div><p class="font-semibold text-sm mb-1">${t==='success'?'SUCESSO':'INFO'}</p><p class="text-sm text-gray-400">${m}</p></div></div>`;c.appendChild(e);setTimeout(()=>e.classList.add('show'),10);setTimeout(()=>{e.classList.remove('show');setTimeout(()=>e.remove(),300)},3000)}};
+    function openYouTube() {
+        const win = document.getElementById('win-youtube');
+        const content = document.getElementById('yt-content');
+        
+        // Usando o modo Embed do YouTube para funcionar no Iframe
+        content.innerHTML = '<iframe src="https://www.youtube.com/embed/jfKfPfyJRdk" allowfullscreen></iframe>';
+        win.style.display = 'flex';
+        win.style.top = '100px';
+        win.style.left = '100px';
+    }
 
-        function switchView(v){document.querySelectorAll('.view-section').forEach(e=>e.classList.add('hidden'));document.getElementById(`view-${v}`).classList.remove('hidden');document.querySelectorAll('.nav-item').forEach(e=>e.classList.remove('active'));const d=document.getElementById(`nav-${v}`),m=document.getElementById(`mob-nav-${v}`);if(d)d.classList.add('active');if(m)m.classList.add('active');System.renderAll()}
+    function closeApp(id) {
+        document.getElementById(id).style.display = 'none';
+        document.getElementById('yt-content').innerHTML = ''; // Para o vídeo parar de tocar
+    }
 
-        function showModal(m){document.getElementById(m).classList.add('active')}
+    // RELÓGIO
+    setInterval(() => {
+        document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    }, 1000);
+</script>
 
-        function closeModal(m){document.getElementById(m).classList.remove('active')}
-
-        function submitTask(e){e.preventDefault();const t=document.getElementById('taskTitle').value,p=parseInt(document.getElementById('taskPoints').value),c=document.getElementById('taskCategory').value,n={id:Date.now(),title:t,points:p,completed:false,category:c};System.data.tasks.push(n);System.saveData();System.renderAll();closeModal('taskModal');System.showToast('Tarefa inserida no sistema','success');e.target.reset()}
-
-        function submitTransaction(e){e.preventDefault();const d=document.getElementById('transDesc').value,a=parseFloat(document.getElementById('transAmount').value),t=document.querySelector('input[name="transType"]:checked').value,c=document.getElementById('transCategory').value,n={id:Date.now(),description:d,amount:a,type:t,category:c,date:new Date().toISOString().split('T')[0]};System.data.transactions.push(n);System.saveData();System.renderAll();closeModal('transactionModal');System.showToast(`Transação registrada: ${d} R$ ${a.toFixed(2)}`,'success');e.target.reset()}
-
-        function changeMonth(d){System.data.currentMonth+=d;if(System.data.currentMonth>11){System.data.currentMonth=0;System.data.currentYear++}if(System.data.currentMonth<0){System.data.currentMonth=11;System.data.currentYear--}System.renderFinance()}
-
-        function activateOmega(){System.showToast('PROTOCOLO OMEGA ATIVADO','success');closeModal('protocolModal');document.body.style.filter='hue-rotate(15deg)';setTimeout(()=>{document.body.style.filter=''},5000)}
-
-        function resetSystem(){if(confirm('CONFIRMAR RESET TOTAL? Todos os dados serão perdidos.')){localStorage.removeItem('cynos_v3');location.reload()}}
-
-        function exportData(t){const d=t==='json'?JSON.stringify(System.data,null,2):System.data.transactions.map(tr=>`${tr.date},${tr.description},${tr.type},${tr.amount},${tr.category}`).join('\n'),b=new Blob([d],{type:t==='json'?'application/json':'text/csv'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=`cynos_backup_${new Date().toISOString().split('T')[0]}.${t}`;a.click();URL.revokeObjectURL(u);System.showToast(`Exportado: ${t.toUpperCase()}`,'success')}
-
-        document.addEventListener('DOMContentLoaded',()=>System.init());
-    </script>
 </body>
 </html>
