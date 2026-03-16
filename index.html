@@ -1,1 +1,1532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <meta name="theme-color" content="#000000"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <title>Nicolly — O Vault ✦</title>
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet"/>
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+  <!-- SoundCloud Widget API -->
+  <script src="https://w.soundcloud.com/player/api.js"></script>
+
+  <style>
+/* ─────────────────────────────────────────────
+   TOKENS
+───────────────────────────────────────────── */
+:root {
+  --p:   #8B00FF;
+  --ps:  #B347FF;
+  --pk:  #FF69B4;
+  --pkh: #FF1493;
+  --pkp: #FFB6C1;
+  --g:   rgba(255,255,255,.04);
+  --gb:  rgba(255,255,255,.07);
+  /* BPM 96 → beat = 625ms */
+  --beat: .625s;
+  --sb:  env(safe-area-inset-bottom, 0px);
+  --st:  env(safe-area-inset-top, 0px);
+  --ph: 72px;          /* player height */
+}
+
+/* ─────────────────────────────────────────────
+   RESET
+───────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:#000;color:#fff;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+  /* room for fixed player + safe area */
+  padding-bottom:calc(var(--ph) + 20px + var(--sb));
+}
+img,svg{display:block}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:var(--ps);border-radius:2px}
+
+/* ─────────────────────────────────────────────
+   GRAIN
+───────────────────────────────────────────── */
+#grain{
+  position:fixed;inset:0;pointer-events:none;z-index:9990;
+  opacity:.042;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:180px;
+  animation:grain .4s steps(1) infinite;
+}
+@keyframes grain{
+  0%  {transform:translate(0,0)}
+  25% {transform:translate(-2%,-2%)}
+  50% {transform:translate(2%,1%)}
+  75% {transform:translate(-1%,3%)}
+}
+
+/* ─────────────────────────────────────────────
+   MESH
+───────────────────────────────────────────── */
+#mesh{position:fixed;inset:0;z-index:0;background:#000;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.b1{
+  width:clamp(200px,60vw,460px);height:clamp(200px,60vw,460px);
+  background:radial-gradient(circle,var(--p),transparent 70%);
+  top:-8%;left:-8%;opacity:.13;
+  animation:f1 9s ease-in-out infinite alternate;
+}
+.b2{
+  width:clamp(160px,50vw,360px);height:clamp(160px,50vw,360px);
+  background:radial-gradient(circle,var(--pk),transparent 70%);
+  bottom:8%;right:-4%;opacity:.11;
+  animation:f2 11s ease-in-out infinite alternate;
+}
+.b3{
+  width:clamp(100px,28vw,240px);height:clamp(100px,28vw,240px);
+  background:radial-gradient(circle,var(--pkh),transparent 70%);
+  top:38%;left:45%;opacity:.06;
+  animation:f1 7s ease-in-out infinite alternate-reverse;
+}
+@keyframes f1{to{transform:translate(25px,18px) scale(1.07)}}
+@keyframes f2{to{transform:translate(-20px,-18px) scale(1.06)}}
+
+/* ─────────────────────────────────────────────
+   CHERRY PETALS
+───────────────────────────────────────────── */
+.petal{position:fixed;pointer-events:none;z-index:5;opacity:0;animation:pfall linear infinite}
+@keyframes pfall{
+  0%  {transform:translateY(-10px) rotate(0deg) translateX(0);opacity:0}
+  5%  {opacity:.6}
+  95% {opacity:.35}
+  100%{transform:translateY(108vh) rotate(560deg) translateX(44px);opacity:0}
+}
+
+/* ─────────────────────────────────────────────
+   CURSOR  (desktop / fine pointer only)
+───────────────────────────────────────────── */
+@media(pointer:fine){
+  body{cursor:none}
+  #cdot{
+    position:fixed;width:9px;height:9px;
+    background:var(--pkh);border-radius:50%;
+    pointer-events:none;z-index:9999;
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 10px var(--pkh),0 0 22px var(--pkh);
+  }
+  #cring{
+    position:fixed;width:32px;height:32px;
+    border:1.5px solid rgba(179,71,255,.48);
+    border-radius:50%;pointer-events:none;z-index:9998;
+    transform:translate(-50%,-50%);
+    transition:width .22s,height .22s;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   INTRO
+───────────────────────────────────────────── */
+#intro{
+  position:fixed;inset:0;z-index:1000;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:1.5rem;background:#000;
+  padding:calc(1.5rem + var(--st)) 1.5rem calc(1.5rem + var(--sb));
+}
+
+.itag{
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(.58rem,3.5vw,.72rem);
+  font-weight:200;letter-spacing:.55em;
+  text-transform:uppercase;color:rgba(255,255,255,.18);
+}
+
+/* ─── VINYL ─── */
+.vwrap{
+  position:relative;
+  width:clamp(155px,46vw,205px);
+  height:clamp(155px,46vw,205px);
+  cursor:pointer;user-select:none;
+  touch-action:manipulation;
+  /* Pulse rings */
+}
+.vwrap::before,.vwrap::after{
+  content:'';position:absolute;inset:-8px;
+  border-radius:50%;
+  animation:pr 2.8s ease-out infinite;
+}
+.vwrap::before{border:1px solid rgba(179,71,255,.2)}
+.vwrap::after {border:1px solid rgba(255,105,180,.14);animation-delay:1.4s}
+@keyframes pr{
+  0%  {transform:scale(.87);opacity:0}
+  30% {opacity:1}
+  100%{transform:scale(1.28);opacity:0}
+}
+
+.vdisc{
+  width:100%;height:100%;border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,#111 0%,#111 14%,transparent 14%),
+    repeating-radial-gradient(circle at 50% 50%,#070707 0px,#131313 1.5px,#070707 3px);
+  box-shadow:0 0 0 2px #1c1c1c,0 0 55px rgba(139,0,255,.38),0 16px 55px rgba(0,0,0,.92);
+  animation:spin 3s linear infinite;
+  position:relative;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.vlabel{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:37%;height:37%;border-radius:50%;
+  background:linear-gradient(135deg,var(--p),var(--pk));
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;z-index:2;
+}
+.vlabel::after{
+  content:'';position:absolute;
+  width:20%;height:20%;border-radius:50%;background:#000;
+}
+.vlabeltxt{
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(4px,1.3vw,6.5px);
+  font-weight:700;letter-spacing:.07em;
+  color:rgba(255,255,255,.9);text-align:center;line-height:1.3;
+  position:relative;z-index:1;
+}
+.vshine{
+  position:absolute;inset:0;border-radius:50%;
+  background:linear-gradient(135deg,rgba(255,255,255,.09) 0%,transparent 55%);
+  pointer-events:none;
+}
+
+.iloader{width:130px;height:1px;background:rgba(255,255,255,.06)}
+.iloader-f{
+  height:100%;
+  background:linear-gradient(90deg,var(--p),var(--pk));
+  width:0;animation:lf 3.2s ease forwards;
+}
+@keyframes lf{to{width:100%}}
+
+.ihint{
+  font-size:clamp(.6rem,3.5vw,.72rem);
+  font-weight:300;letter-spacing:.34em;
+  color:rgba(255,255,255,.3);text-transform:uppercase;
+  animation:iblink 2s ease-in-out infinite;
+}
+@keyframes iblink{0%,100%{opacity:.3}50%{opacity:.72}}
+
+/* ─────────────────────────────────────────────
+   SOUNDCLOUD HIDDEN
+───────────────────────────────────────────── */
+#sc-wrap{
+  position:absolute;left:-9999px;top:-9999px;
+  width:1px;height:1px;overflow:hidden;
+}
+/* HTML5 audio fallback */
+#audio-el{display:none}
+
+/* ─────────────────────────────────────────────
+   MUSIC PLAYER  (fixed bottom)
+───────────────────────────────────────────── */
+#mplayer{
+  position:fixed;bottom:0;left:0;right:0;z-index:900;
+  padding:0 .65rem;
+  padding-bottom:calc(.65rem + var(--sb));
+  transform:translateY(120%);
+  transition:transform .65s cubic-bezier(.34,1.56,.64,1);
+}
+#mplayer.up{transform:translateY(0)}
+
+.mpshell{
+  background:rgba(6,0,16,.9);
+  border:1px solid rgba(179,71,255,.24);
+  border-radius:18px;
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  overflow:hidden;position:relative;
+}
+.mpshell::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(179,71,255,.75),rgba(255,105,180,.75),transparent);
+}
+
+/* Progress */
+.mpprog{height:2px;background:rgba(255,255,255,.06);position:relative}
+.mpprogf{
+  height:100%;width:0%;position:absolute;top:0;left:0;
+  background:linear-gradient(90deg,var(--p),var(--pk));
+  transition:width .8s linear;
+}
+
+/* Row */
+.mprow{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.56rem .85rem;
+}
+
+/* Vinyl knob */
+.mpviny{
+  width:40px;height:40px;flex-shrink:0;border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,#111 0%,#111 16%,transparent 16%),
+    repeating-radial-gradient(circle at 50% 50%,#070707 0px,#131313 1px,#070707 2px);
+  position:relative;
+  box-shadow:0 0 14px rgba(139,0,255,.45);
+  transition:box-shadow .3s;
+}
+.mpviny.sp{animation:spin var(--beat) linear infinite}
+/* Glow on playing — synced to beat */
+.mpviny.sp{
+  animation:
+    spin 2s linear infinite,
+    vbgl var(--beat) ease-in-out infinite;
+}
+@keyframes vbgl{
+  0%,100%{box-shadow:0 0 14px rgba(139,0,255,.45)}
+  50%     {box-shadow:0 0 36px rgba(179,71,255,.95),0 0 70px rgba(255,105,180,.35)}
+}
+.mpviny::after{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:36%;height:36%;border-radius:50%;
+  background:linear-gradient(135deg,var(--p),var(--pk));
+}
+
+/* Info */
+.mpinfo{flex:1;min-width:0}
+.mptitle{
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(.8rem,4.5vw,.9rem);
+  font-weight:500;letter-spacing:.03em;color:#fff;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mpartist{
+  font-size:clamp(.6rem,3.2vw,.68rem);
+  color:rgba(255,255,255,.38);margin-top:1px;
+}
+
+/* Beat bars — exactly 96 BPM */
+.mpbars{display:flex;align-items:flex-end;gap:2px;height:20px}
+.mpb{
+  width:2.5px;border-radius:2px;
+  background:linear-gradient(to top,var(--p),var(--pk));
+  animation:bd var(--beat) ease-in-out infinite;
+}
+.mpb:nth-child(1){animation-delay:0s}
+.mpb:nth-child(2){animation-delay:.078s}
+.mpb:nth-child(3){animation-delay:.156s}
+.mpb:nth-child(4){animation-delay:.234s}
+.mpb:nth-child(5){animation-delay:.117s}
+@keyframes bd{0%,100%{height:3px;opacity:.5}50%{height:18px;opacity:1}}
+.mpbars.still .mpb{animation-play-state:paused}
+
+/* Play button */
+.mpbtn{
+  width:40px;height:40px;flex-shrink:0;border-radius:50%;
+  background:linear-gradient(135deg,rgba(139,0,255,.28),rgba(255,105,180,.28));
+  border:1px solid rgba(179,71,255,.4);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;
+  transition:transform .15s,background .18s;
+  touch-action:manipulation;
+  /* Guaranteed 44px tap target */
+  min-width:44px;min-height:44px;
+}
+.mpbtn:active{transform:scale(.88);background:rgba(139,0,255,.5)}
+.mpbtn svg{width:14px;height:14px}
+
+/* ─────────────────────────────────────────────
+   MAIN CONTENT
+───────────────────────────────────────────── */
+#main{opacity:0;pointer-events:none;position:relative;z-index:10}
+#main.on{opacity:1;pointer-events:all}
+
+/* ─────────────────────────────────────────────
+   HERO
+───────────────────────────────────────────── */
+.hero{
+  min-height:100svh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:calc(1.5rem + var(--st)) 1rem 1.5rem;
+  text-align:center;position:relative;overflow:hidden;
+}
+
+.heye{
+  font-size:clamp(.55rem,3vw,.68rem);
+  font-weight:400;letter-spacing:.5em;
+  color:var(--pk);text-transform:uppercase;
+  margin-bottom:1.5rem;opacity:0;
+}
+
+.hnw{position:relative}
+.hname{
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(2.8rem,17vw,10.5rem);
+  font-weight:700;
+  letter-spacing:clamp(.06em,1.5vw,.16em);
+  line-height:.9;text-transform:uppercase;
+  background:linear-gradient(135deg,#fff 0%,var(--pkp) 48%,var(--ps) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;opacity:0;
+  /* prevent extra-long word from overflowing */
+  word-break:break-word;
+  hyphens:none;
+}
+.hghost{
+  position:absolute;inset:0;
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(2.8rem,17vw,10.5rem);font-weight:700;
+  letter-spacing:clamp(.06em,1.5vw,.16em);
+  line-height:.9;text-transform:uppercase;
+  -webkit-text-stroke:1px rgba(179,71,255,.1);
+  color:transparent;filter:blur(18px);
+  transform:translateY(8px);
+  user-select:none;pointer-events:none;word-break:break-word;
+}
+.hsub{
+  font-size:clamp(.78rem,4vw,.98rem);
+  font-weight:300;font-style:italic;
+  color:rgba(255,255,255,.35);letter-spacing:.03em;
+  margin-top:1.15rem;
+  max-width:min(430px,88vw);
+  opacity:0;
+}
+.hnp{
+  display:inline-flex;align-items:center;gap:.42rem;
+  margin-top:1.6rem;padding:.36rem .82rem;
+  background:rgba(139,0,255,.1);
+  border:1px solid rgba(139,0,255,.22);
+  border-radius:100px;
+  font-size:clamp(.58rem,3vw,.67rem);
+  font-weight:400;letter-spacing:.12em;text-transform:uppercase;
+  color:rgba(255,255,255,.38);opacity:0;
+}
+.npdot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--pk);box-shadow:0 0 8px var(--pk);
+  animation:nd 1.5s ease-in-out infinite;
+}
+@keyframes nd{0%,100%{opacity:.35;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+
+.hscroll{
+  position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.35rem;
+  opacity:.2;
+}
+.scrollln{
+  width:1px;height:40px;
+  background:linear-gradient(to bottom,transparent,var(--pk));
+  animation:sla 2s ease-in-out infinite;
+}
+@keyframes sla{0%,100%{transform:scaleY(1);opacity:.5}50%{transform:scaleY(.55);opacity:1}}
+
+/* ─────────────────────────────────────────────
+   GLASS CARD
+───────────────────────────────────────────── */
+.card{
+  background:var(--g);border:1px solid var(--gb);
+  border-radius:18px;
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  position:relative;overflow:hidden;
+  transition:border-color .3s,box-shadow .3s,transform .4s cubic-bezier(.25,.46,.45,.94);
+}
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.09),transparent);
+}
+/* Hover only on desktop */
+@media(pointer:fine){
+  .card:hover{
+    border-color:rgba(179,71,255,.2);
+    box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 40px rgba(139,0,255,.07);
+    transform:translateY(-3px);
+  }
+}
+/* Tap feedback on mobile */
+@media(pointer:coarse){
+  .card:active{opacity:.92}
+}
+
+/* ─────────────────────────────────────────────
+   SECTIONS
+───────────────────────────────────────────── */
+.sec{
+  padding:clamp(2.75rem,8vw,5.5rem) clamp(.85rem,5vw,1.85rem);
+  max-width:1140px;margin:0 auto;
+}
+
+.slabel{
+  display:inline-block;
+  font-size:clamp(.56rem,2.8vw,.64rem);
+  font-weight:500;letter-spacing:.4em;text-transform:uppercase;
+  color:var(--ps);background:rgba(139,0,255,.1);
+  border:1px solid rgba(139,0,255,.2);
+  padding:.25rem .82rem;border-radius:100px;
+  margin-bottom:.8rem;
+}
+.stitle{
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(1.7rem,7vw,3.3rem);
+  font-weight:500;letter-spacing:.04em;color:#fff;line-height:1.1;
+}
+.stitle span{
+  background:linear-gradient(135deg,var(--pk),var(--ps));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+
+/* ─────────────────────────────────────────────
+   BENTO — mobile first (1 col → 2 col → 12 col)
+───────────────────────────────────────────── */
+.bento{display:grid;grid-template-columns:1fr;gap:.75rem}
+
+@media(min-width:520px){
+  .bento{grid-template-columns:1fr 1fr}
+  .bw{grid-column:span 2}
+}
+@media(min-width:880px){
+  .bento{grid-template-columns:repeat(12,1fr)}
+  .bc7{grid-column:span 7}.bc5{grid-column:span 5}
+  .bc12{grid-column:span 12}
+}
+
+.cp{padding:clamp(1rem,4vw,1.65rem)}
+
+/* Glow accents */
+.gpurp::after{
+  content:'';position:absolute;bottom:-24px;right:-24px;
+  width:105px;height:105px;background:var(--p);border-radius:50%;
+  filter:blur(48px);opacity:.1;pointer-events:none;
+}
+.gpink::after{
+  content:'';position:absolute;top:-24px;left:-24px;
+  width:105px;height:105px;background:var(--pkh);border-radius:50%;
+  filter:blur(48px);opacity:.09;pointer-events:none;
+}
+
+/* Trait pills */
+.tpill{
+  display:inline-flex;align-items:center;gap:.35rem;
+  padding:.4rem .9rem;border-radius:100px;
+  font-size:clamp(.7rem,3.5vw,.82rem);font-weight:500;letter-spacing:.04em;
+  border:1px solid;cursor:default;touch-action:manipulation;
+  /* min height for comfortable touch */
+  min-height:36px;
+}
+.tp{background:rgba(255,105,180,.1);border-color:rgba(255,105,180,.28);color:var(--pk)}
+.tpu{background:rgba(139,0,255,.1);border-color:rgba(139,0,255,.28);color:var(--ps)}
+.tw{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.68)}
+
+.biglet{
+  position:absolute;bottom:-.8rem;right:.8rem;
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(4.5rem,18vw,7.5rem);font-weight:700;
+  color:rgba(255,255,255,.016);line-height:1;
+  user-select:none;pointer-events:none;
+}
+
+/* Mini vinyl in bento */
+.mviny{
+  width:40px;height:40px;flex-shrink:0;border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 50%,#111 0%,#111 17%,transparent 17%),
+    repeating-radial-gradient(circle at 50% 50%,#070707 0px,#131313 1px,#070707 2px);
+  animation:spin 3s linear infinite;position:relative;
+}
+.mviny::after{
+  content:'';position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);width:36%;height:36%;
+  border-radius:50%;background:linear-gradient(135deg,var(--p),var(--pk));
+}
+
+/* Music bars in bento — synced to BPM */
+.mbars{display:flex;align-items:flex-end;gap:2.5px;height:22px}
+.mb{width:3px;border-radius:2px;background:linear-gradient(to top,var(--p),var(--pk));animation:bd var(--beat) ease-in-out infinite}
+.mb:nth-child(2){animation-delay:.078s}
+.mb:nth-child(3){animation-delay:.156s}
+.mb:nth-child(4){animation-delay:.234s}
+.mb:nth-child(5){animation-delay:.117s}
+.mb:nth-child(6){animation-delay:.195s}
+
+.mtrack{
+  display:flex;align-items:center;gap:.65rem;
+  padding:.55rem .78rem;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);
+  border-radius:10px;
+}
+.mtxt{flex:1;min-width:0}
+.mn{font-size:clamp(.74rem,3.5vw,.82rem);font-weight:500;color:rgba(255,255,255,.82)}
+.ms{font-size:clamp(.6rem,3vw,.69rem);color:rgba(255,255,255,.28);margin-top:1px}
+
+/* Interest pills */
+.ipill{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.32rem .72rem;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);
+  border-radius:8px;font-size:clamp(.66rem,3vw,.75rem);
+  color:rgba(255,255,255,.58);cursor:default;
+  transition:all .18s;touch-action:manipulation;
+  min-height:34px;
+}
+@media(pointer:coarse){
+  .ipill:active{background:rgba(179,71,255,.1);border-color:rgba(179,71,255,.28);color:var(--ps)}
+}
+
+/* Safe place quote */
+.sq{
+  font-size:clamp(.86rem,3.8vw,1.1rem);
+  font-weight:300;font-style:italic;line-height:1.85;
+  color:rgba(255,255,255,.52);
+}
+.sq em{font-style:normal;color:var(--pkp);font-weight:400}
+
+.mpill{
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:clamp(.6rem,3vw,.7rem);color:rgba(255,255,255,.26);
+}
+
+/* ─────────────────────────────────────────────
+   UNLOCK
+───────────────────────────────────────────── */
+.uwrap{max-width:580px;margin:0 auto;text-align:center}
+
+.unlockbtn{
+  display:inline-flex;align-items:center;justify-content:center;gap:.6rem;
+  padding:.85rem 2rem;border-radius:100px;
+  background:linear-gradient(135deg,rgba(139,0,255,.2),rgba(255,105,180,.2));
+  border:1px solid rgba(179,71,255,.38);
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(.76rem,4vw,.98rem);
+  font-weight:400;letter-spacing:.2em;text-transform:uppercase;
+  color:#fff;cursor:pointer;position:relative;overflow:hidden;
+  transition:all .3s;touch-action:manipulation;
+  min-height:52px;min-width:180px;
+}
+.unlockbtn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(139,0,255,.38),rgba(255,105,180,.38));
+  opacity:0;transition:opacity .3s;
+}
+.unlockbtn:active::before{opacity:1}
+.unlockbtn span{position:relative;z-index:1;display:flex;align-items:center;gap:.6rem}
+
+.sbox{
+  display:none;text-align:left;padding:1.15rem;
+  background:rgba(139,0,255,.07);border:1px solid rgba(179,71,255,.17);
+  border-radius:15px;margin-top:1.35rem;
+}
+.sbox.show{display:block}
+
+/* ─────────────────────────────────────────────
+   PASSWORD MODAL
+───────────────────────────────────────────── */
+.modalbg{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,.9);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:center;
+  padding:1rem;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.modalbg.on{opacity:1;pointer-events:all}
+
+.mbox{
+  background:rgba(7,0,17,.96);
+  border:1px solid rgba(179,71,255,.24);border-radius:20px;
+  padding:1.65rem;width:min(350px,100%);text-align:center;
+  transform:scale(.85);transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+}
+.modalbg.on .mbox{transform:scale(1)}
+
+.pwinp{
+  width:100%;padding:.75rem 1rem;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.1);border-radius:12px;
+  color:#fff;font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:1.1rem;letter-spacing:.42em;text-align:center;
+  outline:none;-webkit-appearance:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.pwinp:focus{border-color:rgba(179,71,255,.5);box-shadow:0 0 0 3px rgba(139,0,255,.12)}
+
+.pwbtn{
+  width:100%;padding:.75rem;margin-top:.65rem;
+  background:linear-gradient(135deg,var(--p),var(--pkh));
+  border:none;border-radius:12px;color:#fff;
+  font-family:'Oswald',sans-serif;font-size:.88rem;font-weight:500;
+  letter-spacing:.2em;text-transform:uppercase;
+  cursor:pointer;min-height:46px;
+  transition:opacity .2s,transform .15s;touch-action:manipulation;
+}
+.pwbtn:active{opacity:.85;transform:scale(.97)}
+
+.pwcanc{
+  display:block;width:100%;padding:.55rem;margin-top:.28rem;
+  background:transparent;border:none;color:rgba(255,255,255,.22);
+  font-size:.75rem;cursor:pointer;min-height:40px;
+  transition:color .2s;touch-action:manipulation;
+}
+.pwcanc:active{color:rgba(255,255,255,.55)}
+
+/* ─────────────────────────────────────────────
+   RECIPE CARD
+───────────────────────────────────────────── */
+.rcard{
+  background:rgba(255,255,255,.024);
+  border:1px solid rgba(255,255,255,.07);border-radius:22px;
+  overflow:hidden;
+  backdrop-filter:blur(28px);-webkit-backdrop-filter:blur(28px);
+  box-shadow:0 28px 70px rgba(0,0,0,.65);position:relative;
+}
+.rcard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,105,180,.45),rgba(139,0,255,.45),transparent);
+}
+.rhdr{
+  padding:clamp(1.15rem,5vw,1.85rem);
+  border-bottom:1px solid rgba(255,255,255,.05);
+  background:linear-gradient(135deg,rgba(139,0,255,.06),rgba(255,105,180,.06));
+}
+.rcols{display:grid;grid-template-columns:1fr}
+@media(min-width:500px){.rcols{grid-template-columns:1fr 1fr}}
+.rcol{padding:clamp(1rem,4vw,1.55rem)}
+.rcol:first-child{border-bottom:1px solid rgba(255,255,255,.05)}
+@media(min-width:500px){
+  .rcol:first-child{border-bottom:none;border-right:1px solid rgba(255,255,255,.05)}
+}
+.rlabel{
+  font-family:'Oswald',sans-serif;
+  font-size:clamp(.58rem,3vw,.68rem);font-weight:400;
+  letter-spacing:.35em;text-transform:uppercase;color:var(--pk);
+  margin-bottom:1rem;
+}
+.irow{display:flex;align-items:center;gap:.72rem;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.irow:last-child{border-bottom:none}
+.idot{width:5px;height:5px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--ps),var(--pk))}
+.iname{font-size:clamp(.77rem,3.5vw,.85rem);color:rgba(255,255,255,.7)}
+.iqty{margin-left:auto;font-size:clamp(.63rem,3vw,.7rem);color:rgba(255,255,255,.25);font-style:italic}
+.srow{display:flex;gap:.8rem;padding:.55rem 0}
+.snum{width:21px;height:21px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--p),var(--pkh));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;margin-top:2px}
+.stxt{font-size:clamp(.76rem,3.5vw,.84rem);color:rgba(255,255,255,.58);line-height:1.65}
+
+/* ─────────────────────────────────────────────
+   GALLERY — 2 col mobile, 3+ on wider screens
+───────────────────────────────────────────── */
+.masonry{columns:2;column-gap:.62rem}
+@media(min-width:580px){.masonry{columns:3}}
+@media(min-width:860px){.masonry{columns:4}}
+
+.gitem{
+  break-inside:avoid;margin-bottom:.62rem;
+  border-radius:13px;overflow:hidden;position:relative;
+  cursor:pointer;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+  touch-action:manipulation;
+}
+.gthumb{width:100%;display:block;border-radius:12px;transition:transform .5s cubic-bezier(.25,.46,.45,.94)}
+@media(pointer:fine){.gitem:hover .gthumb{transform:scale(1.06)}}
+.gov{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,transparent 28%,rgba(0,0,0,.9) 100%);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:.8rem;border-radius:12px;
+  opacity:0;transition:opacity .3s;
+}
+@media(pointer:fine){.gitem:hover .gov{opacity:1}}
+@media(pointer:coarse){.gitem:active .gov{opacity:1}}
+.gcap{font-size:clamp(.6rem,3vw,.7rem);color:rgba(255,255,255,.72);line-height:1.4}
+
+/* Lightbox */
+.lbox{
+  position:fixed;inset:0;z-index:950;
+  background:rgba(0,0,0,.97);
+  display:flex;align-items:center;justify-content:center;
+  padding:1.25rem;
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+.lbox.on{opacity:1;pointer-events:all}
+.lbclose{
+  position:absolute;top:.9rem;right:.9rem;
+  width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;color:#fff;z-index:1;
+  touch-action:manipulation;min-width:42px;
+}
+
+/* ─────────────────────────────────────────────
+   FOOTER
+───────────────────────────────────────────── */
+.fdiv{height:1px;margin:0 .9rem;background:linear-gradient(90deg,transparent,rgba(179,71,255,.3),rgba(255,105,180,.3),transparent)}
+footer{
+  padding:clamp(2.2rem,8vw,5rem) clamp(.85rem,5vw,1.85rem);
+  max-width:640px;margin:0 auto;text-align:center;
+}
+.ffaith{
+  font-size:clamp(.78rem,3.8vw,.88rem);
+  font-style:italic;font-weight:300;
+  color:rgba(255,255,255,.26);line-height:1.95;
+  max-width:460px;margin:0 auto;
+}
+
+/* ─────────────────────────────────────────────
+   UTILITIES
+───────────────────────────────────────────── */
+.fup{opacity:0;transform:translateY(26px)}
+.sep{height:1px;margin:0 clamp(.75rem,5vw,3.5rem);background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent)}
+
+/* ─────────────────────────────────────────────
+   NOW PLAYING LYRICS TICKER  (mobile touch extra)
+───────────────────────────────────────────── */
+.lyric-ticker{
+  position:fixed;top:calc(.6rem + var(--st));left:0;right:0;z-index:500;
+  display:flex;justify-content:center;pointer-events:none;
+  opacity:0;transition:opacity .5s;
+}
+.lyric-ticker.on{opacity:1}
+.lt-inner{
+  background:rgba(0,0,0,.7);
+  border:1px solid rgba(179,71,255,.2);
+  border-radius:100px;
+  padding:.28rem .9rem;
+  font-size:clamp(.58rem,3vw,.65rem);
+  font-weight:300;font-style:italic;letter-spacing:.06em;
+  color:rgba(255,255,255,.45);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  max-width:min(340px,85vw);
+  backdrop-filter:blur(10px);
+}
+  </style>
+</head>
+<body>
+
+<!-- ATMOSPHERIC -->
+<div id="grain" aria-hidden="true"></div>
+<div id="mesh"  aria-hidden="true">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+</div>
+<div id="petals" aria-hidden="true"></div>
+
+<!-- CURSOR (desktop) -->
+<div id="cdot"  aria-hidden="true"></div>
+<div id="cring" aria-hidden="true"></div>
+
+<!-- LYRICS TICKER -->
+<div class="lyric-ticker" id="lticker" aria-hidden="true">
+  <div class="lt-inner" id="ltxt">♫ Lugar ao Sol — Charlie Brown Jr.</div>
+</div>
+
+<!-- SOUNDCLOUD HIDDEN PLAYER -->
+<div id="sc-wrap" aria-hidden="true">
+  <!--
+    Primary: official channel
+    Fallback handled in JS with alternative SC URL
+  -->
+  <iframe
+    id="sc-frame"
+    src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/charlie-brown-jr-official/lugar-ao-sol&auto_play=false&hide_related=true&show_comments=false&show_user=false&visual=false&color=%23B347FF"
+    width="100%" height="90"
+    scrolling="no" frameborder="no"
+    allow="autoplay">
+  </iframe>
+</div>
+
+<!-- HTML5 AUDIO FALLBACK (archive.org) -->
+<audio id="audio-el" preload="none" crossorigin="anonymous">
+  <source src="https://archive.org/download/LugarAoSol/Lugar%20ao%20Sol%20-%20Charlie%20Brown%20Jr..mp3" type="audio/mpeg"/>
+</audio>
+
+<!-- ═══════════════════════════════════════════
+     INTRO
+════════════════════════════════════════════ -->
+<div id="intro" role="dialog" aria-label="Toque no disco para entrar no Vault da Nic">
+
+  <p class="itag" aria-hidden="true">O Vault da Nic</p>
+
+  <div class="vwrap" id="vinyl" tabindex="0" role="button"
+       aria-label="Toque no disco para entrar">
+    <div class="vdisc" id="vdisc">
+      <div class="vlabel">
+        <p class="vlabeltxt">CHARLIE<br/>BROWN<br/>JR.</p>
+      </div>
+      <div class="vshine"></div>
+    </div>
+  </div>
+
+  <div class="iloader"><div class="iloader-f" id="lbar"></div></div>
+
+  <p class="ihint" id="ihint">✦ toque no disco ✦</p>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     FLOATING MUSIC PLAYER
+════════════════════════════════════════════ -->
+<div id="mplayer" role="region" aria-label="Player — Lugar ao Sol">
+  <div class="mpshell" id="mpshell">
+    <div class="mpprog"><div class="mpprogf" id="progfill"></div></div>
+    <div class="mprow">
+      <div class="mpviny" id="mpviny"></div>
+      <div class="mpinfo">
+        <p class="mptitle">Lugar ao Sol</p>
+        <p class="mpartist">Charlie Brown Jr. · Chorão</p>
+      </div>
+      <div class="mpbars still" id="mpbars">
+        <div class="mpb" style="height:3px"></div>
+        <div class="mpb" style="height:3px"></div>
+        <div class="mpb" style="height:3px"></div>
+        <div class="mpb" style="height:3px"></div>
+        <div class="mpb" style="height:3px"></div>
+      </div>
+      <button class="mpbtn" id="playbtn" aria-label="Tocar / Pausar">
+        <i data-lucide="play" id="playico"></i>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════ -->
+<div id="main">
+
+  <!-- ── HERO ─────────────────────────────── -->
+  <section class="hero">
+    <p class="heye fup">✦ Bem-vinda ao Vault ✦</p>
+
+    <div class="hnw">
+      <div class="hghost" aria-hidden="true">NIC O L L Y</div>
+      <h1 class="hname fup">NIC O L L Y</h1>
+    </div>
+
+    <p class="hsub fup">"Um espaço reservado para o que é verdadeiro."</p>
+
+    <div class="hnp fup" id="hnp">
+      <div class="npdot"></div>
+      <span>Lugar ao Sol — tocando agora</span>
+    </div>
+
+    <div class="hscroll" aria-hidden="true">
+      <div class="scrollln"></div>
+      <span style="font-family:'Oswald',sans-serif;font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.25);">role</span>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- ── BENTO ─────────────────────────────── -->
+  <section class="sec fup" aria-labelledby="bh">
+    <div style="margin-bottom:1.65rem;">
+      <div class="slabel">✦ Constelação</div>
+      <h2 class="stitle" id="bh">Quem é a <span>Nic?</span></h2>
+    </div>
+
+    <div class="bento">
+
+      <!-- Card 1 — Traits -->
+      <div class="card cp gpurp bc7 bw fup" style="min-height:220px;">
+        <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:1.1rem;">
+          <div style="width:29px;height:29px;border-radius:8px;background:linear-gradient(135deg,var(--p),var(--pkh));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="sparkles" style="width:13px;height:13px;color:#fff;"></i>
+          </div>
+          <span style="font-family:'Oswald',sans-serif;font-size:clamp(.54rem,3vw,.62rem);letter-spacing:.34em;text-transform:uppercase;color:rgba(255,255,255,.3);">Traços Essenciais</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.48rem;margin-bottom:1.15rem;">
+          <span class="tpill tp"><i data-lucide="smile" style="width:12px;height:12px;"></i>Risonha</span>
+          <span class="tpill tpu"><i data-lucide="star" style="width:12px;height:12px;"></i>Vaidosa</span>
+          <span class="tpill tw"><i data-lucide="heart" style="width:12px;height:12px;"></i>Carinhosa</span>
+        </div>
+        <p style="font-size:clamp(.76rem,3.5vw,.84rem);color:rgba(255,255,255,.3);line-height:1.9;font-weight:300;">
+          Alguém que ilumina o ambiente só de existir.<br/>Que ri de si mesma com uma leveza rara.
+        </p>
+        <div class="biglet" aria-hidden="true">N</div>
+      </div>
+
+      <!-- Card 2 — Música -->
+      <div class="card cp gpink bc5 fup" style="min-height:190px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.95rem;">
+          <div style="display:flex;align-items:center;gap:.55rem;">
+            <div class="mviny" aria-hidden="true"></div>
+            <div>
+              <p style="font-family:'Oswald',sans-serif;font-size:clamp(.54rem,3vw,.59rem);letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.26);">Trilha Sonora</p>
+              <p style="font-size:clamp(.76rem,3.5vw,.86rem);font-weight:500;color:#fff;">Playing now</p>
+            </div>
+          </div>
+          <div class="mbars" aria-hidden="true">
+            <div class="mb" style="height:3px;"></div>
+            <div class="mb" style="height:3px;"></div>
+            <div class="mb" style="height:3px;"></div>
+            <div class="mb" style="height:3px;"></div>
+            <div class="mb" style="height:3px;"></div>
+            <div class="mb" style="height:3px;"></div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.42rem;">
+          <div class="mtrack">
+            <span style="font-size:.9rem;flex-shrink:0;">🎸</span>
+            <div class="mtxt"><p class="mn">Charlie Brown Jr.</p><p class="ms">Rock nacional · Chorão eterno</p></div>
+          </div>
+          <div class="mtrack">
+            <span style="font-size:.9rem;flex-shrink:0;">🖤</span>
+            <div class="mtxt"><p class="mn">Tokio Hotel</p><p class="ms">Rock alemão · intensidade</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 — Interesses -->
+      <div class="card cp bc5 fup" style="min-height:180px;">
+        <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.95rem;">
+          <div style="width:29px;height:29px;border-radius:8px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="zap" style="width:13px;height:13px;color:var(--ps);"></i>
+          </div>
+          <span style="font-family:'Oswald',sans-serif;font-size:clamp(.54rem,3vw,.59rem);letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.28);">Universo da Nic</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+          <span class="ipill">🌸 Animes</span>
+          <span class="ipill" style="color:rgba(230,80,60,.9);border-color:rgba(230,80,60,.2);background:rgba(230,80,60,.05);">🔴 Stranger Things</span>
+          <span class="ipill" style="color:#E5B400;border-color:rgba(229,180,0,.2);background:rgba(229,180,0,.05);">⚔️ Mortal Kombat</span>
+          <span class="ipill">💄 Estética</span>
+          <span class="ipill">🎮 Games</span>
+          <span class="ipill">🌙 Noites frias</span>
+        </div>
+      </div>
+
+      <!-- Card 4 — Safe Place -->
+      <div class="card cp bc12 bw fup" style="position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Oswald',sans-serif;font-size:clamp(2.8rem,10vw,7rem);font-weight:700;color:rgba(255,255,255,.013);letter-spacing:.1em;user-select:none;" aria-hidden="true">SAFE PLACE</div>
+        <div style="position:relative;z-index:1;">
+          <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:1rem;">
+            <i data-lucide="home" style="width:13px;height:13px;color:var(--pkp);flex-shrink:0;"></i>
+            <span style="font-family:'Oswald',sans-serif;font-size:clamp(.54rem,3vw,.59rem);letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.28);">Safe Place</span>
+          </div>
+          <blockquote class="sq">
+            Ela encontra paz em <em>casas cheias de vida</em>,<br/>
+            em <em>cantos quietos</em> onde o mundo para,<br/>
+            e no frio do <em>inverno</em> que convida<br/>
+            a ficar um pouco mais dentro de si.
+          </blockquote>
+          <div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.1rem;">
+            <span class="mpill"><i data-lucide="snowflake" style="width:11px;height:11px;color:rgba(179,71,255,.7);"></i>Inverno</span>
+            <span class="mpill"><i data-lucide="coffee" style="width:11px;height:11px;color:rgba(255,105,180,.7);"></i>Aconchego</span>
+            <span class="mpill"><i data-lucide="moon" style="width:11px;height:11px;color:rgba(179,71,255,.7);"></i>Silêncio</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- ── UNLOCK ─────────────────────────────── -->
+  <section class="sec fup" aria-labelledby="uh">
+    <div class="uwrap">
+      <div class="slabel" style="margin-bottom:.8rem;">✦ Segredo</div>
+      <h2 class="stitle" id="uh" style="margin-bottom:.75rem;">Só pra <span>você</span></h2>
+      <p style="font-size:clamp(.74rem,3.8vw,.82rem);color:rgba(255,255,255,.25);margin-bottom:1.55rem;line-height:1.9;">
+        Tem uma mensagem aqui que não é pra qualquer um.<br/>
+        Se você conhece a Nic de verdade, já sabe a senha.
+      </p>
+
+      <button class="unlockbtn" id="unlockbtn" aria-label="Desbloquear mensagem secreta">
+        <span>
+          <i data-lucide="lock" style="width:13px;height:13px;"></i>
+          Desbloquear
+        </span>
+      </button>
+
+      <div class="sbox" id="sbox" aria-live="polite">
+        <p style="font-size:.58rem;letter-spacing:.4em;text-transform:uppercase;color:var(--ps);margin-bottom:.78rem;">✦ Apenas para você ✦</p>
+        <p style="font-size:clamp(.82rem,3.8vw,.92rem);line-height:1.95;color:rgba(255,255,255,.62);font-style:italic;">
+          Você é daquelas pessoas raras que tornam os lugares melhores só de existir neles.
+          Sua risada é a trilha sonora de qualquer ambiente, e seu coração é grande demais
+          pro mundo que às vezes tenta diminuí-lo. Nunca mude o essencial —
+          o essencial é exatamente o que faz de você, você. 🌸
+        </p>
+        <div style="display:flex;align-items:center;gap:.36rem;margin-top:.85rem;padding-top:.78rem;border-top:1px solid rgba(255,255,255,.05);">
+          <i data-lucide="heart" style="width:11px;height:11px;color:var(--pk);flex-shrink:0;"></i>
+          <span style="font-size:.68rem;color:rgba(255,255,255,.2);">Com carinho, do universo pra você.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PASSWORD MODAL -->
+  <div class="modalbg" id="pwmodal" role="dialog" aria-modal="true" aria-labelledby="pwt">
+    <div class="mbox">
+      <div style="width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,rgba(139,0,255,.3),rgba(255,105,180,.3));border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+        <i data-lucide="lock-keyhole" style="width:17px;height:17px;color:var(--ps);"></i>
+      </div>
+      <h3 id="pwt" style="font-family:'Oswald',sans-serif;font-size:1.18rem;font-weight:400;letter-spacing:.07em;color:#fff;margin-bottom:.35rem;">Qual é a senha?</h3>
+      <p style="font-size:.72rem;color:rgba(255,255,255,.26);margin-bottom:1.1rem;">Só quem conhece de verdade sabe. 🌸</p>
+      <input class="pwinp" type="password" id="pwinp" placeholder="••••••••" aria-label="Senha" autocomplete="off"/>
+      <button class="pwbtn" id="pwsubmit">Entrar</button>
+      <button class="pwcanc" id="pwcancel">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- ── RECIPE ─────────────────────────────── -->
+  <section class="sec fup" aria-labelledby="rh">
+    <div style="text-align:center;margin-bottom:1.65rem;">
+      <div class="slabel" style="margin-bottom:.8rem;">✦ Receita Secreta</div>
+      <h2 class="stitle" id="rh">A famosa <span>Panqueca da Nic</span></h2>
+    </div>
+
+    <div class="rcard">
+      <div class="rhdr">
+        <span style="font-size:2.1rem;display:block;margin-bottom:.55rem;">🥞</span>
+        <h3 style="font-family:'Oswald',sans-serif;font-size:clamp(1.2rem,5vw,1.5rem);font-weight:500;letter-spacing:.04em;color:#fff;">Panqueca da Nic</h3>
+        <p style="font-size:clamp(.68rem,3.5vw,.76rem);color:rgba(255,255,255,.25);margin-top:.36rem;">A receita que transforma qualquer manhã numa boa história.</p>
+        <div style="display:flex;gap:1.1rem;margin-top:.85rem;flex-wrap:wrap;">
+          <div style="display:flex;align-items:center;gap:.3rem;font-size:clamp(.6rem,3vw,.68rem);color:rgba(255,255,255,.3);">
+            <i data-lucide="clock" style="width:11px;height:11px;color:var(--pk);flex-shrink:0;"></i>15 min
+          </div>
+          <div style="display:flex;align-items:center;gap:.3rem;font-size:clamp(.6rem,3vw,.68rem);color:rgba(255,255,255,.3);">
+            <i data-lucide="users" style="width:11px;height:11px;color:var(--pk);flex-shrink:0;"></i>2 porções
+          </div>
+          <div style="display:flex;align-items:center;gap:.3rem;font-size:clamp(.6rem,3vw,.68rem);color:rgba(255,255,255,.3);">
+            <i data-lucide="flame" style="width:11px;height:11px;color:var(--pk);flex-shrink:0;"></i>Fácil
+          </div>
+        </div>
+      </div>
+
+      <div class="rcols">
+        <div class="rcol">
+          <p class="rlabel">Ingredientes</p>
+          <div class="irow"><div class="idot"></div><span class="iname">Ovos</span><span class="iqty">2 un.</span></div>
+          <div class="irow"><div class="idot"></div><span class="iname">Farinha de trigo</span><span class="iqty">1 xícara</span></div>
+          <div class="irow"><div class="idot"></div><span class="iname">Leite</span><span class="iqty">1 xícara</span></div>
+          <div class="irow"><div class="idot"></div><span class="iname">Toddy em pó</span><span class="iqty">2 col. sopa</span></div>
+          <div class="irow"><div class="idot"></div><span class="iname">Manteiga</span><span class="iqty">pra untar</span></div>
+          <div class="irow"><div class="idot"></div><span class="iname">Sal</span><span class="iqty">pitada</span></div>
+        </div>
+        <div class="rcol">
+          <p class="rlabel">Modo de Preparo</p>
+          <div class="srow"><div class="snum">1</div><p class="stxt">Misture ovos, leite e Toddy até ficar homogêneo e perfumado.</p></div>
+          <div class="srow"><div class="snum">2</div><p class="stxt">Acrescente a farinha aos poucos, mexendo sem parar. Adicione o sal.</p></div>
+          <div class="srow"><div class="snum">3</div><p class="stxt">Aqueça a frigideira e derreta uma porção generosa de manteiga.</p></div>
+          <div class="srow"><div class="snum">4</div><p class="stxt">Despeje uma concha da massa. Doure dos dois lados com carinho.</p></div>
+          <div class="srow"><div class="snum">5</div><p class="stxt">Sirva quentinha no inverno, com uma música boa ao fundo. 🎶</p></div>
+        </div>
+      </div>
+
+      <div style="padding:.9rem 1.3rem;border-top:1px solid rgba(255,255,255,.05);background:rgba(139,0,255,.04);text-align:center;font-size:clamp(.65rem,3vw,.74rem);color:rgba(255,255,255,.25);font-style:italic;">
+        "A receita mais gostosa sempre tem o ingrediente secreto: foi feita por ela."
+      </div>
+    </div>
+  </section>
+
+  <div class="sep"></div>
+
+  <!-- ── GALLERY ─────────────────────────────── -->
+  <section class="sec fup" aria-labelledby="gh">
+    <div style="text-align:center;margin-bottom:1.65rem;">
+      <div class="slabel" style="margin-bottom:.8rem;">✦ Memórias</div>
+      <h2 class="stitle" id="gh">O <span>Álbum</span></h2>
+    </div>
+    <div class="masonry" id="gallery"></div>
+  </section>
+
+  <!-- LIGHTBOX -->
+  <div class="lbox" id="lbox" role="dialog" aria-modal="true" aria-label="Memória ampliada">
+    <button class="lbclose" id="lbclose" aria-label="Fechar">
+      <i data-lucide="x" style="width:16px;height:16px;"></i>
+    </button>
+    <div id="lbcont"></div>
+  </div>
+
+  <div class="sep"></div>
+
+  <!-- ── FOOTER ─────────────────────────────── -->
+  <div class="fdiv"></div>
+  <footer aria-label="Fé e Aniversário">
+    <span style="font-size:1.15rem;display:block;margin-bottom:.85rem;opacity:.36;" aria-hidden="true">✝</span>
+    <p class="ffaith">
+      "Ela tem uma fé que não grita,<br/>
+      mas que sustenta tudo em silêncio.<br/>
+      O tipo de fé que aparece nos momentos<br/>
+      em que as palavras não chegam."
+    </p>
+    <div style="display:inline-flex;align-items:center;gap:.42rem;margin-top:1.65rem;font-family:'Oswald',sans-serif;font-size:clamp(.62rem,3.5vw,.74rem);font-weight:300;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,255,255,.17);">
+      <i data-lucide="cake" style="width:11px;height:11px;color:var(--pk);flex-shrink:0;"></i>
+      16 de Junho — Aniversário da Nic
+      <i data-lucide="cake" style="width:11px;height:11px;color:var(--pk);flex-shrink:0;"></i>
+    </div>
+    <p style="margin-top:1.3rem;font-size:clamp(.68rem,3.5vw,.76rem);color:rgba(255,255,255,.1);">Feito com muito carinho para Nicolly 🌸</p>
+    <p style="margin-top:.45rem;font-size:.57rem;letter-spacing:.2em;color:rgba(255,255,255,.06);text-transform:uppercase;">O VAULT DA NIC · UM ESPAÇO SÓ SEU</p>
+  </footer>
+
+</div><!-- /main -->
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════ -->
+<script>
+/* ─── GSAP ─── */
+gsap.registerPlugin(ScrollTrigger);
+
+/* ─── DEVICE CHECK ─── */
+const TOUCH = () => window.matchMedia('(pointer:coarse)').matches;
+
+/* ─────────────────────────────────────────────
+   CURSOR (desktop)
+───────────────────────────────────────────── */
+;(function(){
+  if(TOUCH()) return;
+  const d=document.getElementById('cdot'), r=document.getElementById('cring');
+  if(!d||!r) return;
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; d.style.left=mx+'px'; d.style.top=my+'px'; });
+  (function t(){ rx+=(mx-rx)*.11; ry+=(my-ry)*.11; r.style.left=rx+'px'; r.style.top=ry+'px'; requestAnimationFrame(t); })();
+})();
+
+/* ─────────────────────────────────────────────
+   MESH PARALLAX (desktop)
+───────────────────────────────────────────── */
+;(function(){
+  if(TOUCH()) return;
+  const b1=document.querySelector('.b1'), b2=document.querySelector('.b2');
+  document.addEventListener('mousemove',e=>{
+    const x=(e.clientX/innerWidth-.5)*2, y=(e.clientY/innerHeight-.5)*2;
+    gsap.to(b1,{x:x*30,y:y*30,duration:2.5,ease:'power1.out'});
+    gsap.to(b2,{x:x*-20,y:y*-20,duration:3,ease:'power1.out'});
+  });
+})();
+
+/* ─────────────────────────────────────────────
+   PETALS
+───────────────────────────────────────────── */
+;(function(){
+  const c=document.getElementById('petals');
+  const max=TOUCH()?4:10; let n=0;
+  function mk(){
+    if(n>=max) return; n++;
+    const p=document.createElement('div'); p.className='petal';
+    const sz=Math.random()*8+5, dur=Math.random()*9+11, del=Math.random()*3;
+    p.style.cssText=`left:${Math.random()*112-6}%;top:-12px;animation-duration:${dur}s;animation-delay:${del}s;`;
+    p.innerHTML=`<svg width="${sz}" height="${sz*1.3}" viewBox="0 0 10 13" xmlns="http://www.w3.org/2000/svg"><ellipse cx="5" cy="7" rx="4.5" ry="5.5" fill="rgba(255,182,193,.52)" transform="rotate(-15 5 7)"/></svg>`;
+    c.appendChild(p);
+    setTimeout(()=>{ p.remove(); n--; },(dur+del+1)*1000);
+  }
+  for(let i=0;i<(TOUCH()?2:5);i++) setTimeout(mk,i*500);
+  setInterval(mk,TOUCH()?2500:1100);
+})();
+
+/* ─────────────────────────────────────────────
+   MUSIC SYSTEM
+   Strategy:
+   1. SC Widget API (primary)
+   2. HTML5 Audio from archive.org (fallback)
+   Both play on user gesture (vinyl tap).
+───────────────────────────────────────────── */
+let scWidget=null, scReady=false, scPlaying=false, needPlay=false;
+const audioEl=document.getElementById('audio-el');
+let useAudioFallback=false;
+
+/* Initialise SC Widget after page load */
+window.addEventListener('load',()=>{
+  const iframe=document.getElementById('sc-frame');
+  if(!iframe||typeof SC==='undefined'){ useAudioFallback=true; return; }
+  try{
+    scWidget=SC.Widget(iframe);
+    scWidget.bind(SC.Widget.Events.READY,()=>{
+      scReady=true;
+      if(needPlay){ scWidget.play(); needPlay=false; }
+    });
+    scWidget.bind(SC.Widget.Events.PLAY,  ()=>{ scPlaying=true;  setUI(true); });
+    scWidget.bind(SC.Widget.Events.PAUSE, ()=>{ scPlaying=false; setUI(false); });
+    scWidget.bind(SC.Widget.Events.FINISH,()=>{
+      scPlaying=false; setUI(false);
+      document.getElementById('progfill').style.width='100%';
+    });
+    scWidget.bind(SC.Widget.Events.PLAY_PROGRESS,e=>{
+      document.getElementById('progfill').style.width=(e.relativePosition*100)+'%';
+    });
+
+    /* If SC load errors silently, fall back after 4s */
+    setTimeout(()=>{
+      if(!scReady){ useAudioFallback=true; }
+    },4000);
+
+  }catch(e){ useAudioFallback=true; }
+});
+
+/* HTML5 audio fallback events */
+audioEl.addEventListener('play',()=>{ scPlaying=true; setUI(true); });
+audioEl.addEventListener('pause',()=>{ scPlaying=false; setUI(false); });
+audioEl.addEventListener('ended',()=>{
+  scPlaying=false; setUI(false);
+  document.getElementById('progfill').style.width='100%';
+});
+audioEl.addEventListener('timeupdate',()=>{
+  if(audioEl.duration){
+    document.getElementById('progfill').style.width=(audioEl.currentTime/audioEl.duration*100)+'%';
+  }
+});
+audioEl.addEventListener('error',()=>{
+  /* Both sources failed — hide player gracefully */
+  console.warn('Audio failed to load from both sources.');
+});
+
+function doPlay(){
+  if(useAudioFallback || !scWidget){
+    audioEl.play().catch(()=>{});
+  } else if(scReady){
+    scWidget.play();
+  } else {
+    needPlay=true;
+  }
+}
+
+function doToggle(){
+  if(useAudioFallback || !scWidget){
+    if(audioEl.paused) audioEl.play().catch(()=>{});
+    else audioEl.pause();
+  } else {
+    if(scPlaying) scWidget.pause();
+    else scWidget.play();
+  }
+}
+
+/* ─────────────────────────────────────────────
+   PLAYER UI
+───────────────────────────────────────────── */
+function setUI(playing){
+  const v=document.getElementById('mpviny');
+  const bars=document.getElementById('mpbars');
+  const ico=document.getElementById('playico');
+  const hnp=document.getElementById('hnp');
+  const ticker=document.getElementById('lticker');
+
+  if(playing){
+    v.classList.add('sp');
+    bars.classList.remove('still');
+    ico.setAttribute('data-lucide','pause');
+    if(hnp) hnp.style.opacity='1';
+    if(ticker) ticker.classList.add('on');
+  } else {
+    v.classList.remove('sp');
+    bars.classList.add('still');
+    ico.setAttribute('data-lucide','play');
+    if(ticker) ticker.classList.remove('on');
+  }
+  lucide.createIcons();
+}
+
+document.getElementById('playbtn').addEventListener('click',doToggle);
+
+/* ─────────────────────────────────────────────
+   LYRICS TICKER — cycle through lines
+   (Lugar ao Sol timing approx.)
+───────────────────────────────────────────── */
+const lyrics=[
+  '♫ Que bom é viver e sonhar...',
+  '♫ Livre pra poder buscar o meu lugar ao Sol',
+  '♫ Livre pra poder sorrir, sim...',
+  '♫ O amor é assim, é a paz de Deus em sua casa',
+  '♫ Nossas vidas, nossos sonhos têm o mesmo valor',
+  '♫ Eu vou com você pra onde você for',
+  '♫ Um dia eu espero te reencontrar...',
+  '♫ Caro pai, como é bom ter por que se orgulhar',
+  '♫ A vida pode passar, não estou sozinho',
+  '♫ Eu sei se eu tiver fé eu volto até a sonhar',
+  '♫ Lugar ao Sol — Charlie Brown Jr.',
+];
+let lIdx=0;
+const ltxtEl=document.getElementById('ltxt');
+
+/* Change lyric every ~12 bars (≈ 30s at 96bpm in 4/4) */
+setInterval(()=>{
+  if(!scPlaying && (audioEl.paused)) return;
+  lIdx=(lIdx+1)%lyrics.length;
+  gsap.to(ltxtEl,{ opacity:0, y:-4, duration:.25,
+    onComplete:()=>{
+      ltxtEl.textContent=lyrics[lIdx];
+      gsap.to(ltxtEl,{opacity:1,y:0,duration:.25});
+    }
+  });
+},30000);
+
+/* ─────────────────────────────────────────────
+   INTRO → VAULT ENTER
+───────────────────────────────────────────── */
+const introEl=document.getElementById('intro');
+const mainEl=document.getElementById('main');
+const vinylEl=document.getElementById('vinyl');
+let entered=false;
+
+function enterVault(){
+  if(entered) return;
+  entered=true;
+
+  /* Speed up vinyl spin as excitement builds */
+  gsap.to('.vdisc',{animationDuration:'.3s',duration:.4,ease:'power2.in'});
+
+  /* — CRITICAL for iOS/Android: play() must happen INSIDE gesture handler — */
+  doPlay();
+
+  /* Show player with spring animation */
+  setTimeout(()=>document.getElementById('mplayer').classList.add('up'), 650);
+
+  /* Fade out intro */
+  gsap.to(introEl,{
+    opacity:0, scale:1.06, duration:1.05,
+    ease:'power3.inOut', delay:.12,
+    onComplete:()=>{
+      introEl.style.display='none';
+      mainEl.classList.add('on');
+      runHero();
+    }
+  });
+}
+
+/* Both tap and keyboard entry */
+vinylEl.addEventListener('click', enterVault);
+vinylEl.addEventListener('keydown', e=>{
+  if(e.key==='Enter'||e.key===' '){ e.preventDefault(); enterVault(); }
+});
+
+/* Auto-enter after 6.5s if no interaction */
+setTimeout(()=>{ if(!entered) enterVault(); }, 6500);
+
+/* ─────────────────────────────────────────────
+   HERO ANIMATION
+───────────────────────────────────────────── */
+function runHero(){
+  const els=[
+    document.querySelector('.heye'),
+    document.querySelector('.hname'),
+    document.querySelector('.hsub'),
+    document.getElementById('hnp'),
+  ].filter(Boolean);
+
+  gsap.fromTo(els,{ opacity:0, y:30 },{
+    opacity:1, y:0,
+    stagger:.12, duration:1.25, ease:'power4.out', delay:.18
+  });
+
+  initReveal();
+}
+
+/* ─────────────────────────────────────────────
+   SCROLL REVEALS
+───────────────────────────────────────────── */
+function initReveal(){
+  document.querySelectorAll('.fup').forEach((el,i)=>{
+    gsap.fromTo(el,{ opacity:0, y:26 },{
+      opacity:1, y:0,
+      duration:.88, ease:'power3.out',
+      delay:(i%4)*.05,
+      scrollTrigger:{
+        trigger:el, start:'top 91%',
+        toggleActions:'play none none none'
+      }
+    });
+  });
+}
+
+/* ─────────────────────────────────────────────
+   GALLERY
+───────────────────────────────────────────── */
+const GD=[
+  {c1:'#0c001e',c2:'#6600CC',e:'🌸',t:'Dias que valem a pena lembrar',h:160},
+  {c1:'#1e0010',c2:'#CC0055',e:'💜',t:'Ela e o inverno são perfeitos juntos',h:210},
+  {c1:'#090014',c2:'#8B00FF',e:'✨',t:'Animes e vibes eternas',h:180},
+  {c1:'#0e0022',c2:'#3300AA',e:'🎸',t:'Rock no coração, flor na alma',h:150},
+  {c1:'#1a0008',c2:'#FF1493',e:'🌙',t:'Noites que inspiram e aquecem',h:190},
+  {c1:'#0c001a',c2:'#B347FF',e:'🎮',t:'Stranger Things é a vibe certa',h:165},
+  {c1:'#1e0014',c2:'#9900AA',e:'💫',t:'Momentos que ficam pra sempre',h:205},
+  {c1:'#130020',c2:'#FF69B4',e:'❄️',t:'O frio e a paz dela',h:172},
+];
+
+const gallery=document.getElementById('gallery');
+GD.forEach((d,i)=>{
+  const el=document.createElement('div');
+  el.className='gitem';
+  el.setAttribute('role','button');
+  el.setAttribute('tabindex','0');
+  el.setAttribute('aria-label',`Memória ${i+1}: ${d.t}`);
+  el.innerHTML=`
+    <div class="gthumb" style="height:${d.h}px;background:linear-gradient(135deg,${d.c1},${d.c2});display:flex;align-items:center;justify-content:center;font-size:1.8rem;">${d.e}</div>
+    <div class="gov"><p class="gcap">${d.t}</p></div>
+  `;
+  el.addEventListener('click',()=>openLB(d));
+  el.addEventListener('keydown',e=>{ if(e.key==='Enter') openLB(d); });
+  gallery.appendChild(el);
+});
+
+const lbox=document.getElementById('lbox');
+const lbcont=document.getElementById('lbcont');
+
+function openLB(d){
+  lbcont.innerHTML=`
+    <div style="width:min(400px,75vw);height:280px;background:linear-gradient(135deg,${d.c1},${d.c2});border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:3rem;box-shadow:0 32px 85px rgba(0,0,0,.85);">${d.e}</div>
+    <p style="margin-top:.75rem;font-size:.8rem;color:rgba(255,255,255,.48);font-style:italic;text-align:center;">${d.t}</p>
+  `;
+  lbox.classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+document.getElementById('lbclose').addEventListener('click',closeLB);
+lbox.addEventListener('click',e=>{ if(e.target===lbox) closeLB(); });
+function closeLB(){ lbox.classList.remove('on'); document.body.style.overflow=''; }
+
+/* ─────────────────────────────────────────────
+   PASSWORD / UNLOCK
+───────────────────────────────────────────── */
+const modal=document.getElementById('pwmodal');
+const pwinp=document.getElementById('pwinp');
+const sbox=document.getElementById('sbox');
+const ubtn=document.getElementById('unlockbtn');
+
+ubtn.addEventListener('click',()=>{ modal.classList.add('on'); setTimeout(()=>pwinp.focus(),310); });
+
+function closeModal(){ modal.classList.remove('on'); pwinp.value=''; }
+document.getElementById('pwcancel').addEventListener('click',closeModal);
+modal.addEventListener('click',e=>{ if(e.target===modal) closeModal(); });
+
+function tryUnlock(){
+  if(pwinp.value.trim().length>0){
+    closeModal();
+    sbox.classList.add('show');
+    gsap.fromTo(sbox,{opacity:0,y:14},{opacity:1,y:0,duration:.72,ease:'power3.out'});
+    ubtn.innerHTML=`<span><i data-lucide="lock-open" style="width:13px;height:13px;"></i>Desbloqueado ✓</span>`;
+    ubtn.style.borderColor='rgba(179,71,255,.55)';
+    lucide.createIcons();
+  } else {
+    gsap.fromTo(pwinp,{x:-8},{x:0,duration:.38,ease:'elastic.out(1,.3)'});
+    pwinp.style.borderColor='rgba(255,20,147,.5)';
+    setTimeout(()=>{ pwinp.style.borderColor=''; },650);
+  }
+}
+
+document.getElementById('pwsubmit').addEventListener('click',tryUnlock);
+pwinp.addEventListener('keydown',e=>{ if(e.key==='Enter') tryUnlock(); });
+
+/* ─── ESC key closes everything ─── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    closeLB(); closeModal();
+    document.body.style.overflow='';
+  }
+});
+
+/* ─── Init icons ─── */
+lucide.createIcons();
+</script>
+</body>
+</html>
