@@ -142,8 +142,8 @@ body{
 .hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(1.5rem + var(--st)) 1rem 1.5rem;text-align:center;position:relative;overflow:hidden}
 .heye{font-size:clamp(.55rem,3vw,.68rem);font-weight:400;letter-spacing:.5em;color:var(--pk);text-transform:uppercase;margin-bottom:1.5rem;opacity:0}
 .hnw{position:relative}
-.hname{font-family:'Oswald',sans-serif;font-size:clamp(2.8rem,17vw,10.5rem);font-weight:700;letter-spacing:clamp(.06em,1.5vw,.16em);line-height:.9;text-transform:uppercase;background:linear-gradient(135deg,#fff 0%,var(--pkp) 48%,var(--ps) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;word-break:break-word}
-.hghost{position:absolute;inset:0;font-family:'Oswald',sans-serif;font-size:clamp(2.8rem,17vw,10.5rem);font-weight:700;letter-spacing:clamp(.06em,1.5vw,.16em);line-height:.9;text-transform:uppercase;-webkit-text-stroke:1px rgba(179,71,255,.1);color:transparent;filter:blur(18px);transform:translateY(8px);user-select:none;pointer-events:none;word-break:break-word}
+.hname{font-family:'Oswald',sans-serif;font-size:clamp(2.8rem,17vw,10.5rem);font-weight:700;letter-spacing:clamp(.02em,.4vw,.05em);line-height:.9;text-transform:uppercase;background:linear-gradient(135deg,#fff 0%,var(--pkp) 48%,var(--ps) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;word-break:break-word}
+.hghost{position:absolute;inset:0;font-family:'Oswald',sans-serif;font-size:clamp(2.8rem,17vw,10.5rem);font-weight:700;letter-spacing:clamp(.02em,.4vw,.05em);line-height:.9;text-transform:uppercase;-webkit-text-stroke:1px rgba(179,71,255,.1);color:transparent;filter:blur(18px);transform:translateY(8px);user-select:none;pointer-events:none;word-break:break-word}
 .hsub{font-size:clamp(.78rem,4vw,.98rem);font-weight:300;font-style:italic;color:rgba(255,255,255,.35);letter-spacing:.03em;margin-top:1.15rem;max-width:min(430px,88vw);opacity:0}
 .hnp{display:inline-flex;align-items:center;gap:.42rem;margin-top:1.6rem;padding:.36rem .82rem;background:rgba(139,0,255,.1);border:1px solid rgba(139,0,255,.22);border-radius:100px;font-size:clamp(.58rem,3vw,.67rem);font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.38);opacity:0}
 .npdot{width:6px;height:6px;border-radius:50%;background:var(--pk);box-shadow:0 0 8px var(--pk);animation:nd 1.5s ease-in-out infinite}
@@ -179,7 +179,10 @@ body{
 .mbars{display:flex;align-items:flex-end;gap:2.5px;height:22px}
 .mb{width:3px;border-radius:2px;background:linear-gradient(to top,var(--p),var(--pk));animation:bd var(--beat) ease-in-out infinite}
 .mb:nth-child(2){animation-delay:.078s}.mb:nth-child(3){animation-delay:.156s}.mb:nth-child(4){animation-delay:.234s}.mb:nth-child(5){animation-delay:.117s}.mb:nth-child(6){animation-delay:.195s}
-.mtrack{display:flex;align-items:center;gap:.65rem;padding:.55rem .78rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px}
+.mtrack{display:flex;align-items:center;gap:.65rem;padding:.55rem .78rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:10px;cursor:pointer;transition:background .2s,border-color .2s,transform .15s;touch-action:manipulation;user-select:none}
+.mtrack:active{transform:scale(.97)}
+.mtrack.active-track{background:rgba(139,0,255,.15);border-color:rgba(179,71,255,.45)}
+@media(pointer:fine){.mtrack:hover{background:rgba(255,255,255,.07);border-color:rgba(179,71,255,.3)}.mtrack.active-track{background:rgba(139,0,255,.18)}}
 .mtxt{flex:1;min-width:0}.mn{font-size:clamp(.74rem,3.5vw,.82rem);font-weight:500;color:rgba(255,255,255,.82)}.ms{font-size:clamp(.6rem,3vw,.69rem);color:rgba(255,255,255,.28);margin-top:1px}
 .ipill{display:inline-flex;align-items:center;gap:.3rem;padding:.32rem .72rem;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:8px;font-size:clamp(.66rem,3vw,.75rem);color:rgba(255,255,255,.58);cursor:default;transition:all .18s;touch-action:manipulation;min-height:34px}
 @media(pointer:coarse){.ipill:active{background:rgba(179,71,255,.1);border-color:rgba(179,71,255,.28);color:var(--ps)}}
@@ -312,7 +315,7 @@ footer{padding:clamp(2.2rem,8vw,5rem) clamp(.85rem,5vw,1.85rem);max-width:640px;
     <p class="hsub fup">"Um espaço reservado para o que é verdadeiro."</p>
     <div class="hnp fup" id="hnp">
       <div class="npdot"></div>
-      <span>Lugar ao Sol — tocando agora</span>
+      <span id="hnp-txt">Lugar ao Sol — tocando agora</span>
     </div>
     <div class="hscroll" aria-hidden="true">
       <div class="scrollln"></div>
@@ -358,8 +361,8 @@ footer{padding:clamp(2.2rem,8vw,5rem) clamp(.85rem,5vw,1.85rem);max-width:640px;
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:.42rem;">
-          <div class="mtrack"><span style="font-size:.9rem;flex-shrink:0;">🎸</span><div class="mtxt"><p class="mn">Charlie Brown Jr.</p><p class="ms">Rock nacional · Chorão eterno</p></div></div>
-          <div class="mtrack"><span style="font-size:.9rem;flex-shrink:0;">🖤</span><div class="mtxt"><p class="mn">Tokio Hotel</p><p class="ms">Rock alemão · intensidade</p></div></div>
+          <div class="mtrack active-track" id="track-cbjr" role="button" tabindex="0" aria-label="Tocar Charlie Brown Jr. - Lugar ao Sol"><span style="font-size:.9rem;flex-shrink:0;">🎸</span><div class="mtxt"><p class="mn">Charlie Brown Jr.</p><p class="ms">Lugar ao Sol · Chorão eterno</p></div><i data-lucide="play-circle" id="cbjr-ico" style="width:14px;height:14px;color:var(--ps);flex-shrink:0;"></i></div>
+          <div class="mtrack" id="track-th" role="button" tabindex="0" aria-label="Tocar Tokio Hotel - Monsoon"><span style="font-size:.9rem;flex-shrink:0;">🖤</span><div class="mtxt"><p class="mn">Tokio Hotel</p><p class="ms">Monsoon · intensidade</p></div><i data-lucide="play-circle" id="th-ico" style="width:14px;height:14px;color:rgba(255,255,255,.2);flex-shrink:0;"></i></div>
         </div>
       </div>
 
@@ -542,18 +545,35 @@ if(!TOUCH()){
 })();
 
 /* ══════════════════════════════════════════
-   YOUTUBE IFRAME API
-   Video: xDiuHDnppf4 — Charlie Brown Jr. - Lugar Ao Sol (oficial)
+   SONGS CONFIG
 ══════════════════════════════════════════ */
-let ytPlayer = null;
-let ytReady  = false;
-let ytPlaying = false;
+const SONGS = {
+  cbjr: {
+    videoId: 'xDiuHDnppf4',
+    title:   'Lugar ao Sol',
+    artist:  'Charlie Brown Jr. · Chorão',
+    npText:  'Lugar ao Sol — tocando agora',
+  },
+  th: {
+    videoId: 'Le_IyYLrUtQ',
+    title:   'Monsoon',
+    artist:  'Tokio Hotel · Bill Kaulitz',
+    npText:  'Monsoon — tocando agora',
+  }
+};
+let currentSong = 'cbjr'; // default
+
+/* ══════════════════════════════════════════
+   YOUTUBE IFRAME API
+══════════════════════════════════════════ */
+let ytPlayer   = null;
+let ytReady    = false;
+let ytPlaying  = false;
 let pendingPlay = false;
 
-// Called by YouTube API when ready
 window.onYouTubeIframeAPIReady = function() {
   ytPlayer = new YT.Player('yt-player', {
-    videoId: 'xDiuHDnppf4',
+    videoId: SONGS.cbjr.videoId,
     playerVars: {
       autoplay: 0,
       controls: 0,
@@ -561,21 +581,16 @@ window.onYouTubeIframeAPIReady = function() {
       fs: 0,
       iv_load_policy: 3,
       modestbranding: 1,
-      playsinline: 1,   // CRITICAL for iOS: play inline, not fullscreen
+      playsinline: 1,
       rel: 0,
       origin: window.location.origin || 'https://localhost'
     },
     events: {
       onReady: function(e) {
         ytReady = true;
-        // Start muted first on some browsers, then unmute after interaction
-        if(pendingPlay) {
-          e.target.playVideo();
-          pendingPlay = false;
-        }
+        if(pendingPlay) { e.target.unMute(); e.target.playVideo(); pendingPlay = false; }
       },
       onStateChange: function(e) {
-        // YT.PlayerState: PLAYING=1, PAUSED=2, ENDED=0, BUFFERING=3
         if(e.data === YT.PlayerState.PLAYING) {
           ytPlaying = true;
           setPlayerUI(true);
@@ -589,15 +604,13 @@ window.onYouTubeIframeAPIReady = function() {
         }
       },
       onError: function(e) {
-        console.warn('YouTube player error:', e.data);
-        // If video is unavailable in region, hide player gracefully
+        console.warn('YT error:', e.data);
         document.getElementById('mplayer').style.display = 'none';
       }
     }
   });
 };
 
-// Poll progress bar (YouTube API doesn't emit events for this)
 let progInterval = null;
 function startProgressPoll() {
   if(progInterval) return;
@@ -606,9 +619,7 @@ function startProgressPoll() {
     try {
       const dur = ytPlayer.getDuration();
       const cur = ytPlayer.getCurrentTime();
-      if(dur > 0) {
-        document.getElementById('progfill').style.width = ((cur/dur)*100) + '%';
-      }
+      if(dur > 0) document.getElementById('progfill').style.width = ((cur/dur)*100) + '%';
     } catch(e) {}
   }, 1000);
 }
@@ -629,18 +640,51 @@ function doToggle() {
   } catch(e) {}
 }
 
+/* Switch to a different song */
+function playSong(key) {
+  currentSong = key;
+  const song = SONGS[key];
+
+  // Update player bar info
+  document.querySelector('.mptitle').textContent  = song.title;
+  document.querySelector('.mpartist').textContent = song.artist;
+  document.getElementById('progfill').style.width = '0%';
+
+  // Update hero now-playing text
+  const hnpTxt = document.getElementById('hnp-txt');
+  if(hnpTxt) hnpTxt.textContent = song.npText;
+
+  // Update track highlight
+  document.getElementById('track-cbjr').classList.toggle('active-track', key === 'cbjr');
+  document.getElementById('track-th').classList.toggle('active-track',   key === 'th');
+  document.getElementById('cbjr-ico').style.color = key === 'cbjr' ? 'var(--ps)' : 'rgba(255,255,255,.2)';
+  document.getElementById('th-ico').style.color   = key === 'th'   ? 'var(--ps)' : 'rgba(255,255,255,.2)';
+
+  // Load & play new video
+  if(ytReady && ytPlayer) {
+    try {
+      ytPlayer.unMute();
+      ytPlayer.loadVideoById(song.videoId);
+    } catch(e){}
+  } else {
+    pendingPlay = true;
+    if(ytPlayer) try{ ytPlayer.cueVideoById(song.videoId); } catch(e){}
+  }
+  lucide.createIcons();
+}
+
 /* ── PLAYER UI ── */
 function setPlayerUI(playing) {
-  const v=document.getElementById('mpviny');
-  const bars=document.getElementById('mpbars');
-  const ico=document.getElementById('playico');
-  const hnp=document.getElementById('hnp');
+  const v    = document.getElementById('mpviny');
+  const bars = document.getElementById('mpbars');
+  const ico  = document.getElementById('playico');
+  const hnp  = document.getElementById('hnp');
 
-  if(playing){
+  if(playing) {
     v.classList.add('sp');
     bars.classList.remove('still');
     ico.setAttribute('data-lucide','pause');
-    if(hnp) hnp.style.opacity='1';
+    if(hnp) hnp.style.opacity = '1';
   } else {
     v.classList.remove('sp');
     bars.classList.add('still');
@@ -651,31 +695,29 @@ function setPlayerUI(playing) {
 
 document.getElementById('playbtn').addEventListener('click', doToggle);
 
+/* Track click handlers */
+document.getElementById('track-cbjr').addEventListener('click', () => playSong('cbjr'));
+document.getElementById('track-th').addEventListener('click',   () => playSong('th'));
+document.getElementById('track-cbjr').addEventListener('keydown', e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();playSong('cbjr');} });
+document.getElementById('track-th').addEventListener('keydown',   e => { if(e.key==='Enter'||e.key===' '){e.preventDefault();playSong('th');} });
+
 /* ── INTRO ENTER ── */
-const introEl=document.getElementById('intro');
-const mainEl=document.getElementById('main');
-const vinylEl=document.getElementById('vinyl');
-let entered=false;
+const introEl = document.getElementById('intro');
+const mainEl  = document.getElementById('main');
+const vinylEl = document.getElementById('vinyl');
+let entered   = false;
 
 function enterVault() {
   if(entered) return;
   entered = true;
-
-  // Speed up vinyl spin
   document.querySelector('.vdisc').style.animationDuration = '.3s';
-
-  // PLAY MUSIC — must be called synchronously inside user gesture
   doPlay();
-
-  // Show player
   setTimeout(() => document.getElementById('mplayer').classList.add('up'), 700);
-
-  // Fade out intro
   gsap.to(introEl, {
     opacity:0, scale:1.06, duration:1.05,
     ease:'power3.inOut', delay:.12,
     onComplete: () => {
-      introEl.style.display='none';
+      introEl.style.display = 'none';
       mainEl.classList.add('on');
       runHero();
     }
@@ -696,7 +738,6 @@ function runHero() {
     document.querySelector('.hsub'),
     document.getElementById('hnp'),
   ].filter(Boolean);
-
   gsap.fromTo(els, {opacity:0,y:30}, {
     opacity:1, y:0,
     stagger:.12, duration:1.25, ease:'power4.out', delay:.18
@@ -756,7 +797,9 @@ function closeModal(){modal.classList.remove('on');pwinp.value='';}
 document.getElementById('pwcancel').addEventListener('click',closeModal);
 modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});
 function tryUnlock(){
-  if(pwinp.value.trim().length>0){
+  const val = pwinp.value.trim();
+  const correct = val === '16/06' || val === '1606' || val === '16 06';
+  if(correct){
     closeModal();sbox.classList.add('show');
     gsap.fromTo(sbox,{opacity:0,y:14},{opacity:1,y:0,duration:.72,ease:'power3.out'});
     ubtn.innerHTML=`<span><i data-lucide="lock-open" style="width:13px;height:13px;"></i>Desbloqueado ✓</span>`;
