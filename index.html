@@ -2,162 +2,143 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Instagram</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      background: #000;
+      background: #0a0a0a;
       color: #fff;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 20px 15px;
+      padding: 20px 15px 0;
+      position: relative;
     }
-    .container {
-      width: 100%;
-      max-width: 350px;
-    }
-    .slogan {
-      font-size: 17px;
-      line-height: 20px;
-      text-align: center;
-      margin-bottom: 24px;
+    .language {
+      font-size: 14px;
       color: #a8a8a8;
+      margin-bottom: 30px;
+      text-align: center;
     }
-    .slogan span {
-      font-weight: 600;
-      background: linear-gradient(90deg, #f56040, #c13584, #833ab4, #405de6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .logo {
+      width: 82px;
+      height: 82px;
+      margin: 0 auto 35px;
+      display: block;
     }
     .card {
+      width: 100%;
+      max-width: 350px;
       background: #121212;
       border: 1px solid #363636;
-      border-radius: 8px;
+      border-radius: 12px;
       padding: 30px 20px 20px;
       text-align: center;
     }
-    .title {
-      font-size: 22px;
-      font-weight: 600;
-      margin-bottom: 24px;
-    }
     input {
       width: 100%;
-      background: #0f0f0f;
+      background: #1c1c1c;
       border: 1px solid #363636;
-      border-radius: 6px;
-      padding: 12px 10px;
-      margin: 8px 0;
+      border-radius: 8px;
+      padding: 13px 12px;
+      margin: 7px 0;
       color: #fff;
-      font-size: 14px;
+      font-size: 15px;
     }
-    input::placeholder { color: #8e8e8e; }
-    input:focus { outline: none; border-color: #a8a8a8; }
+    input::placeholder {
+      color: #8e8e8e;
+    }
+    input:focus {
+      outline: none;
+      border-color: #a8a8a8;
+    }
     .btn-entrar {
       width: 100%;
       background: #0095f6;
       color: #fff;
       border: none;
-      border-radius: 8px;
-      padding: 10px;
-      font-weight: 600;
+      border-radius: 30px;
+      padding: 11px;
+      font-weight: 700;
       font-size: 15px;
-      margin: 12px 0;
+      margin: 15px 0 8px;
       cursor: pointer;
     }
-    .btn-entrar:hover { background: #1877f2; }
+    .btn-entrar:active {
+      background: #1877f2;
+    }
     .forgot {
       color: #0095f6;
       font-size: 13px;
+      margin: 12px 0 25px;
       text-decoration: none;
       display: block;
-      margin: 12px 0 20px;
     }
-    .fb-btn {
-      width: 100%;
-      background: transparent;
-      border: 1px solid #363636;
-      color: #fff;
-      border-radius: 8px;
-      padding: 10px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 15px;
-    }
-    .create-btn {
+    .btn-criar {
       width: 100%;
       background: transparent;
       border: 1px solid #0095f6;
       color: #0095f6;
-      border-radius: 8px;
-      padding: 10px;
-      font-weight: 600;
+      border-radius: 30px;
+      padding: 11px;
+      font-weight: 700;
+      font-size: 15px;
       margin-top: 10px;
+      cursor: pointer;
     }
     .meta {
-      text-align: center;
-      margin-top: 30px;
-      color: #8e8e8e;
+      margin-top: 35px;
       font-size: 14px;
+      color: #8e8e8e;
+      text-align: center;
     }
     .footer {
-      margin-top: 40px;
+      margin-top: auto;
+      padding: 30px 0 15px;
       text-align: center;
       font-size: 12px;
       color: #8e8e8e;
-      line-height: 1.6;
+      line-height: 1.5;
     }
     .footer a {
       color: #8e8e8e;
       text-decoration: none;
-      margin: 0 5px;
+      margin: 0 3px;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <p class="slogan">
-      Veja momentos do dia a dia dos <span>seus amigos próximos</span>.
-    </p>
+  <div class="language">Português (Brasil)</div>
 
-    <div class="card">
-      <div class="title">Entrar no Instagram</div>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Instagram_logo_2022.svg/800px-Instagram_logo_2022.svg.png" 
+       class="logo" alt="Instagram">
 
-      <form>
-        <input type="text" placeholder="Número de celular, nome de usuário ou email" required>
-        <input type="password" placeholder="Senha" required>
-        <button type="submit" class="btn-entrar">Entrar</button>
-      </form>
+  <div class="card">
+    <form>
+      <input type="text" placeholder="Nome de usuário, email ou celular" required>
+      <input type="password" placeholder="Senha" required>
+      <button type="submit" class="btn-entrar">Entrar</button>
+    </form>
 
-      <a href="#" class="forgot">Esqueceu a senha?</a>
+    <a href="#" class="forgot">Esqueceu a senha?</a>
 
-      <button class="fb-btn">
-        <i class="fab fa-facebook-square"></i> Entrar com o Facebook
-      </button>
-
-      <button class="create-btn">Criar nova conta</button>
-    </div>
-
-    <div class="meta">∞ Meta</div>
+    <button class="btn-criar">Criar nova conta</button>
   </div>
 
+  <div class="meta">∞ Meta</div>
+
   <div class="footer">
-    <div>
-      Meta • Sobre • Blog • Carreiras • Ajuda • API • Privacidade • Termos • Localizações • Instagram Lite • Threads • Meta Verified
-    </div>
-    <div style="margin-top: 12px;">
-      Português (Brasil) © 2026 Instagram from Meta
-    </div>
+    Meta • Sobre • Blog • Carreiras • Ajuda • API • Privacidade • Termos • Localizações • Instagram Lite • Threads • Meta Verified<br>
+    Português (Brasil) © 2026 Instagram from Meta
   </div>
 
 </body>
