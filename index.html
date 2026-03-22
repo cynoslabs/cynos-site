@@ -6,6 +6,30 @@
 <title>TypeFlow — Treinador de Digitação</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+/* ── Credential store (XOR-obfuscated, seed=73, mod=11) ──────────────────
+   These are runtime-decoded only. Do not log or expose _dc() output.
+──────────────────────────────────────────────────────────────────────── */
+(function(){
+  const _s=73,_m=11;
+  function _dc(e){
+    try{
+      const r=atob(e);
+      return r.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^(_s+(i%_m)))).join('');
+    }catch{return'';}
+  }
+  const _a='IT4/PD50YH8/ID85JyIlNTcmPDMjNC4hLCQ3IWEjJCIyKys4KWMtIA==';
+  const _b='OigUPDgsIzkiOjIrJi4TfwoJIDM8ZAwuEQocKCERHw00BhMkDRJ/egllC2oMBA==';
+  // Initialise Supabase — stored on window, never re-exposed as plain text
+  try {
+    window._sb = window.supabase.createClient(_dc(_a), _dc(_b));
+  } catch(e) {
+    window._sb = null;
+  }
+})();
+</script>
 <style>
 /* ────────────────────────────────
    TOKENS
@@ -554,6 +578,163 @@ header{
 .rank-info{font-size:.74rem;color:var(--txt3)}
 
 /* ────────────────────────────────
+   NAME CHIP (saved state)
+──────────────────────────────── */
+.name-chip-wrap{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 14px;
+  background:var(--bg);border:1px solid var(--bd2);
+  border-radius:var(--r);
+}
+.name-chip-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--acc);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:.9rem;font-weight:700;
+  flex-shrink:0;
+}
+.name-chip-info{flex:1;min-width:0}
+.name-chip-label{font-size:.62rem;color:var(--txt3);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.name-chip-name{
+  font-family:var(--mono);font-size:.92rem;font-weight:600;
+  color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.name-chip-actions{display:flex;gap:6px;flex-shrink:0}
+.name-chip-btn{
+  font-family:var(--sans);font-size:.72rem;font-weight:500;
+  padding:4px 10px;border-radius:6px;border:1px solid var(--bd2);
+  background:var(--surface);color:var(--txt2);cursor:pointer;transition:all .12s;
+}
+.name-chip-btn:hover{background:var(--s2);color:var(--txt)}
+.name-chip-btn.accent{border-color:var(--m1);color:var(--m1);background:var(--m1-d)}
+.name-chip-btn.accent:hover{background:var(--m1);color:#fff}
+
+/* ────────────────────────────────
+   REQUEST MODAL
+──────────────────────────────── */
+#req-overlay{
+  position:fixed;inset:0;z-index:8000;
+  background:rgba(26,25,23,.5);
+  backdrop-filter:blur(5px);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s;
+}
+#req-overlay.open{opacity:1;pointer-events:all}
+#req-box{
+  background:var(--surface);
+  border:1px solid var(--bd);
+  border-radius:var(--rl);
+  box-shadow:var(--shm);
+  width:100%;max-width:420px;
+  transform:translateY(16px) scale(.97);
+  transition:transform .22s var(--eout);
+  overflow:hidden;
+}
+#req-overlay.open #req-box{transform:translateY(0) scale(1)}
+.req-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px 12px;
+  border-bottom:1px solid var(--bd);
+}
+.req-title{
+  font-family:var(--mono);font-size:.92rem;font-weight:700;color:var(--txt);
+  display:flex;align-items:center;gap:7px;
+}
+.req-close{
+  width:26px;height:26px;border-radius:50%;
+  background:var(--s2);border:1px solid var(--bd);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;color:var(--txt2);transition:background .12s;
+}
+.req-close:hover{background:var(--bd)}
+.req-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px}
+.req-field label{
+  display:block;font-size:.7rem;font-weight:500;
+  color:var(--txt2);margin-bottom:5px;
+}
+.req-field input,
+.req-field textarea{
+  font-family:var(--sans);font-size:.88rem;
+  background:var(--bg);border:1px solid var(--bd2);
+  border-radius:var(--r);color:var(--txt);
+  padding:9px 12px;width:100%;outline:none;
+  transition:border-color .13s,box-shadow .13s;
+  resize:none;
+}
+.req-field input:focus,
+.req-field textarea:focus{border-color:var(--m1);box-shadow:0 0 0 3px var(--m1-d)}
+.req-field input[readonly]{
+  background:var(--s2);color:var(--txt2);cursor:not-allowed;
+}
+.req-sub-note{font-size:.72rem;color:var(--txt3);line-height:1.5}
+.req-err{font-size:.73rem;color:var(--err);display:none}
+.req-err.show{display:block}
+.req-ok{
+  font-size:.8rem;color:var(--ok);
+  background:var(--ok-d);border:1px solid rgba(26,122,60,.2);
+  border-radius:var(--r);padding:10px 14px;text-align:center;
+  display:none;
+}
+.req-ok.show{display:block}
+
+/* ────────────────────────────────
+   ADMIN — REQUESTS section styles
+──────────────────────────────── */
+.adm-req-list{
+  border:1px solid var(--bd);border-radius:var(--r);
+  background:var(--surface);
+  max-height:260px;overflow-y:auto;
+  margin-bottom:12px;
+}
+.adm-req-row{
+  padding:12px 14px;border-bottom:1px solid var(--bd);
+}
+.adm-req-row:last-child{border-bottom:none}
+.adm-req-top{
+  display:flex;align-items:center;gap:8px;margin-bottom:6px;
+}
+.adm-req-from{
+  font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--txt);
+  flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.adm-req-arrow{color:var(--txt3);font-size:.8rem}
+.adm-req-to{
+  font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--m1);
+}
+.adm-req-date{font-size:.68rem;color:var(--txt3);flex-shrink:0}
+.adm-req-reason{
+  font-size:.76rem;color:var(--txt2);line-height:1.5;
+  background:var(--bg);border-radius:5px;
+  padding:6px 10px;margin-bottom:8px;
+}
+.adm-req-btns{display:flex;gap:6px}
+.adm-req-approve{
+  font-family:var(--sans);font-size:.74rem;font-weight:600;
+  padding:5px 14px;border-radius:6px;
+  background:var(--ok);color:#fff;border:none;cursor:pointer;transition:background .12s;
+}
+.adm-req-approve:hover{background:#15693214}
+.adm-req-approve:hover{background:#126130}
+.adm-req-reject{
+  font-family:var(--sans);font-size:.74rem;font-weight:500;
+  padding:5px 12px;border-radius:6px;
+  background:var(--s2);color:var(--txt2);border:1px solid var(--bd2);cursor:pointer;transition:all .12s;
+}
+.adm-req-reject:hover{background:var(--err-d);color:var(--err);border-color:var(--err)}
+.adm-req-empty{
+  padding:24px;text-align:center;font-size:.82rem;color:var(--txt3);
+}
+.adm-notif{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:16px;height:16px;border-radius:50%;
+  background:var(--err);color:#fff;
+  font-size:.6rem;font-weight:700;
+  margin-left:5px;
+}
+
+/* ────────────────────────────────
    ADMIN PANEL
 ──────────────────────────────── */
 /* Overlay */
@@ -848,15 +1029,33 @@ body.shake{animation:bodyShake .22s ease}
     </div>
 
     <div class="cfg">
-      <div class="cfg-lbl">Identificação — obrigatório para jogar <span style="color:var(--err)">*</span></div>
-      <div class="name-row">
-        <input type="text" id="player-name" class="name-inp"
-          placeholder="Digite seu nome ou apelido"
-          maxlength="20" autocomplete="off" autocorrect="off"
-          autocapitalize="none" spellcheck="false">
-        <button class="btn btn-dark btn-lg" id="btn-start">Iniciar →</button>
+      <div class="cfg-lbl">Identificação <span style="color:var(--err)">*</span></div>
+
+      <!-- Saved-name chip (shown when name is saved) -->
+      <div class="name-chip-wrap" id="name-chip" style="display:none">
+        <div class="name-chip-avatar" id="name-chip-avatar">?</div>
+        <div class="name-chip-info">
+          <div class="name-chip-label">Jogando como</div>
+          <div class="name-chip-name" id="name-chip-name">—</div>
+        </div>
+        <div class="name-chip-actions">
+          <button class="name-chip-btn accent" id="btn-req-name" title="Solicitar mudança de nome">✏ Alterar nome</button>
+          <button class="name-chip-btn" id="btn-clear-name" title="Sair / trocar jogador">Sair</button>
+        </div>
       </div>
-      <div class="name-req" id="name-req">⚠ Por favor, insira um nome antes de jogar.</div>
+
+      <!-- Name input (shown when no name saved) -->
+      <div id="name-input-wrap">
+        <div class="name-row">
+          <input type="text" id="player-name" class="name-inp"
+            placeholder="Digite seu nome ou apelido"
+            maxlength="20" autocomplete="off" autocorrect="off"
+            autocapitalize="none" spellcheck="false">
+          <button class="btn btn-dark btn-lg" id="btn-start">Iniciar →</button>
+        </div>
+        <div class="name-req" id="name-req">⚠ Por favor, insira um nome antes de jogar.</div>
+      </div>
+
       <div id="rec-row"></div>
     </div>
 
@@ -1055,6 +1254,49 @@ body.shake{animation:bodyShake .22s ease}
 </div>
 
 <!-- ═══════════════════════════════════════
+     NAME-CHANGE REQUEST MODAL
+═══════════════════════════════════════ -->
+<div id="req-overlay">
+  <div id="req-box">
+    <div class="req-hdr">
+      <div class="req-title">✏ Solicitar mudança de nome</div>
+      <button class="req-close" id="req-close">✕</button>
+    </div>
+    <div class="req-body">
+      <div class="req-ok" id="req-ok">
+        ✅ Solicitação enviada! Aguarde a aprovação do admin.
+      </div>
+      <div id="req-form-inner">
+        <div class="req-field">
+          <label>Nome atual</label>
+          <input type="text" id="req-cur-name" readonly>
+        </div>
+        <div class="req-field">
+          <label>Nome desejado <span style="color:var(--err)">*</span></label>
+          <input type="text" id="req-new-name" maxlength="20"
+            autocomplete="off" autocorrect="off"
+            autocapitalize="none" spellcheck="false"
+            placeholder="Como quer ser chamado?">
+        </div>
+        <div class="req-field">
+          <label>Motivo <span style="color:var(--err)">*</span></label>
+          <textarea id="req-reason" rows="3"
+            maxlength="200"
+            placeholder="Por que quer mudar? (máx. 200 caracteres)"></textarea>
+        </div>
+        <div class="req-err" id="req-err"></div>
+        <div class="req-sub-note">
+          Sua solicitação será analisada pelo administrador. Você será notificado aqui assim que for aprovada ou rejeitada.
+        </div>
+        <button class="adm-btn adm-btn-dark" id="req-submit" style="width:100%;margin-top:4px">
+          Enviar solicitação →
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
      ADMIN PANEL OVERLAY
 ═══════════════════════════════════════ -->
 <div id="admin-overlay">
@@ -1139,6 +1381,18 @@ body.shake{animation:bodyShake .22s ease}
         <div class="adm-rank-list" id="adm-rank-list"></div>
         <div class="adm-btn-row">
           <button class="adm-btn" id="adm-refresh">↻ Atualizar lista</button>
+        </div>
+      </div>
+
+      <!-- Name change requests -->
+      <div class="adm-section">
+        <div class="adm-section-title">
+          📬 Solicitações de mudança de nome
+          <span class="adm-notif" id="adm-req-notif" style="display:none">0</span>
+        </div>
+        <div class="adm-req-list" id="adm-req-list"></div>
+        <div class="adm-btn-row">
+          <button class="adm-btn" id="adm-req-refresh">↻ Atualizar</button>
         </div>
       </div>
 
@@ -1632,6 +1886,21 @@ function skipWord() {
    SESSION MANAGEMENT
 ────────────────────────────────────── */
 function startSession() {
+  // Check if there's an approved name change to notify
+  const reqs   = getRequests();
+  const approved = reqs.find(r => r.from === getSavedName() && r.status === 'approved');
+  if (approved) {
+    const msg = `✅ Seu nome foi alterado para "${approved.to}" pelo admin!`;
+    // Apply change
+    setSavedName(approved.to);
+    // Remove from requests
+    const updated = reqs.filter(r => !(r.from === approved.from && r.status === 'approved'));
+    saveRequests(updated);
+    updateNameUI();
+    toast(msg);
+    return; // let user see the notification before starting
+  }
+
   // Name is required
   const nameInp = document.getElementById('player-name');
   const nameReq = document.getElementById('name-req');
@@ -1639,7 +1908,7 @@ function startSession() {
 
   if (!nameVal) {
     nameInp.classList.remove('error');
-    void nameInp.offsetWidth; // reset animation
+    void nameInp.offsetWidth;
     nameInp.classList.add('error');
     nameReq.classList.add('show');
     nameInp.focus();
@@ -1648,6 +1917,10 @@ function startSession() {
   // Clear any error state
   nameInp.classList.remove('error');
   nameReq.classList.remove('show');
+
+  // Save name for next time
+  setSavedName(nameVal);
+  updateNameUI();
   // Reset state
   Object.assign(G, {
     words:        buildPool(),
@@ -1712,7 +1985,7 @@ function endSession() {
 /* ──────────────────────────────────────
    RESULTS
 ────────────────────────────────────── */
-function showResults() {
+async function showResults() {
   const wpm    = calcWPM();
   const acc    = calcAcc();
   const words  = G.correctWords + G.wrongWords;
@@ -1727,7 +2000,7 @@ function showResults() {
   const name = document.getElementById('player-name').value.trim() || 'ANON';
   saveSession({ name, wpm, acc, mode: G.mode, ts: Date.now() });
 
-  // Always save to rank leaderboard
+  // Always save to rank leaderboard (async — fire and don't block UI)
   saveRankEntry({ name, wpm, acc, streak: G.maxStreak, mode: G.mode, ts: Date.now() });
 
   const rec = getRec();
@@ -1848,12 +2121,52 @@ function saveSession(d) {
 function getRec() { try { return JSON.parse(localStorage.getItem('tf_rec') || '{}'); } catch(_) { return {}; } }
 function saveRec(d) { try { localStorage.setItem('tf_rec', JSON.stringify(d)); } catch(_) {} }
 
+/* ── NAME PERSISTENCE ── */
+function getSavedName()     { try { return localStorage.getItem('tf_name') || ''; } catch(_) { return ''; } }
+function setSavedName(name) { try { localStorage.setItem('tf_name', name); } catch(_) {} }
+function clearSavedName()   { try { localStorage.removeItem('tf_name'); } catch(_) {} }
+
+/* Sync visible name field from saved value */
+function updateNameUI() {
+  const saved = getSavedName();
+  const chip       = document.getElementById('name-chip');
+  const inputWrap  = document.getElementById('name-input-wrap');
+  const chipName   = document.getElementById('name-chip-name');
+  const chipAvatar = document.getElementById('name-chip-avatar');
+  const nameInp    = document.getElementById('player-name');
+
+  if (saved) {
+    chip.style.display      = '';
+    inputWrap.style.display = 'none';
+    chipName.textContent    = saved;
+    chipAvatar.textContent  = saved.charAt(0).toUpperCase();
+    nameInp.value           = saved;
+  } else {
+    chip.style.display      = 'none';
+    inputWrap.style.display = '';
+    nameInp.value           = '';
+  }
+}
+
+/* ── NAME-CHANGE REQUESTS STORAGE ── */
+function getRequests()      { try { return JSON.parse(localStorage.getItem('tf_reqs') || '[]'); } catch(_) { return []; } }
+function saveRequests(data) { try { localStorage.setItem('tf_reqs', JSON.stringify(data)); } catch(_) {} }
+function addRequest(req)    {
+  const data = getRequests();
+  // Prevent duplicate pending from same user
+  const existing = data.findIndex(r => r.from === req.from && r.status === 'pending');
+  if (existing !== -1) data.splice(existing, 1); // replace old pending
+  data.push(req);
+  saveRequests(data);
+}
+
 function loadRecDisplay() {
   const r = getRec();
   const row = document.getElementById('rec-row');
   row.innerHTML = r.wpm
     ? `<div class="rec-chip" style="display:inline-flex;margin-top:8px"><span class="star">★</span>${r.name || 'ANON'} — ${r.wpm} WPM, ${r.acc}% precisão</div>`
     : '';
+  updateNameUI();
 }
 
 /* ──────────────────────────────────────
@@ -1877,31 +2190,102 @@ function share() {
 }
 
 /* ──────────────────────────────────────
-   RANK STORAGE
+   RANK STORAGE  — Supabase (global) with localStorage fallback
+   Table: rankings (id uuid pk, name text, wpm int, acc int,
+                    streak int, mode int, created_at timestamptz)
 ────────────────────────────────────── */
-function getRankData() {
+const SB_TABLE = 'rank';
+
+// ── READ ──
+async function getRankData() {
+  if (window._sb) {
+    try {
+      const { data, error } = await window._sb
+        .from(SB_TABLE)
+        .select('name,wpm,acc,streak,mode,created_at')
+        .order('wpm', { ascending: false })
+        .limit(100);
+      if (!error && data) {
+        return data.map(r => ({
+          name:   r.name,
+          wpm:    r.wpm,
+          acc:    r.acc,
+          streak: r.streak ?? 0,
+          mode:   r.mode,
+          ts:     new Date(r.created_at).getTime(),
+        }));
+      }
+    } catch(_) {}
+  }
+  // fallback: localStorage
   try { return JSON.parse(localStorage.getItem('tf_rank') || '[]'); } catch(_) { return []; }
 }
-function saveRankEntry(entry) {
+
+// ── WRITE ──
+async function saveRankEntry(entry) {
+  if (window._sb) {
+    try {
+      await window._sb.from(SB_TABLE).insert({
+        name:   entry.name,
+        wpm:    entry.wpm,
+        acc:    entry.acc,
+        streak: entry.streak ?? 0,
+        mode:   entry.mode,
+      });
+      return;
+    } catch(_) {}
+  }
+  // fallback: localStorage
   try {
-    const data = getRankData();
-    data.push(entry);
-    // Keep top 100 by WPM globally so the board never gets stale
-    data.sort((a, b) => b.wpm - a.wpm);
-    if (data.length > 100) data.splice(100);
-    localStorage.setItem('tf_rank', JSON.stringify(data));
+    const h = JSON.parse(localStorage.getItem('tf_rank') || '[]');
+    h.push(entry);
+    h.sort((a,b) => b.wpm - a.wpm);
+    if (h.length > 100) h.splice(100);
+    localStorage.setItem('tf_rank', JSON.stringify(h));
   } catch(_) {}
 }
-function clearRankData() {
+
+// ── DELETE ALL ──
+async function clearRankData() {
+  if (window._sb) {
+    try {
+      // Delete all rows — requires DELETE policy on anon role in Supabase
+      await window._sb.from(SB_TABLE).delete().neq('wpm', -99999);
+      return;
+    } catch(_) {}
+  }
   try { localStorage.removeItem('tf_rank'); } catch(_) {}
 }
 
+// ── DELETE ONE (by name+wpm+ts approximation) ──
+async function deleteRankEntry(entry) {
+  if (window._sb) {
+    try {
+      // Match by name + wpm + created_at approximation (within 60s)
+      const tsIso = new Date(entry.ts).toISOString();
+      const tsFrom = new Date(entry.ts - 60000).toISOString();
+      await window._sb.from(SB_TABLE).delete()
+        .eq('name', entry.name)
+        .eq('wpm',  entry.wpm)
+        .gte('created_at', tsFrom)
+        .lte('created_at', tsIso);
+      return;
+    } catch(_) {}
+  }
+  // fallback localStorage
+  try {
+    const h = JSON.parse(localStorage.getItem('tf_rank') || '[]');
+    const idx = h.findIndex(r => r.name === entry.name && r.wpm === entry.wpm && r.ts === entry.ts);
+    if (idx !== -1) { h.splice(idx, 1); localStorage.setItem('tf_rank', JSON.stringify(h)); }
+  } catch(_) {}
+}
+
 /* ──────────────────────────────────────
-   RANK RENDER
+   RANK RENDER  (async — fetches from Supabase)
 ────────────────────────────────────── */
 let _rankFilter = 'all';
 
-const MEDALS  = { 1:'🥇', 2:'🥈', 3:'🥉' };
+const MEDALS   = { 1:'🥇', 2:'🥈', 3:'🥉' };
 const MODE_LBL = { 1:'Sem Olhar', 2:'Velocidade', 3:'Híbrido' };
 const MODE_CLS = { 1:'m1', 2:'m2', 3:'m3' };
 
@@ -1910,18 +2294,23 @@ function fmtDate(ts) {
   return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
 }
 
-function renderRank() {
-  const all   = getRankData();
-  const currentName = (document.getElementById('player-name').value.trim() || 'ANON').toUpperCase();
+async function renderRank() {
+  const tbody  = document.getElementById('rank-tbody');
+  const infoEl = document.getElementById('rank-info');
+  const currentName = (document.getElementById('player-name').value.trim() || getSavedName() || 'ANON').toUpperCase();
 
-  // Filter
+  // Loading state
+  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--txt3);font-size:.85rem">
+    Carregando ranking... ⏳
+  </td></tr>`;
+  infoEl.textContent = '';
+
+  const all = await getRankData();
+
+  // Filter by mode
   const filtered = _rankFilter === 'all'
     ? all
     : all.filter(e => String(e.mode) === String(_rankFilter));
-
-  // Already sorted by WPM from saveRankEntry
-  const tbody   = document.getElementById('rank-tbody');
-  const infoEl  = document.getElementById('rank-info');
 
   tbody.innerHTML = '';
 
@@ -1939,13 +2328,11 @@ function renderRank() {
   }
 
   filtered.forEach((entry, i) => {
-    const pos  = i + 1;
-    const isYou = entry.name.toUpperCase() === currentName;
-    const tr   = document.createElement('tr');
+    const pos    = i + 1;
+    const isYou  = entry.name.toUpperCase() === currentName;
+    const tr     = document.createElement('tr');
     tr.className = 'rank-row';
-    tr.style.animationDelay = Math.min(i * 30, 300) + 'ms';
-
-    // Highlight current player's row softly
+    tr.style.animationDelay = Math.min(i * 25, 300) + 'ms';
     if (isYou) tr.style.background = 'rgba(232,96,10,.04)';
 
     const posCls = pos <= 3 ? ` p${pos}` : '';
@@ -2149,9 +2536,148 @@ document.getElementById('rank-filters').addEventListener('click', e => {
    INIT
 ────────────────────────────────────── */
 buildKb();
-loadRecDisplay();
+loadRecDisplay(); // also calls updateNameUI()
 showScreen('home');
 setTimeout(refocus, 150);
+
+/* ─── Name chip bindings ─── */
+
+// "Sair" — clear saved name, show input
+document.getElementById('btn-clear-name').addEventListener('click', () => {
+  clearSavedName();
+  updateNameUI();
+});
+
+// "Alterar nome" — open request modal
+document.getElementById('btn-req-name').addEventListener('click', () => {
+  openRequestModal();
+});
+
+/* ─── Request modal ─── */
+function openRequestModal() {
+  const saved = getSavedName();
+  document.getElementById('req-cur-name').value = saved;
+  document.getElementById('req-new-name').value = '';
+  document.getElementById('req-reason').value   = '';
+  document.getElementById('req-err').classList.remove('show');
+  document.getElementById('req-ok').classList.remove('show');
+  document.getElementById('req-form-inner').style.opacity = '1';
+  document.getElementById('req-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('req-new-name').focus(), 80);
+}
+
+function closeRequestModal() {
+  document.getElementById('req-overlay').classList.remove('open');
+}
+
+document.getElementById('req-close').addEventListener('click', closeRequestModal);
+document.getElementById('req-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('req-overlay')) closeRequestModal();
+});
+
+document.getElementById('req-submit').addEventListener('click', () => {
+  const from   = getSavedName();
+  const to     = document.getElementById('req-new-name').value.trim();
+  const reason = document.getElementById('req-reason').value.trim();
+  const errEl  = document.getElementById('req-err');
+
+  if (!to)     { showReqErr(errEl, 'Por favor, preencha o nome desejado.'); return; }
+  if (to.length < 2) { showReqErr(errEl, 'O nome deve ter pelo menos 2 caracteres.'); return; }
+  if (to === from)   { showReqErr(errEl, 'O nome desejado é igual ao atual.'); return; }
+  if (!reason) { showReqErr(errEl, 'Por favor, informe o motivo da mudança.'); return; }
+
+  errEl.classList.remove('show');
+
+  addRequest({ from, to, reason, status: 'pending', ts: Date.now() });
+
+  // Show success, hide form fields
+  document.getElementById('req-ok').classList.add('show');
+  document.getElementById('req-form-inner').style.opacity = '0.4';
+  document.getElementById('req-form-inner').style.pointerEvents = 'none';
+
+  setTimeout(closeRequestModal, 2200);
+  toast('Solicitação enviada ao admin!');
+});
+
+function showReqErr(el, msg) {
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ─── Admin requests ─── */
+function loadAdminRequests() {
+  const reqs   = getRequests().filter(r => r.status === 'pending');
+  const list   = document.getElementById('adm-req-list');
+  const notif  = document.getElementById('adm-req-notif');
+
+  // Update notification badge
+  if (reqs.length > 0) {
+    notif.textContent = reqs.length;
+    notif.style.display = '';
+  } else {
+    notif.style.display = 'none';
+  }
+
+  if (!reqs.length) {
+    list.innerHTML = '<div class="adm-req-empty">Nenhuma solicitação pendente. ✓</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  reqs.forEach((req, i) => {
+    const allReqs = getRequests();
+    // Find original index
+    const origIdx = allReqs.findIndex(r => r.ts === req.ts && r.from === req.from);
+
+    const row = document.createElement('div');
+    row.className = 'adm-req-row';
+    row.innerHTML = `
+      <div class="adm-req-top">
+        <span class="adm-req-from">${escHtml(req.from)}</span>
+        <span class="adm-req-arrow">→</span>
+        <span class="adm-req-to">${escHtml(req.to)}</span>
+        <span class="adm-req-date">${fmtDate(req.ts)}</span>
+      </div>
+      <div class="adm-req-reason">"${escHtml(req.reason)}"</div>
+      <div class="adm-req-btns">
+        <button class="adm-req-approve" data-ts="${req.ts}">✓ Aprovar</button>
+        <button class="adm-req-reject"  data-ts="${req.ts}">✕ Rejeitar</button>
+      </div>
+    `;
+    list.appendChild(row);
+  });
+
+  // Approve
+  list.querySelectorAll('.adm-req-approve').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ts   = parseInt(btn.dataset.ts, 10);
+      const all  = getRequests();
+      const idx  = all.findIndex(r => r.ts === ts);
+      if (idx === -1) return;
+      all[idx].status = 'approved';
+      saveRequests(all);
+      loadAdminRequests();
+      toast(`✅ Mudança para "${all[idx].to}" aprovada!`);
+    });
+  });
+
+  // Reject
+  list.querySelectorAll('.adm-req-reject').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const ts  = parseInt(btn.dataset.ts, 10);
+      const all = getRequests();
+      const idx = all.findIndex(r => r.ts === ts);
+      if (idx === -1) return;
+      all[idx].status = 'rejected';
+      saveRequests(all);
+      loadAdminRequests();
+      toast('Solicitação rejeitada.');
+    });
+  });
+}
+
+document.getElementById('adm-req-refresh').addEventListener('click', loadAdminRequests);
 
 /* ══════════════════════════════════════
    ADMIN PANEL
@@ -2202,6 +2728,7 @@ function openAdmin() {
     document.getElementById('adm-login').style.display = 'none';
     document.getElementById('adm-panel').style.display = '';
     loadAdminList();
+    loadAdminRequests();
   }
 }
 
@@ -2222,6 +2749,7 @@ function tryAdminLogin() {
     document.getElementById('adm-login').style.display = 'none';
     document.getElementById('adm-panel').style.display = '';
     loadAdminList();
+    loadAdminRequests();
   } else {
     errEl.classList.add('show');
     document.getElementById('adm-pass').value = '';
@@ -2230,10 +2758,13 @@ function tryAdminLogin() {
 }
 
 // ── Load rank list inside admin ──
-function loadAdminList() {
-  const data  = getRankData();
+async function loadAdminList() {
   const list  = document.getElementById('adm-rank-list');
   const count = document.getElementById('adm-count');
+
+  list.innerHTML = '<div style="padding:16px;text-align:center;font-size:.8rem;color:var(--txt3)">Carregando... ⏳</div>';
+
+  const data = await getRankData();
   count.textContent = `(${data.length})`;
 
   if (!data.length) {
@@ -2250,27 +2781,24 @@ function loadAdminList() {
       <div class="adm-rank-row-name">${escHtml(entry.name)}</div>
       <div class="adm-rank-row-wpm">${entry.wpm} <span style="font-size:.6rem;color:var(--txt3)">wpm</span></div>
       <div style="font-size:.72rem;color:var(--txt3);min-width:36px;text-align:right">${entry.acc}%</div>
-      <button class="adm-rank-row-del" data-idx="${i}" title="Remover entrada">✕</button>
+      <button class="adm-rank-row-del" title="Remover entrada">✕</button>
     `;
-    list.appendChild(row);
-  });
-
-  // Delete individual entry
-  list.querySelectorAll('.adm-rank-row-del').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.idx, 10);
-      const d = getRankData();
-      d.splice(idx, 1);
-      try { localStorage.setItem('tf_rank', JSON.stringify(d)); } catch(_){}
-      loadAdminList();
+    // Attach delete to the specific entry object
+    const btn = row.querySelector('.adm-rank-row-del');
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = '...';
+      await deleteRankEntry(entry);
+      await loadAdminList();
       if (G.screen === 'rank') renderRank();
       toast('Entrada removida.');
     });
+    list.appendChild(row);
   });
 }
 
 // ── Add custom entry ──
-function addCustomEntry() {
+async function addCustomEntry() {
   const nameEl   = document.getElementById('adm-r-name');
   const wpmEl    = document.getElementById('adm-r-wpm');
   const accEl    = document.getElementById('adm-r-acc');
@@ -2291,8 +2819,16 @@ function addCustomEntry() {
 
   errEl.style.display = 'none';
 
-  saveRankEntry({ name, wpm, acc, streak, mode, ts: Date.now() });
-  loadAdminList();
+  const addBtn = document.getElementById('adm-add-btn');
+  addBtn.disabled = true;
+  addBtn.textContent = 'Salvando...';
+
+  await saveRankEntry({ name, wpm, acc, streak, mode, ts: Date.now() });
+
+  addBtn.disabled = false;
+  addBtn.textContent = '➕ Adicionar ao ranking';
+
+  await loadAdminList();
   if (G.screen === 'rank') renderRank();
 
   // Clear fields
@@ -2329,10 +2865,13 @@ document.getElementById('adm-add-btn').addEventListener('click', addCustomEntry)
 
 document.getElementById('adm-refresh').addEventListener('click', loadAdminList);
 
-document.getElementById('adm-clear-btn').addEventListener('click', () => {
+document.getElementById('adm-clear-btn').addEventListener('click', async () => {
   if (!confirm('Apagar TODOS os dados do ranking? Isso é permanente.')) return;
-  clearRankData();
-  loadAdminList();
+  const btn = document.getElementById('adm-clear-btn');
+  btn.disabled = true; btn.textContent = 'Apagando...';
+  await clearRankData();
+  btn.disabled = false; btn.textContent = '🗑 Apagar ranking completo';
+  await loadAdminList();
   if (G.screen === 'rank') renderRank();
   toast('Ranking apagado pelo admin.');
 });
