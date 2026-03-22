@@ -195,7 +195,23 @@ header{
   flex:1;outline:none;transition:border-color .13s,box-shadow .13s;
 }
 .name-inp::placeholder{color:var(--txt3)}
-.name-inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-d)}
+.name-inp.error{
+  border-color:var(--err)!important;
+  box-shadow:0 0 0 3px var(--err-d)!important;
+  animation:inpShake .28s ease;
+}
+@keyframes inpShake{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  50%{transform:translateX(6px)}
+  80%{transform:translateX(-4px)}
+}
+.name-req{
+  font-size:.73rem;color:var(--err);
+  margin-top:6px;display:none;
+  align-items:center;gap:4px;
+}
+.name-req.show{display:flex}
 .rec-chip{
   font-size:.76rem;color:var(--txt2);
   background:var(--s2);border:1px solid var(--bd);
@@ -538,6 +554,166 @@ header{
 .rank-info{font-size:.74rem;color:var(--txt3)}
 
 /* ────────────────────────────────
+   ADMIN PANEL
+──────────────────────────────── */
+/* Overlay */
+#admin-overlay{
+  position:fixed;inset:0;z-index:9000;
+  background:rgba(26,25,23,.55);
+  backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  opacity:0;pointer-events:none;
+  transition:opacity .22s;
+}
+#admin-overlay.open{opacity:1;pointer-events:all}
+
+/* Panel box */
+#admin-box{
+  background:var(--surface);
+  border:1px solid var(--bd);
+  border-radius:18px;
+  box-shadow:0 24px 64px rgba(0,0,0,.14),0 4px 12px rgba(0,0,0,.08);
+  width:100%;max-width:520px;
+  max-height:92dvh;overflow-y:auto;
+  transform:translateY(18px) scale(.97);
+  transition:transform .25s var(--eout);
+  position:relative;
+}
+#admin-overlay.open #admin-box{transform:translateY(0) scale(1)}
+
+/* Header strip */
+.adm-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px 14px;
+  border-bottom:1px solid var(--bd);
+  position:sticky;top:0;background:var(--surface);
+  border-radius:18px 18px 0 0;z-index:1;
+}
+.adm-title{
+  font-family:var(--mono);font-size:.95rem;font-weight:700;
+  color:var(--txt);display:flex;align-items:center;gap:8px;
+}
+.adm-badge{
+  font-size:.6rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;background:var(--err-d);
+  color:var(--err);border-radius:4px;padding:2px 7px;
+}
+.adm-close{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--s2);border:1px solid var(--bd);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;color:var(--txt2);transition:background .12s;
+}
+.adm-close:hover{background:var(--bd)}
+
+/* Login form */
+.adm-login{padding:28px 22px 24px}
+.adm-login-title{
+  font-size:.78rem;font-weight:600;color:var(--txt3);
+  letter-spacing:.07em;text-transform:uppercase;margin-bottom:18px;
+}
+.adm-field{margin-bottom:12px}
+.adm-field label{
+  display:block;font-size:.72rem;font-weight:500;
+  color:var(--txt2);margin-bottom:5px;
+}
+.adm-inp{
+  font-family:var(--mono);font-size:.9rem;
+  background:var(--bg);border:1px solid var(--bd2);
+  border-radius:var(--r);color:var(--txt);
+  padding:9px 12px;width:100%;outline:none;
+  transition:border-color .13s,box-shadow .13s;
+}
+.adm-inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-d)}
+.adm-login-err{
+  font-size:.75rem;color:var(--err);
+  margin-top:4px;display:none;
+}
+.adm-login-err.show{display:block}
+
+/* Admin body (after login) */
+.adm-body{padding:20px 22px 24px;display:flex;flex-direction:column;gap:18px}
+
+/* Section */
+.adm-section{
+  background:var(--bg);border:1px solid var(--bd);
+  border-radius:var(--r);padding:16px;
+}
+.adm-section-title{
+  font-size:.68rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--txt3);margin-bottom:14px;
+  display:flex;align-items:center;gap:6px;
+}
+
+/* Grid inputs */
+.adm-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.adm-grid .adm-field{margin-bottom:0}
+.adm-grid-3{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+}
+.adm-grid-3 .adm-field{margin-bottom:0}
+
+/* Select */
+.adm-sel{
+  font-family:var(--sans);font-size:.85rem;
+  background:var(--bg);border:1px solid var(--bd2);
+  border-radius:var(--r);color:var(--txt);
+  padding:9px 12px;width:100%;outline:none;
+  cursor:pointer;
+  transition:border-color .13s;
+}
+.adm-sel:focus{border-color:var(--acc)}
+
+/* Danger zone */
+.adm-danger{border-color:rgba(198,40,40,.25);background:var(--err-d)}
+.adm-danger .adm-section-title{color:var(--err)}
+
+/* Admin action buttons */
+.adm-btn{
+  font-family:var(--sans);font-size:.82rem;font-weight:500;
+  padding:9px 18px;border-radius:var(--r);border:1px solid var(--bd2);
+  background:var(--surface);color:var(--txt2);cursor:pointer;
+  transition:all .13s;white-space:nowrap;
+}
+.adm-btn:hover{background:var(--s2);color:var(--txt)}
+.adm-btn-dark{background:var(--txt);color:#fff;border-color:var(--txt)}
+.adm-btn-dark:hover{background:#2e2d29}
+.adm-btn-danger{
+  background:var(--err);color:#fff;border-color:var(--err);
+}
+.adm-btn-danger:hover{background:#a82020}
+.adm-btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* Rank list inside admin */
+.adm-rank-list{
+  max-height:220px;overflow-y:auto;
+  border:1px solid var(--bd);border-radius:var(--r);
+  background:var(--surface);margin-bottom:12px;
+}
+.adm-rank-row{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 12px;border-bottom:1px solid var(--bd);
+  font-size:.8rem;
+}
+.adm-rank-row:last-child{border-bottom:none}
+.adm-rank-row-pos{
+  font-family:var(--mono);font-weight:700;
+  color:var(--txt3);min-width:22px;text-align:center;font-size:.75rem;
+}
+.adm-rank-row-name{flex:1;color:var(--txt);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.adm-rank-row-wpm{font-family:var(--mono);font-weight:700;color:var(--txt);min-width:48px;text-align:right}
+.adm-rank-row-del{
+  width:22px;height:22px;border-radius:4px;
+  background:transparent;border:1px solid transparent;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:.8rem;color:var(--txt3);transition:all .12s;flex-shrink:0;
+}
+.adm-rank-row-del:hover{background:var(--err-d);border-color:var(--err);color:var(--err)}
+
+/* ────────────────────────────────
    TOAST
 ──────────────────────────────── */
 #toast{
@@ -617,7 +793,7 @@ body.shake{animation:bodyShake .22s ease}
   <div class="body">
 
     <div class="hero">
-      <h1>TypeFlow</h1>
+      <h1>Digite<br>sem <em>olhar.</em></h1>
       <p>Três modos de treino para construir memória muscular, velocidade e consistência no teclado.</p>
     </div>
 
@@ -672,14 +848,15 @@ body.shake{animation:bodyShake .22s ease}
     </div>
 
     <div class="cfg">
-      <div class="cfg-lbl">Identificação — salvar recorde</div>
+      <div class="cfg-lbl">Identificação — obrigatório para jogar <span style="color:var(--err)">*</span></div>
       <div class="name-row">
         <input type="text" id="player-name" class="name-inp"
-          placeholder="Seu nome (opcional)"
+          placeholder="Digite seu nome ou apelido"
           maxlength="20" autocomplete="off" autocorrect="off"
           autocapitalize="none" spellcheck="false">
         <button class="btn btn-dark btn-lg" id="btn-start">Iniciar →</button>
       </div>
+      <div class="name-req" id="name-req">⚠ Por favor, insira um nome antes de jogar.</div>
       <div id="rec-row"></div>
     </div>
 
@@ -834,6 +1011,150 @@ body.shake{animation:bodyShake .22s ease}
 <!-- ═══════════════════════════════════════
      SCRIPT
 ═══════════════════════════════════════ -->
+<!-- ═══════════════════════════════════════
+     RANKING
+═══════════════════════════════════════ -->
+<div id="s-rank" class="screen hidden">
+  <header>
+    <div class="logo"><span class="logo-dot"></span>TypeFlow</div>
+    <button class="btn btn-sm" id="r-back">← Voltar</button>
+  </header>
+
+  <div class="body">
+    <h2 class="rank-title">🏆 <em>Ranking</em></h2>
+    <p class="rank-sub">Top jogadores desta máquina · Salvo localmente</p>
+
+    <div class="rank-filters" id="rank-filters">
+      <button class="pill pill-sm on" data-rf="all">Todos</button>
+      <button class="pill pill-sm" data-rf="1">🎯 Sem Olhar</button>
+      <button class="pill pill-sm" data-rf="2">⚡ Velocidade</button>
+      <button class="pill pill-sm" data-rf="3">🔥 Híbrido</button>
+    </div>
+
+    <div class="rank-wrap">
+      <table class="rank-table" id="rank-table">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Jogador</th>
+            <th class="r">WPM</th>
+            <th class="r">Acc</th>
+            <th class="r">Streak</th>
+            <th class="r">Modo</th>
+            <th class="r">Data</th>
+          </tr>
+        </thead>
+        <tbody id="rank-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="rank-footer">
+      <span class="rank-info" id="rank-info"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ADMIN PANEL OVERLAY
+═══════════════════════════════════════ -->
+<div id="admin-overlay">
+  <div id="admin-box">
+
+    <!-- Header -->
+    <div class="adm-hdr">
+      <div class="adm-title">⚙ Painel Admin <span class="adm-badge">Restrito</span></div>
+      <button class="adm-close" id="adm-close" title="Fechar">✕</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="adm-login" class="adm-login">
+      <div class="adm-login-title">🔒 Autenticação necessária</div>
+      <div class="adm-field">
+        <label>Usuário</label>
+        <input class="adm-inp" id="adm-user" type="text"
+          autocomplete="off" autocorrect="off"
+          autocapitalize="none" spellcheck="false"
+          placeholder="usuário">
+      </div>
+      <div class="adm-field">
+        <label>Senha</label>
+        <input class="adm-inp" id="adm-pass" type="password"
+          autocomplete="off" placeholder="senha">
+      </div>
+      <div class="adm-login-err" id="adm-err">Usuário ou senha incorretos.</div>
+      <div style="margin-top:16px">
+        <button class="adm-btn adm-btn-dark" id="adm-login-btn" style="width:100%">Entrar →</button>
+      </div>
+    </div>
+
+    <!-- PANEL BODY (hidden until login) -->
+    <div id="adm-panel" class="adm-body" style="display:none">
+
+      <!-- Add custom result -->
+      <div class="adm-section">
+        <div class="adm-section-title">➕ Adicionar resultado manualmente</div>
+        <div class="adm-field" style="margin-bottom:10px">
+          <label>Nome do jogador</label>
+          <input class="adm-inp" id="adm-r-name" type="text"
+            autocomplete="off" autocorrect="off"
+            autocapitalize="none" spellcheck="false"
+            placeholder="Nome ou apelido">
+        </div>
+        <div class="adm-grid" style="margin-bottom:10px">
+          <div class="adm-field">
+            <label>WPM</label>
+            <input class="adm-inp" id="adm-r-wpm" type="number"
+              min="1" max="999" placeholder="ex: 120">
+          </div>
+          <div class="adm-field">
+            <label>Precisão (%)</label>
+            <input class="adm-inp" id="adm-r-acc" type="number"
+              min="1" max="100" placeholder="ex: 98">
+          </div>
+        </div>
+        <div class="adm-grid" style="margin-bottom:14px">
+          <div class="adm-field">
+            <label>Streak</label>
+            <input class="adm-inp" id="adm-r-streak" type="number"
+              min="0" max="9999" placeholder="ex: 25">
+          </div>
+          <div class="adm-field">
+            <label>Modo</label>
+            <select class="adm-sel" id="adm-r-mode">
+              <option value="1">🎯 Sem Olhar</option>
+              <option value="2">⚡ Velocidade</option>
+              <option value="3">🔥 Híbrido</option>
+            </select>
+          </div>
+        </div>
+        <button class="adm-btn adm-btn-dark" id="adm-add-btn" style="width:100%">
+          ➕ Adicionar ao ranking
+        </button>
+        <div id="adm-add-err" style="font-size:.73rem;color:var(--err);margin-top:6px;display:none"></div>
+      </div>
+
+      <!-- Manage entries -->
+      <div class="adm-section">
+        <div class="adm-section-title">📋 Entradas no ranking <span id="adm-count" style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px"></span></div>
+        <div class="adm-rank-list" id="adm-rank-list"></div>
+        <div class="adm-btn-row">
+          <button class="adm-btn" id="adm-refresh">↻ Atualizar lista</button>
+        </div>
+      </div>
+
+      <!-- Danger zone -->
+      <div class="adm-section adm-danger">
+        <div class="adm-section-title">⚠ Zona de Perigo</div>
+        <p style="font-size:.78rem;color:var(--txt2);margin-bottom:14px;line-height:1.6">
+          Apagar o ranking remove <strong>todos</strong> os dados permanentemente. Esta ação não pode ser desfeita.
+        </p>
+        <button class="adm-btn adm-btn-danger" id="adm-clear-btn">🗑 Apagar ranking completo</button>
+      </div>
+
+    </div><!-- /#adm-panel -->
+  </div><!-- /#admin-box -->
+</div><!-- /#admin-overlay -->
+
 <script>
 /* ──────────────────────────────────────
    WORD BANKS
@@ -902,6 +1223,7 @@ WORDS.mix = null; // will be built on demand
 ────────────────────────────────────── */
 let G = {
   screen:  'home',
+  prevScreen: 'home',  // tracks where user came FROM (for rank back button)
   mode:    1,        // 1=SemOlhar 2=Speed 3=Hybrid
   dur:     60,       // seconds, 0=unlimited
   lang:    'pt',
@@ -1310,6 +1632,22 @@ function skipWord() {
    SESSION MANAGEMENT
 ────────────────────────────────────── */
 function startSession() {
+  // Name is required
+  const nameInp = document.getElementById('player-name');
+  const nameReq = document.getElementById('name-req');
+  const nameVal = nameInp.value.trim();
+
+  if (!nameVal) {
+    nameInp.classList.remove('error');
+    void nameInp.offsetWidth; // reset animation
+    nameInp.classList.add('error');
+    nameReq.classList.add('show');
+    nameInp.focus();
+    return;
+  }
+  // Clear any error state
+  nameInp.classList.remove('error');
+  nameReq.classList.remove('show');
   // Reset state
   Object.assign(G, {
     words:        buildPool(),
@@ -1638,6 +1976,8 @@ function escHtml(str) {
    SCREEN ROUTER  (updated)
 ────────────────────────────────────── */
 function showScreen(name) {
+  // Track where we came FROM so back button knows where to return
+  if (name === 'rank') G.prevScreen = G.screen;
   G.screen = name;
   ['home','game','end','rank'].forEach(id => {
     document.getElementById('s-' + id).classList.toggle('hidden', id !== name);
@@ -1760,6 +2100,12 @@ document.getElementById('lang-row').addEventListener('click', e => {
 // Start
 document.getElementById('btn-start').addEventListener('click', startSession);
 
+// Clear name error on typing
+document.getElementById('player-name').addEventListener('input', () => {
+  document.getElementById('player-name').classList.remove('error');
+  document.getElementById('name-req').classList.remove('show');
+});
+
 // Header mute
 document.getElementById('h-mute').addEventListener('click', toggleMute);
 
@@ -1786,9 +2132,8 @@ document.getElementById('e-mute').addEventListener('click',  toggleMute);
    RANK UI BINDINGS
 ────────────────────────────────────── */
 document.getElementById('r-back').addEventListener('click', () => {
-  // Go back to wherever we came from (end or home)
-  const prev = document.getElementById('s-end').classList.contains('hidden') ? 'home' : 'end';
-  showScreen(prev);
+  // Return to wherever the user came from (home or end screen)
+  showScreen(G.prevScreen || 'home');
 });
 
 document.getElementById('rank-filters').addEventListener('click', e => {
@@ -1800,13 +2145,6 @@ document.getElementById('rank-filters').addEventListener('click', e => {
   renderRank();
 });
 
-document.getElementById('rank-clear').addEventListener('click', () => {
-  if (!confirm('Tem certeza que quer apagar todo o ranking? Não tem volta.')) return;
-  clearRankData();
-  renderRank();
-  toast('Ranking apagado.');
-});
-
 /* ──────────────────────────────────────
    INIT
 ────────────────────────────────────── */
@@ -1814,50 +2152,198 @@ buildKb();
 loadRecDisplay();
 showScreen('home');
 setTimeout(refocus, 150);
+
+/* ══════════════════════════════════════
+   ADMIN PANEL
+══════════════════════════════════════ */
+const ADMIN_USER = '00';
+const ADMIN_PASS = '2503katy';
+
+let _adminOpen      = false;
+let _adminLoggedIn  = false;
+
+// ── Secret key sequence: 1 → 6 → v → v ──
+// Must be typed within 3 seconds of starting the sequence
+const SECRET_SEQ = ['1','6','v','v'];
+let _seqBuf = [];
+let _seqTid  = null;
+
+function checkSecretSeq(key) {
+  if (G.screen === 'game') return; // don't trigger during play
+  const k = key.toLowerCase();
+  if (!SECRET_SEQ.includes(k) && _seqBuf.length === 0) return;
+
+  _seqBuf.push(k);
+
+  // Reset timer on each key
+  clearTimeout(_seqTid);
+  _seqTid = setTimeout(() => { _seqBuf = []; }, 3000);
+
+  // Check if sequence matches
+  const needed = SECRET_SEQ.slice(0, _seqBuf.length);
+  if (JSON.stringify(_seqBuf) !== JSON.stringify(needed)) {
+    _seqBuf = []; clearTimeout(_seqTid); return;
+  }
+
+  if (_seqBuf.length === SECRET_SEQ.length) {
+    _seqBuf = []; clearTimeout(_seqTid);
+    openAdmin();
+  }
+}
+
+function openAdmin() {
+  _adminOpen = true;
+  document.getElementById('admin-overlay').classList.add('open');
+  if (!_adminLoggedIn) {
+    document.getElementById('adm-login').style.display = '';
+    document.getElementById('adm-panel').style.display = 'none';
+    setTimeout(() => document.getElementById('adm-user').focus(), 80);
+  } else {
+    document.getElementById('adm-login').style.display = 'none';
+    document.getElementById('adm-panel').style.display = '';
+    loadAdminList();
+  }
+}
+
+function closeAdmin() {
+  _adminOpen = false;
+  document.getElementById('admin-overlay').classList.remove('open');
+  if (G.screen === 'game') refocus();
+}
+
+function tryAdminLogin() {
+  const u = document.getElementById('adm-user').value.trim();
+  const p = document.getElementById('adm-pass').value;
+  const errEl = document.getElementById('adm-err');
+
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    _adminLoggedIn = true;
+    errEl.classList.remove('show');
+    document.getElementById('adm-login').style.display = 'none';
+    document.getElementById('adm-panel').style.display = '';
+    loadAdminList();
+  } else {
+    errEl.classList.add('show');
+    document.getElementById('adm-pass').value = '';
+    document.getElementById('adm-pass').focus();
+  }
+}
+
+// ── Load rank list inside admin ──
+function loadAdminList() {
+  const data  = getRankData();
+  const list  = document.getElementById('adm-rank-list');
+  const count = document.getElementById('adm-count');
+  count.textContent = `(${data.length})`;
+
+  if (!data.length) {
+    list.innerHTML = '<div style="padding:16px;text-align:center;font-size:.8rem;color:var(--txt3)">Nenhuma entrada no ranking.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  data.forEach((entry, i) => {
+    const row = document.createElement('div');
+    row.className = 'adm-rank-row';
+    row.innerHTML = `
+      <div class="adm-rank-row-pos">${i+1}</div>
+      <div class="adm-rank-row-name">${escHtml(entry.name)}</div>
+      <div class="adm-rank-row-wpm">${entry.wpm} <span style="font-size:.6rem;color:var(--txt3)">wpm</span></div>
+      <div style="font-size:.72rem;color:var(--txt3);min-width:36px;text-align:right">${entry.acc}%</div>
+      <button class="adm-rank-row-del" data-idx="${i}" title="Remover entrada">✕</button>
+    `;
+    list.appendChild(row);
+  });
+
+  // Delete individual entry
+  list.querySelectorAll('.adm-rank-row-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx, 10);
+      const d = getRankData();
+      d.splice(idx, 1);
+      try { localStorage.setItem('tf_rank', JSON.stringify(d)); } catch(_){}
+      loadAdminList();
+      if (G.screen === 'rank') renderRank();
+      toast('Entrada removida.');
+    });
+  });
+}
+
+// ── Add custom entry ──
+function addCustomEntry() {
+  const nameEl   = document.getElementById('adm-r-name');
+  const wpmEl    = document.getElementById('adm-r-wpm');
+  const accEl    = document.getElementById('adm-r-acc');
+  const streakEl = document.getElementById('adm-r-streak');
+  const modeEl   = document.getElementById('adm-r-mode');
+  const errEl    = document.getElementById('adm-add-err');
+
+  const name   = nameEl.value.trim();
+  const wpm    = parseInt(wpmEl.value, 10);
+  const acc    = parseInt(accEl.value, 10);
+  const streak = parseInt(streakEl.value, 10) || 0;
+  const mode   = parseInt(modeEl.value, 10);
+
+  // Validate
+  if (!name) { showAdmErr(errEl, 'Nome é obrigatório.'); return; }
+  if (!wpm || wpm < 1 || wpm > 999) { showAdmErr(errEl, 'WPM inválido (1–999).'); return; }
+  if (!acc || acc < 1 || acc > 100) { showAdmErr(errEl, 'Precisão inválida (1–100).'); return; }
+
+  errEl.style.display = 'none';
+
+  saveRankEntry({ name, wpm, acc, streak, mode, ts: Date.now() });
+  loadAdminList();
+  if (G.screen === 'rank') renderRank();
+
+  // Clear fields
+  nameEl.value = ''; wpmEl.value = ''; accEl.value = '';
+  streakEl.value = ''; modeEl.selectedIndex = 0;
+
+  toast(`✅ "${name}" adicionado ao ranking com ${wpm} WPM.`);
+}
+
+function showAdmErr(el, msg) {
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 3000);
+}
+
+// ── Admin bindings ──
+document.getElementById('adm-close').addEventListener('click', closeAdmin);
+
+// Close on overlay backdrop click
+document.getElementById('admin-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('admin-overlay')) closeAdmin();
+});
+
+document.getElementById('adm-login-btn').addEventListener('click', tryAdminLogin);
+
+// Enter key in login inputs
+['adm-user','adm-pass'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); tryAdminLogin(); }
+  });
+});
+
+document.getElementById('adm-add-btn').addEventListener('click', addCustomEntry);
+
+document.getElementById('adm-refresh').addEventListener('click', loadAdminList);
+
+document.getElementById('adm-clear-btn').addEventListener('click', () => {
+  if (!confirm('Apagar TODOS os dados do ranking? Isso é permanente.')) return;
+  clearRankData();
+  loadAdminList();
+  if (G.screen === 'rank') renderRank();
+  toast('Ranking apagado pelo admin.');
+});
+
+// Hook secret sequence into existing keydown handler
+const _origOnKD = onKD;
+document.addEventListener('keydown', e => {
+  checkSecretSeq(e.key);
+  // Close admin with Escape
+  if (e.key === 'Escape' && _adminOpen) { e.stopPropagation(); closeAdmin(); }
+});
 </script>
-<!-- ═══════════════════════════════════════
-     RANKING
-═══════════════════════════════════════ -->
-<div id="s-rank" class="screen hidden">
-  <header>
-    <div class="logo"><span class="logo-dot"></span>TypeFlow</div>
-    <button class="btn btn-sm" id="r-back">← Voltar</button>
-  </header>
-
-  <div class="body">
-    <h2 class="rank-title">🏆 <em>Ranking</em></h2>
-    <p class="rank-sub">Top jogadores desta máquina • Salvo localmente</p>
-
-    <div class="rank-filters" id="rank-filters">
-      <button class="pill pill-sm on" data-rf="all">Todos</button>
-      <button class="pill pill-sm" data-rf="1">🎯 Sem Olhar</button>
-      <button class="pill pill-sm" data-rf="2">⚡ Velocidade</button>
-      <button class="pill pill-sm" data-rf="3">🔥 Híbrido</button>
-    </div>
-
-    <div class="rank-wrap">
-      <table class="rank-table" id="rank-table">
-        <thead>
-          <tr>
-            <th style="width:36px">#</th>
-            <th>Jogador</th>
-            <th class="r">WPM</th>
-            <th class="r">Acc</th>
-            <th class="r">Streak</th>
-            <th class="r">Modo</th>
-            <th class="r">Data</th>
-          </tr>
-        </thead>
-        <tbody id="rank-tbody"></tbody>
-      </table>
-    </div>
-
-    <div class="rank-footer">
-      <span class="rank-info" id="rank-info"></span>
-      <button class="rank-clear" id="rank-clear">Limpar ranking</button>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>
