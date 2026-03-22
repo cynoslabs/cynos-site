@@ -462,6 +462,82 @@ header{
 .end-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
 /* ────────────────────────────────
+   RANK SCREEN
+──────────────────────────────── */
+#s-rank .body{
+  flex:1;display:flex;flex-direction:column;
+  align-items:center;padding:36px 20px 52px;
+  max-width:680px;margin:0 auto;width:100%;
+}
+.rank-title{
+  font-family:var(--mono);
+  font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;
+  letter-spacing:-.04em;color:var(--txt);
+  margin-bottom:4px;text-align:center;
+}
+.rank-title em{color:var(--acc);font-style:normal}
+.rank-sub{font-size:.85rem;color:var(--txt3);text-align:center;margin-bottom:22px}
+.rank-filters{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;width:100%}
+
+/* table */
+.rank-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:20px}
+.rank-table{width:100%;border-collapse:collapse;min-width:480px}
+.rank-table thead th{
+  font-size:.63rem;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--txt3);
+  padding:0 10px 10px;text-align:left;
+  border-bottom:1px solid var(--bd);
+}
+.rank-table thead th.r{text-align:right}
+.rank-table tbody tr{
+  border-bottom:1px solid var(--bd);transition:background .12s;
+}
+.rank-table tbody tr:last-child{border-bottom:none}
+.rank-table tbody tr:hover{background:var(--s2)}
+@keyframes rowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
+.rank-row{animation:rowIn .2s var(--eout) both}
+.rank-table td{padding:11px 10px;vertical-align:middle}
+
+.rk-pos{
+  font-family:var(--mono);font-size:.88rem;font-weight:700;
+  color:var(--txt3);width:36px;text-align:center;
+}
+.rk-pos.p1{font-size:1.15rem}.rk-pos.p2{font-size:1.05rem}.rk-pos.p3{font-size:1rem}
+.rk-name{
+  font-family:var(--sans);font-size:.88rem;font-weight:500;color:var(--txt);
+  max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.rk-you{
+  font-size:.58rem;font-weight:600;letter-spacing:.06em;
+  background:var(--acc-d);color:var(--acc);border-radius:4px;
+  padding:1px 5px;margin-left:5px;text-transform:uppercase;vertical-align:middle;
+}
+.rk-wpm{
+  font-family:var(--mono);font-size:1.05rem;font-weight:700;
+  color:var(--txt);text-align:right;white-space:nowrap;
+}
+.rk-wpm sup{font-size:.58rem;font-weight:400;color:var(--txt3);margin-left:2px}
+.rk-acc{font-family:var(--mono);font-size:.82rem;color:var(--ok);text-align:right}
+.rk-streak{font-family:var(--mono);font-size:.82rem;color:var(--m3);text-align:right}
+.rk-mode{font-size:.65rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;text-align:right;white-space:nowrap}
+.rk-mode.m1{color:var(--m1)}.rk-mode.m2{color:var(--acc)}.rk-mode.m3{color:var(--m3)}
+.rk-date{font-size:.7rem;color:var(--txt3);text-align:right;white-space:nowrap}
+
+.rank-empty{
+  text-align:center;padding:52px 0;color:var(--txt3);
+  font-size:.9rem;line-height:1.8;width:100%;
+}
+.rank-empty-ico{font-size:2.4rem;display:block;margin-bottom:10px}
+.rank-footer{display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:10px}
+.rank-clear{
+  font-size:.74rem;color:var(--txt3);cursor:pointer;
+  background:none;border:none;text-decoration:underline;
+  font-family:var(--sans);padding:0;
+}
+.rank-clear:hover{color:var(--err)}
+.rank-info{font-size:.74rem;color:var(--txt3)}
+
+/* ────────────────────────────────
    TOAST
 ──────────────────────────────── */
 #toast{
@@ -532,7 +608,10 @@ body.shake{animation:bodyShake .22s ease}
 <div id="s-home" class="screen">
   <header>
     <div class="logo"><span class="logo-dot"></span>TypeFlow</div>
-    <button class="btn-icon" id="h-mute" title="Som">🔊</button>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="btn btn-sm" id="h-rank" style="display:flex;align-items:center;gap:5px">🏆 Ranking</button>
+      <button class="btn-icon" id="h-mute" title="Som">🔊</button>
+    </div>
   </header>
 
   <div class="body">
@@ -741,6 +820,7 @@ body.shake{animation:bodyShake .22s ease}
 
     <div class="end-btns">
       <button class="btn btn-dark btn-lg" id="e-retry">Tentar novamente</button>
+      <button class="btn btn-lg" id="e-rank" style="display:flex;align-items:center;gap:5px">🏆 Ranking</button>
       <button class="btn btn-lg" id="e-share">Compartilhar</button>
       <button class="btn btn-lg" id="e-menu">Menu</button>
     </div>
@@ -1308,6 +1388,10 @@ function showResults() {
   // Save & check record
   const name = document.getElementById('player-name').value.trim() || 'ANON';
   saveSession({ name, wpm, acc, mode: G.mode, ts: Date.now() });
+
+  // Always save to rank leaderboard
+  saveRankEntry({ name, wpm, acc, streak: G.maxStreak, mode: G.mode, ts: Date.now() });
+
   const rec = getRec();
   if (wpm > (rec.wpm || 0)) {
     saveRec({ name, wpm, acc });
@@ -1455,15 +1539,112 @@ function share() {
 }
 
 /* ──────────────────────────────────────
-   SCREEN ROUTER
+   RANK STORAGE
+────────────────────────────────────── */
+function getRankData() {
+  try { return JSON.parse(localStorage.getItem('tf_rank') || '[]'); } catch(_) { return []; }
+}
+function saveRankEntry(entry) {
+  try {
+    const data = getRankData();
+    data.push(entry);
+    // Keep top 100 by WPM globally so the board never gets stale
+    data.sort((a, b) => b.wpm - a.wpm);
+    if (data.length > 100) data.splice(100);
+    localStorage.setItem('tf_rank', JSON.stringify(data));
+  } catch(_) {}
+}
+function clearRankData() {
+  try { localStorage.removeItem('tf_rank'); } catch(_) {}
+}
+
+/* ──────────────────────────────────────
+   RANK RENDER
+────────────────────────────────────── */
+let _rankFilter = 'all';
+
+const MEDALS  = { 1:'🥇', 2:'🥈', 3:'🥉' };
+const MODE_LBL = { 1:'Sem Olhar', 2:'Velocidade', 3:'Híbrido' };
+const MODE_CLS = { 1:'m1', 2:'m2', 3:'m3' };
+
+function fmtDate(ts) {
+  const d = new Date(ts);
+  return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+}
+
+function renderRank() {
+  const all   = getRankData();
+  const currentName = (document.getElementById('player-name').value.trim() || 'ANON').toUpperCase();
+
+  // Filter
+  const filtered = _rankFilter === 'all'
+    ? all
+    : all.filter(e => String(e.mode) === String(_rankFilter));
+
+  // Already sorted by WPM from saveRankEntry
+  const tbody   = document.getElementById('rank-tbody');
+  const infoEl  = document.getElementById('rank-info');
+
+  tbody.innerHTML = '';
+
+  if (!filtered.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="7">
+        <div class="rank-empty">
+          <span class="rank-empty-ico">🎮</span>
+          Nenhuma sessão salva ainda.<br>
+          Complete uma sessão para aparecer aqui!
+        </div>
+      </td></tr>`;
+    infoEl.textContent = '';
+    return;
+  }
+
+  filtered.forEach((entry, i) => {
+    const pos  = i + 1;
+    const isYou = entry.name.toUpperCase() === currentName;
+    const tr   = document.createElement('tr');
+    tr.className = 'rank-row';
+    tr.style.animationDelay = Math.min(i * 30, 300) + 'ms';
+
+    // Highlight current player's row softly
+    if (isYou) tr.style.background = 'rgba(232,96,10,.04)';
+
+    const posCls = pos <= 3 ? ` p${pos}` : '';
+    const medal  = MEDALS[pos] || pos;
+
+    tr.innerHTML = `
+      <td><div class="rk-pos${posCls}">${medal}</div></td>
+      <td><div class="rk-name">${escHtml(entry.name)}${isYou ? '<span class="rk-you">você</span>' : ''}</div></td>
+      <td><div class="rk-wpm">${entry.wpm}<sup>wpm</sup></div></td>
+      <td><div class="rk-acc">${entry.acc}%</div></td>
+      <td><div class="rk-streak">${entry.streak ?? '—'}</div></td>
+      <td><div class="rk-mode ${MODE_CLS[entry.mode] || ''}">${MODE_LBL[entry.mode] || '—'}</div></td>
+      <td><div class="rk-date">${fmtDate(entry.ts)}</div></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  infoEl.textContent = `${filtered.length} entrada${filtered.length !== 1 ? 's' : ''}`;
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ──────────────────────────────────────
+   SCREEN ROUTER  (updated)
 ────────────────────────────────────── */
 function showScreen(name) {
   G.screen = name;
-  document.getElementById('s-home').classList.toggle('hidden', name !== 'home');
-  document.getElementById('s-game').classList.toggle('hidden', name !== 'game');
-  document.getElementById('s-end').classList.toggle('hidden',  name !== 'end');
+  ['home','game','end','rank'].forEach(id => {
+    document.getElementById('s-' + id).classList.toggle('hidden', id !== name);
+  });
   if (name === 'game') refocus();
   if (name === 'home') loadRecDisplay();
+  if (name === 'rank') renderRank();
 }
 
 /* ──────────────────────────────────────
@@ -1582,6 +1763,9 @@ document.getElementById('btn-start').addEventListener('click', startSession);
 // Header mute
 document.getElementById('h-mute').addEventListener('click', toggleMute);
 
+// Home → Rank
+document.getElementById('h-rank').addEventListener('click', () => showScreen('rank'));
+
 /* ──────────────────────────────────────
    GAME UI BINDINGS
 ────────────────────────────────────── */
@@ -1593,9 +1777,35 @@ document.getElementById('g-skip').addEventListener('click', () => { skipWord(); 
    END UI BINDINGS
 ────────────────────────────────────── */
 document.getElementById('e-retry').addEventListener('click', startSession);
+document.getElementById('e-rank').addEventListener('click',  () => showScreen('rank'));
 document.getElementById('e-share').addEventListener('click', share);
 document.getElementById('e-menu').addEventListener('click',  () => showScreen('home'));
 document.getElementById('e-mute').addEventListener('click',  toggleMute);
+
+/* ──────────────────────────────────────
+   RANK UI BINDINGS
+────────────────────────────────────── */
+document.getElementById('r-back').addEventListener('click', () => {
+  // Go back to wherever we came from (end or home)
+  const prev = document.getElementById('s-end').classList.contains('hidden') ? 'home' : 'end';
+  showScreen(prev);
+});
+
+document.getElementById('rank-filters').addEventListener('click', e => {
+  const pill = e.target.closest('[data-rf]');
+  if (!pill) return;
+  _rankFilter = pill.dataset.rf;
+  document.querySelectorAll('#rank-filters .pill').forEach(p => p.classList.remove('on'));
+  pill.classList.add('on');
+  renderRank();
+});
+
+document.getElementById('rank-clear').addEventListener('click', () => {
+  if (!confirm('Tem certeza que quer apagar todo o ranking? Não tem volta.')) return;
+  clearRankData();
+  renderRank();
+  toast('Ranking apagado.');
+});
 
 /* ──────────────────────────────────────
    INIT
@@ -1605,5 +1815,49 @@ loadRecDisplay();
 showScreen('home');
 setTimeout(refocus, 150);
 </script>
+<!-- ═══════════════════════════════════════
+     RANKING
+═══════════════════════════════════════ -->
+<div id="s-rank" class="screen hidden">
+  <header>
+    <div class="logo"><span class="logo-dot"></span>TypeFlow</div>
+    <button class="btn btn-sm" id="r-back">← Voltar</button>
+  </header>
+
+  <div class="body">
+    <h2 class="rank-title">🏆 <em>Ranking</em></h2>
+    <p class="rank-sub">Top jogadores desta máquina • Salvo localmente</p>
+
+    <div class="rank-filters" id="rank-filters">
+      <button class="pill pill-sm on" data-rf="all">Todos</button>
+      <button class="pill pill-sm" data-rf="1">🎯 Sem Olhar</button>
+      <button class="pill pill-sm" data-rf="2">⚡ Velocidade</button>
+      <button class="pill pill-sm" data-rf="3">🔥 Híbrido</button>
+    </div>
+
+    <div class="rank-wrap">
+      <table class="rank-table" id="rank-table">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Jogador</th>
+            <th class="r">WPM</th>
+            <th class="r">Acc</th>
+            <th class="r">Streak</th>
+            <th class="r">Modo</th>
+            <th class="r">Data</th>
+          </tr>
+        </thead>
+        <tbody id="rank-tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="rank-footer">
+      <span class="rank-info" id="rank-info"></span>
+      <button class="rank-clear" id="rank-clear">Limpar ranking</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
