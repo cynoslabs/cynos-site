@@ -3,955 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>TypeFlow — Treinador de Digitação</title>
+<title>TypeFlow — Cynos Labs</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<!-- Supabase client -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<script>
-/* ── Credential store (XOR-obfuscated, seed=73, mod=11) ──────────────────
-   These are runtime-decoded only. Do not log or expose _dc() output.
-──────────────────────────────────────────────────────────────────────── */
-(function(){
-  const _s=73,_m=11;
-  function _dc(e){
-    try{
-      const r=atob(e);
-      return r.split('').map((c,i)=>String.fromCharCode(c.charCodeAt(0)^(_s+(i%_m)))).join('');
-    }catch{return'';}
-  }
-  const _a='IT4/PD50YH8/ID85JyIlNTcmPDMjNC4hLCQ3IWEjJCIyKys4KWMtIA==';
-  const _b='OigUPDgsIzkiOjIrJi4TfwoJIDM8ZAwuEQocKCERHw00BhMkDRJ/egllC2oMBA==';
-  // Initialise Supabase — stored on window, never re-exposed as plain text
-  try {
-    window._sb = window.supabase.createClient(_dc(_a), _dc(_b));
-  } catch(e) {
-    window._sb = null;
-  }
-})();
-</script>
-<style>
-/* ────────────────────────────────
-   TOKENS
-──────────────────────────────── */
-:root {
-  --bg:       #f8f7f4;
-  --surface:  #ffffff;
-  --s2:       #f2f0ec;
-  --bd:       #e4e1da;
-  --bd2:      #cac6bc;
-  --txt:      #1a1917;
-  --txt2:     #6b6860;
-  --txt3:     #aaa79f;
-  --txt4:     #d4d1ca;
-
-  --acc:      #e8600a;          /* orange — Speed */
-  --acc-d:    rgba(232,96,10,.10);
-  --m1:       #2563eb;          /* blue  — Sem Olhar */
-  --m1-d:     rgba(37,99,235,.10);
-  --m3:       #7c3aed;          /* purple — Híbrido */
-  --m3-d:     rgba(124,58,237,.10);
-
-  --ok:       #1a7a3c;
-  --ok-d:     rgba(26,122,60,.10);
-  --err:      #c62828;
-  --err-d:    rgba(198,40,40,.09);
-
-  --key-bg:   #eceae5;
-  --key-bd:   #ccc8be;
-  --key-sh:   #b5b1a7;
-
-  --r:  8px;
-  --rl: 14px;
-  --sh: 0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
-  --shm:0 4px 16px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.04);
-
-  --mono:'JetBrains Mono',Consolas,monospace;
-  --sans:'DM Sans',system-ui,sans-serif;
-  --eout:cubic-bezier(.22,1,.36,1);
-}
-
-/* ────────────────────────────────
-   RESET
-──────────────────────────────── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{font-size:16px;height:100%}
-body{
-  font-family:var(--sans);background:var(--bg);color:var(--txt);
-  min-height:100dvh;overflow-x:hidden;
-  -webkit-tap-highlight-color:transparent;
-  user-select:none;-webkit-user-select:none;
-}
-
-/* ────────────────────────────────
-   OTG TRAP
-──────────────────────────────── */
-#trap{
-  position:fixed;top:-9999px;left:-9999px;
-  width:1px;height:1px;opacity:0;
-  border:none;outline:none;resize:none;
-  font-size:16px;background:transparent;color:transparent;
-  pointer-events:none;
-}
-
-/* ────────────────────────────────
-   SCREENS
-──────────────────────────────── */
-.screen{display:flex;flex-direction:column;min-height:100dvh}
-.screen.hidden{display:none!important}
-
-/* ────────────────────────────────
-   HEADER
-──────────────────────────────── */
-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 28px;height:52px;
-  background:var(--surface);border-bottom:1px solid var(--bd);
-  flex-shrink:0;position:sticky;top:0;z-index:100;
-}
-.logo{
-  font-family:var(--mono);font-size:.95rem;font-weight:700;
-  color:var(--txt);display:flex;align-items:center;gap:8px;
-}
-.logo-dot{width:7px;height:7px;background:var(--acc);border-radius:50%}
-
-/* ────────────────────────────────
-   BUTTONS
-──────────────────────────────── */
-.btn{
-  font-family:var(--sans);font-size:.84rem;font-weight:500;
-  padding:9px 20px;border-radius:var(--r);
-  border:1px solid var(--bd2);background:var(--surface);color:var(--txt2);
-  cursor:pointer;transition:all .13s;white-space:nowrap;line-height:1;
-}
-.btn:hover{background:var(--s2);color:var(--txt)}
-.btn:active{transform:scale(.97)}
-.btn-dark{background:var(--txt);color:#fff;border-color:var(--txt)}
-.btn-dark:hover{background:#2e2d29;color:#fff}
-.btn-lg{font-size:.95rem;padding:12px 30px;font-weight:600;border-radius:10px}
-.btn-sm{font-size:.75rem;padding:6px 12px;border-radius:6px}
-.btn-icon{width:32px;height:32px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--bd);background:transparent;font-size:.9rem;cursor:pointer;transition:background .12s}
-.btn-icon:hover{background:var(--s2)}
-
-/* ────────────────────────────────
-   HOME
-──────────────────────────────── */
-#s-home .body{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;padding:44px 20px 52px;
-  max-width:680px;margin:0 auto;width:100%;
-}
-
-.hero{text-align:center;margin-bottom:40px}
-.hero h1{
-  font-family:var(--mono);
-  font-size:clamp(2rem,5vw,3.2rem);
-  font-weight:700;letter-spacing:-.04em;line-height:1.1;
-  color:var(--txt);margin-bottom:10px;
-}
-.hero h1 em{color:var(--acc);font-style:normal}
-.hero p{font-size:.9rem;color:var(--txt2);line-height:1.65;max-width:400px;margin:0 auto}
-
-/* MODE CARDS */
-.mode-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);
-  gap:10px;margin-bottom:24px;width:100%;
-}
-.mode-card{
-  background:var(--surface);border:2px solid var(--bd);
-  border-radius:var(--rl);padding:20px 16px;cursor:pointer;
-  transition:border-color .15s,transform .12s,box-shadow .15s;
-  text-align:left;position:relative;overflow:hidden;
-}
-.mode-card::after{
-  content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  border-radius:var(--rl) var(--rl) 0 0;opacity:0;transition:opacity .15s;
-}
-.mode-card.m1::after{background:var(--m1)}
-.mode-card.m2::after{background:var(--acc)}
-.mode-card.m3::after{background:var(--m3)}
-.mode-card:hover{transform:translateY(-2px);box-shadow:var(--shm)}
-.mode-card.sel{box-shadow:var(--shm)}
-.mode-card.m1.sel{border-color:var(--m1)}
-.mode-card.m2.sel{border-color:var(--acc)}
-.mode-card.m3.sel{border-color:var(--m3)}
-.mode-card.sel::after{opacity:1}
-
-.mc-ico{font-size:1.3rem;margin-bottom:8px;display:block}
-.mc-name{
-  font-family:var(--mono);font-size:.86rem;font-weight:600;
-  color:var(--txt);margin-bottom:4px;letter-spacing:-.01em;
-}
-.mc-desc{font-size:.73rem;color:var(--txt2);line-height:1.5}
-.mc-tag{
-  display:inline-block;font-size:.62rem;font-weight:600;
-  padding:2px 7px;border-radius:4px;text-transform:uppercase;
-  letter-spacing:.06em;margin-top:8px;
-}
-.m1 .mc-tag{background:var(--m1-d);color:var(--m1)}
-.m2 .mc-tag{background:var(--acc-d);color:var(--acc)}
-.m3 .mc-tag{background:var(--m3-d);color:var(--m3)}
-
-/* CONFIG CARD */
-.cfg{
-  background:var(--surface);border:1px solid var(--bd);
-  border-radius:var(--rl);padding:22px 24px;
-  margin-bottom:14px;box-shadow:var(--sh);width:100%;
-}
-.cfg-lbl{
-  font-size:.67rem;font-weight:600;color:var(--txt3);
-  letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;
-}
-.pill-row{display:flex;gap:6px;flex-wrap:wrap}
-.pill{
-  font-family:var(--sans);font-size:.8rem;font-weight:500;
-  padding:6px 16px;border-radius:99px;border:1px solid var(--bd2);
-  background:var(--bg);color:var(--txt2);cursor:pointer;transition:all .13s;
-}
-.pill:hover{border-color:var(--txt2);color:var(--txt)}
-.pill.on{background:var(--txt);color:#fff;border-color:var(--txt)}
-
-.name-row{display:flex;gap:10px;align-items:center;margin-bottom:10px}
-.name-inp{
-  font-family:var(--sans);font-size:.9rem;
-  background:var(--bg);border:1px solid var(--bd2);
-  border-radius:var(--r);color:var(--txt);padding:9px 14px;
-  flex:1;outline:none;transition:border-color .13s,box-shadow .13s;
-}
-.name-inp::placeholder{color:var(--txt3)}
-.name-inp.error{
-  border-color:var(--err)!important;
-  box-shadow:0 0 0 3px var(--err-d)!important;
-  animation:inpShake .28s ease;
-}
-@keyframes inpShake{
-  0%,100%{transform:translateX(0)}
-  20%{transform:translateX(-6px)}
-  50%{transform:translateX(6px)}
-  80%{transform:translateX(-4px)}
-}
-.name-req{
-  font-size:.73rem;color:var(--err);
-  margin-top:6px;display:none;
-  align-items:center;gap:4px;
-}
-.name-req.show{display:flex}
-.rec-chip{
-  font-size:.76rem;color:var(--txt2);
-  background:var(--s2);border:1px solid var(--bd);
-  border-radius:99px;padding:4px 12px;
-  display:inline-flex;align-items:center;gap:5px;
-}
-.rec-chip .star{color:#b45309}
-
-.note{
-  font-size:.74rem;color:var(--txt3);text-align:center;
-  padding:10px 16px;background:var(--s2);
-  border:1px solid var(--bd);border-radius:var(--r);
-  margin-bottom:18px;width:100%;
-}
-.note strong{color:var(--txt2)}
-
-.shortcuts{
-  display:flex;gap:18px;flex-wrap:wrap;justify-content:center;
-  font-size:.73rem;color:var(--txt3);
-}
-.shortcuts kbd{
-  font-family:var(--mono);font-size:.65rem;
-  background:var(--surface);border:1px solid var(--bd2);
-  border-radius:4px;padding:1px 5px;color:var(--txt2);
-  margin-right:3px;box-shadow:0 1px 0 var(--key-sh);
-}
-
-/* ────────────────────────────────
-   GAME SCREEN
-──────────────────────────────── */
-#s-game{background:var(--bg)}
-
-.g-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 24px;height:52px;
-  background:var(--surface);border-bottom:1px solid var(--bd);
-  flex-shrink:0;
-}
-.g-badge{
-  font-size:.7rem;font-weight:600;letter-spacing:.06em;
-  text-transform:uppercase;padding:4px 10px;
-  border-radius:6px;
-}
-.g-badge.m1{background:var(--m1-d);color:var(--m1)}
-.g-badge.m2{background:var(--acc-d);color:var(--acc)}
-.g-badge.m3{background:var(--m3-d);color:var(--m3)}
-
-.g-stats{display:flex;align-items:center;gap:18px}
-.g-stat-val{
-  font-family:var(--mono);font-size:1rem;font-weight:700;
-  color:var(--txt);line-height:1;
-}
-.g-stat-lbl{font-size:.57rem;color:var(--txt3);letter-spacing:.06em;text-transform:uppercase}
-.g-div{width:1px;height:22px;background:var(--bd);flex-shrink:0}
-
-/* Timer row */
-.timer-row{
-  display:flex;align-items:center;gap:12px;
-  padding:16px 24px 0;max-width:800px;margin:0 auto;width:100%;
-}
-.timer-num{
-  font-family:var(--mono);font-size:clamp(2rem,5vw,3rem);
-  font-weight:300;color:var(--txt3);line-height:1;
-  min-width:72px;text-align:center;letter-spacing:-.04em;
-  transition:color .3s;
-}
-.timer-num.warn  {color:var(--err); font-weight:500}
-.timer-bar{flex:1;height:3px;background:var(--bd);border-radius:99px;overflow:hidden}
-.timer-fill{
-  height:100%;background:var(--acc);border-radius:99px;
-  transition:width .4s linear,background .4s;
-}
-.timer-fill.warn{background:var(--err)}
-
-/* Word area */
-.word-area{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:24px 24px 16px;
-}
-
-/* ── Current word display ── */
-.cur-word{
-  font-family:var(--mono);
-  font-size:clamp(2.8rem, 8vw, 6rem);
-  font-weight:500;
-  color:var(--txt);letter-spacing:.02em;
-  text-align:center;word-break:break-all;
-  line-height:1.2;
-  transition:filter .4s,opacity .4s,transform .4s;
-  min-height:1.3em;
-  display:flex;align-items:center;justify-content:center;
-}
-.cur-word.ok  {animation:wordOk  .35s var(--eout) forwards}
-.cur-word.err {animation:wordErr .4s  ease        forwards}
-@keyframes wordOk  {0%{color:var(--ok)} 100%{color:var(--txt)}}
-@keyframes wordErr {
-  0%,100%{transform:translateX(0);color:var(--txt)}
-  20%{transform:translateX(-10px);color:var(--err)}
-  50%{transform:translateX(10px);color:var(--err)}
-  80%{transform:translateX(-6px);color:var(--err)}
-}
-@keyframes wordIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-.word-in{animation:wordIn .2s var(--eout) forwards}
-
-/* char coloring */
-.cur-word .c-ok  {color:var(--ok)}
-.cur-word .c-err {color:var(--err);text-decoration:underline wavy var(--err)}
-.cur-word .c-dim {color:var(--txt4)}
-
-/* Queue — next words */
-.queue{
-  display:flex;gap:16px;flex-wrap:wrap;
-  justify-content:center;align-items:center;
-  margin-top:18px;min-height:36px;
-}
-.q-word{
-  font-family:var(--mono);font-size:clamp(1rem,2.5vw,1.4rem);
-  color:var(--txt4);font-weight:400;letter-spacing:.01em;
-}
-.q-word:first-child{color:var(--txt3)}
-
-/* Typed feedback bar */
-.typed-bar{
-  display:flex;align-items:center;justify-content:center;
-  min-height:52px;margin-top:10px;gap:0;flex-wrap:wrap;
-}
-.typed-bar .c{
-  font-family:var(--mono);
-  font-size:clamp(1.4rem,3vw,2.2rem);
-  font-weight:400;color:var(--txt2);
-  line-height:1.5;
-}
-.typed-bar .c.ok {color:var(--ok)}
-.typed-bar .c.err{color:var(--err)}
-.caret{
-  display:inline-block;width:2.5px;
-  background:var(--acc);border-radius:2px;
-  animation:cblink .7s step-end infinite;
-  margin-left:1px;align-self:stretch;
-}
-@keyframes cblink{0%,100%{opacity:1}50%{opacity:0}}
-
-/* Mode-1 hint tip */
-.m1-tip{
-  font-size:.75rem;color:var(--m1);background:var(--m1-d);
-  border-radius:99px;padding:5px 14px;
-  display:inline-flex;align-items:center;gap:6px;
-  margin-top:18px;flex-shrink:0;
-}
-.m1-tip.hidden{display:none}
-
-/* ── VISUAL KEYBOARD ── */
-.kb-wrap{
-  flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  padding:12px 24px 20px;
-  display:flex;justify-content:center;
-}
-.keyboard{
-  background:var(--surface);border:1px solid var(--bd);
-  border-radius:var(--rl);padding:14px 16px;
-  display:flex;flex-direction:column;gap:5px;
-  min-width:580px;box-shadow:var(--sh);
-}
-.kb-row{display:flex;gap:4px;justify-content:center}
-.key{
-  min-width:36px;height:34px;
-  background:var(--key-bg);border:1px solid var(--key-bd);
-  border-bottom:2px solid var(--key-sh);border-radius:5px;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:.58rem;font-weight:500;
-  color:var(--txt2);flex-shrink:0;cursor:default;
-  transition:background .07s,color .07s,transform .07s,box-shadow .07s;
-  text-transform:uppercase;
-}
-.key.w15{min-width:54px}.key.w20{min-width:70px}
-.key.w25{min-width:88px}.key.w175{min-width:62px}.key.sp{min-width:220px}
-.key.hit{
-  background:var(--txt);color:#fff;
-  border-color:var(--txt);border-bottom-color:#000;
-  transform:translateY(1px);
-}
-.key.next-key{
-  background:var(--m1-d);border-color:var(--m1);
-  color:var(--m1);box-shadow:0 0 0 2px var(--m1-d);
-}
-
-/* ── Session controls ── */
-.ctrl-row{
-  display:flex;gap:6px;flex-wrap:wrap;justify-content:center;
-  padding:0 24px 8px;flex-shrink:0;
-}
-
-/* ────────────────────────────────
-   RESULTS SCREEN
-──────────────────────────────── */
-#s-end .body{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;padding:40px 20px 52px;
-  max-width:640px;margin:0 auto;width:100%;
-}
-.end-title{
-  font-family:var(--mono);
-  font-size:clamp(1.8rem,4.5vw,2.8rem);
-  font-weight:700;letter-spacing:-.04em;
-  color:var(--txt);margin-bottom:6px;text-align:center;
-}
-.end-title em{color:var(--acc);font-style:normal}
-.end-sub{font-size:.86rem;color:var(--txt3);text-align:center;margin-bottom:24px}
-
-.rec-banner{
-  display:inline-flex;align-items:center;gap:7px;
-  background:#fffbeb;border:1px solid #fcd34d;color:#92400e;
-  font-size:.78rem;font-weight:600;
-  padding:6px 16px;border-radius:99px;margin-bottom:20px;
-}
-.rec-banner.hidden{display:none}
-
-/* Score grid */
-.score-grid{
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:10px;width:100%;margin-bottom:20px;
-}
-.score-cell{
-  background:var(--surface);border:1px solid var(--bd);
-  border-radius:var(--r);padding:18px 16px;text-align:center;
-  box-shadow:var(--sh);position:relative;overflow:hidden;
-}
-.score-cell::after{
-  content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
-}
-.sc-wpm::after  {background:var(--acc)}
-.sc-acc::after  {background:var(--ok)}
-.sc-str::after  {background:var(--m3)}
-.sc-words::after{background:var(--m1)}
-.sc-lbl{font-size:.64rem;font-weight:600;color:var(--txt3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:5px}
-.sc-val{font-family:var(--mono);font-size:2.2rem;font-weight:700;color:var(--txt);line-height:1}
-.sc-sub{font-size:.67rem;color:var(--txt3);margin-top:3px}
-
-/* Missed keys */
-.miss-card{
-  background:var(--surface);border:1px solid var(--bd);
-  border-radius:var(--r);padding:18px 20px;
-  width:100%;margin-bottom:20px;box-shadow:var(--sh);
-}
-.miss-lbl{font-size:.67rem;font-weight:600;color:var(--txt3);letter-spacing:.07em;text-transform:uppercase;margin-bottom:12px}
-.miss-list{display:flex;gap:8px;flex-wrap:wrap;min-height:32px}
-.miss-key{
-  font-family:var(--mono);font-size:.82rem;font-weight:500;
-  background:var(--err-d);border:1px solid rgba(198,40,40,.2);
-  color:var(--err);border-radius:6px;padding:4px 12px;
-  display:inline-flex;align-items:center;gap:5px;
-}
-.miss-key-n{font-size:.68rem;opacity:.7}
-.miss-none{font-size:.82rem;color:var(--ok)}
-
-/* History chart */
-.chart-card{
-  background:var(--surface);border:1px solid var(--bd);
-  border-radius:var(--r);padding:18px 20px;
-  width:100%;margin-bottom:24px;box-shadow:var(--sh);
-}
-
-.end-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-
-/* ────────────────────────────────
-   RANK SCREEN
-──────────────────────────────── */
-#s-rank .body{
-  flex:1;display:flex;flex-direction:column;
-  align-items:center;padding:36px 20px 52px;
-  max-width:680px;margin:0 auto;width:100%;
-}
-.rank-title{
-  font-family:var(--mono);
-  font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;
-  letter-spacing:-.04em;color:var(--txt);
-  margin-bottom:4px;text-align:center;
-}
-.rank-title em{color:var(--acc);font-style:normal}
-.rank-sub{font-size:.85rem;color:var(--txt3);text-align:center;margin-bottom:22px}
-.rank-filters{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:20px;width:100%}
-
-/* table */
-.rank-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:20px}
-.rank-table{width:100%;border-collapse:collapse;min-width:480px}
-.rank-table thead th{
-  font-size:.63rem;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--txt3);
-  padding:0 10px 10px;text-align:left;
-  border-bottom:1px solid var(--bd);
-}
-.rank-table thead th.r{text-align:right}
-.rank-table tbody tr{
-  border-bottom:1px solid var(--bd);transition:background .12s;
-}
-.rank-table tbody tr:last-child{border-bottom:none}
-.rank-table tbody tr:hover{background:var(--s2)}
-@keyframes rowIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:translateX(0)}}
-.rank-row{animation:rowIn .2s var(--eout) both}
-.rank-table td{padding:11px 10px;vertical-align:middle}
-
-.rk-pos{
-  font-family:var(--mono);font-size:.88rem;font-weight:700;
-  color:var(--txt3);width:36px;text-align:center;
-}
-.rk-pos.p1{font-size:1.15rem}.rk-pos.p2{font-size:1.05rem}.rk-pos.p3{font-size:1rem}
-.rk-name{
-  font-family:var(--sans);font-size:.88rem;font-weight:500;color:var(--txt);
-  max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.rk-you{
-  font-size:.58rem;font-weight:600;letter-spacing:.06em;
-  background:var(--acc-d);color:var(--acc);border-radius:4px;
-  padding:1px 5px;margin-left:5px;text-transform:uppercase;vertical-align:middle;
-}
-.rk-wpm{
-  font-family:var(--mono);font-size:1.05rem;font-weight:700;
-  color:var(--txt);text-align:right;white-space:nowrap;
-}
-.rk-wpm sup{font-size:.58rem;font-weight:400;color:var(--txt3);margin-left:2px}
-.rk-acc{font-family:var(--mono);font-size:.82rem;color:var(--ok);text-align:right}
-.rk-streak{font-family:var(--mono);font-size:.82rem;color:var(--m3);text-align:right}
-.rk-mode{font-size:.65rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;text-align:right;white-space:nowrap}
-.rk-mode.m1{color:var(--m1)}.rk-mode.m2{color:var(--acc)}.rk-mode.m3{color:var(--m3)}
-.rk-date{font-size:.7rem;color:var(--txt3);text-align:right;white-space:nowrap}
-
-.rank-empty{
-  text-align:center;padding:52px 0;color:var(--txt3);
-  font-size:.9rem;line-height:1.8;width:100%;
-}
-.rank-empty-ico{font-size:2.4rem;display:block;margin-bottom:10px}
-.rank-footer{display:flex;align-items:center;justify-content:space-between;width:100%;flex-wrap:wrap;gap:10px}
-.rank-clear{
-  font-size:.74rem;color:var(--txt3);cursor:pointer;
-  background:none;border:none;text-decoration:underline;
-  font-family:var(--sans);padding:0;
-}
-.rank-clear:hover{color:var(--err)}
-.rank-info{font-size:.74rem;color:var(--txt3)}
-
-/* ────────────────────────────────
-   NAME CHIP (saved state)
-──────────────────────────────── */
-.name-chip-wrap{
-  display:flex;align-items:center;gap:10px;
-  padding:10px 14px;
-  background:var(--bg);border:1px solid var(--bd2);
-  border-radius:var(--r);
-}
-.name-chip-avatar{
-  width:32px;height:32px;border-radius:50%;
-  background:var(--acc);color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:.9rem;font-weight:700;
-  flex-shrink:0;
-}
-.name-chip-info{flex:1;min-width:0}
-.name-chip-label{font-size:.62rem;color:var(--txt3);font-weight:500;letter-spacing:.06em;text-transform:uppercase}
-.name-chip-name{
-  font-family:var(--mono);font-size:.92rem;font-weight:600;
-  color:var(--txt);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.name-chip-actions{display:flex;gap:6px;flex-shrink:0}
-.name-chip-btn{
-  font-family:var(--sans);font-size:.72rem;font-weight:500;
-  padding:4px 10px;border-radius:6px;border:1px solid var(--bd2);
-  background:var(--surface);color:var(--txt2);cursor:pointer;transition:all .12s;
-}
-.name-chip-btn:hover{background:var(--s2);color:var(--txt)}
-.name-chip-btn.accent{border-color:var(--m1);color:var(--m1);background:var(--m1-d)}
-.name-chip-btn.accent:hover{background:var(--m1);color:#fff}
-
-/* ────────────────────────────────
-   REQUEST MODAL
-──────────────────────────────── */
-#req-overlay{
-  position:fixed;inset:0;z-index:8000;
-  background:rgba(26,25,23,.5);
-  backdrop-filter:blur(5px);
-  display:flex;align-items:center;justify-content:center;
-  padding:16px;
-  opacity:0;pointer-events:none;
-  transition:opacity .2s;
-}
-#req-overlay.open{opacity:1;pointer-events:all}
-#req-box{
-  background:var(--surface);
-  border:1px solid var(--bd);
-  border-radius:var(--rl);
-  box-shadow:var(--shm);
-  width:100%;max-width:420px;
-  transform:translateY(16px) scale(.97);
-  transition:transform .22s var(--eout);
-  overflow:hidden;
-}
-#req-overlay.open #req-box{transform:translateY(0) scale(1)}
-.req-hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px 12px;
-  border-bottom:1px solid var(--bd);
-}
-.req-title{
-  font-family:var(--mono);font-size:.92rem;font-weight:700;color:var(--txt);
-  display:flex;align-items:center;gap:7px;
-}
-.req-close{
-  width:26px;height:26px;border-radius:50%;
-  background:var(--s2);border:1px solid var(--bd);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:.75rem;color:var(--txt2);transition:background .12s;
-}
-.req-close:hover{background:var(--bd)}
-.req-body{padding:18px 20px 20px;display:flex;flex-direction:column;gap:12px}
-.req-field label{
-  display:block;font-size:.7rem;font-weight:500;
-  color:var(--txt2);margin-bottom:5px;
-}
-.req-field input,
-.req-field textarea{
-  font-family:var(--sans);font-size:.88rem;
-  background:var(--bg);border:1px solid var(--bd2);
-  border-radius:var(--r);color:var(--txt);
-  padding:9px 12px;width:100%;outline:none;
-  transition:border-color .13s,box-shadow .13s;
-  resize:none;
-}
-.req-field input:focus,
-.req-field textarea:focus{border-color:var(--m1);box-shadow:0 0 0 3px var(--m1-d)}
-.req-field input[readonly]{
-  background:var(--s2);color:var(--txt2);cursor:not-allowed;
-}
-.req-sub-note{font-size:.72rem;color:var(--txt3);line-height:1.5}
-.req-err{font-size:.73rem;color:var(--err);display:none}
-.req-err.show{display:block}
-.req-ok{
-  font-size:.8rem;color:var(--ok);
-  background:var(--ok-d);border:1px solid rgba(26,122,60,.2);
-  border-radius:var(--r);padding:10px 14px;text-align:center;
-  display:none;
-}
-.req-ok.show{display:block}
-
-/* ────────────────────────────────
-   ADMIN — REQUESTS section styles
-──────────────────────────────── */
-.adm-req-list{
-  border:1px solid var(--bd);border-radius:var(--r);
-  background:var(--surface);
-  max-height:260px;overflow-y:auto;
-  margin-bottom:12px;
-}
-.adm-req-row{
-  padding:12px 14px;border-bottom:1px solid var(--bd);
-}
-.adm-req-row:last-child{border-bottom:none}
-.adm-req-top{
-  display:flex;align-items:center;gap:8px;margin-bottom:6px;
-}
-.adm-req-from{
-  font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--txt);
-  flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.adm-req-arrow{color:var(--txt3);font-size:.8rem}
-.adm-req-to{
-  font-family:var(--mono);font-size:.82rem;font-weight:600;color:var(--m1);
-}
-.adm-req-date{font-size:.68rem;color:var(--txt3);flex-shrink:0}
-.adm-req-reason{
-  font-size:.76rem;color:var(--txt2);line-height:1.5;
-  background:var(--bg);border-radius:5px;
-  padding:6px 10px;margin-bottom:8px;
-}
-.adm-req-btns{display:flex;gap:6px}
-.adm-req-approve{
-  font-family:var(--sans);font-size:.74rem;font-weight:600;
-  padding:5px 14px;border-radius:6px;
-  background:var(--ok);color:#fff;border:none;cursor:pointer;transition:background .12s;
-}
-.adm-req-approve:hover{background:#15693214}
-.adm-req-approve:hover{background:#126130}
-.adm-req-reject{
-  font-family:var(--sans);font-size:.74rem;font-weight:500;
-  padding:5px 12px;border-radius:6px;
-  background:var(--s2);color:var(--txt2);border:1px solid var(--bd2);cursor:pointer;transition:all .12s;
-}
-.adm-req-reject:hover{background:var(--err-d);color:var(--err);border-color:var(--err)}
-.adm-req-empty{
-  padding:24px;text-align:center;font-size:.82rem;color:var(--txt3);
-}
-.adm-notif{
-  display:inline-flex;align-items:center;justify-content:center;
-  width:16px;height:16px;border-radius:50%;
-  background:var(--err);color:#fff;
-  font-size:.6rem;font-weight:700;
-  margin-left:5px;
-}
-
-/* ────────────────────────────────
-   ADMIN PANEL
-──────────────────────────────── */
-/* Overlay */
-#admin-overlay{
-  position:fixed;inset:0;z-index:9000;
-  background:rgba(26,25,23,.55);
-  backdrop-filter:blur(6px);
-  display:flex;align-items:center;justify-content:center;
-  padding:16px;
-  opacity:0;pointer-events:none;
-  transition:opacity .22s;
-}
-#admin-overlay.open{opacity:1;pointer-events:all}
-
-/* Panel box */
-#admin-box{
-  background:var(--surface);
-  border:1px solid var(--bd);
-  border-radius:18px;
-  box-shadow:0 24px 64px rgba(0,0,0,.14),0 4px 12px rgba(0,0,0,.08);
-  width:100%;max-width:520px;
-  max-height:92dvh;overflow-y:auto;
-  transform:translateY(18px) scale(.97);
-  transition:transform .25s var(--eout);
-  position:relative;
-}
-#admin-overlay.open #admin-box{transform:translateY(0) scale(1)}
-
-/* Header strip */
-.adm-hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 22px 14px;
-  border-bottom:1px solid var(--bd);
-  position:sticky;top:0;background:var(--surface);
-  border-radius:18px 18px 0 0;z-index:1;
-}
-.adm-title{
-  font-family:var(--mono);font-size:.95rem;font-weight:700;
-  color:var(--txt);display:flex;align-items:center;gap:8px;
-}
-.adm-badge{
-  font-size:.6rem;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;background:var(--err-d);
-  color:var(--err);border-radius:4px;padding:2px 7px;
-}
-.adm-close{
-  width:28px;height:28px;border-radius:50%;
-  background:var(--s2);border:1px solid var(--bd);
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:.8rem;color:var(--txt2);transition:background .12s;
-}
-.adm-close:hover{background:var(--bd)}
-
-/* Login form */
-.adm-login{padding:28px 22px 24px}
-.adm-login-title{
-  font-size:.78rem;font-weight:600;color:var(--txt3);
-  letter-spacing:.07em;text-transform:uppercase;margin-bottom:18px;
-}
-.adm-field{margin-bottom:12px}
-.adm-field label{
-  display:block;font-size:.72rem;font-weight:500;
-  color:var(--txt2);margin-bottom:5px;
-}
-.adm-inp{
-  font-family:var(--mono);font-size:.9rem;
-  background:var(--bg);border:1px solid var(--bd2);
-  border-radius:var(--r);color:var(--txt);
-  padding:9px 12px;width:100%;outline:none;
-  transition:border-color .13s,box-shadow .13s;
-}
-.adm-inp:focus{border-color:var(--acc);box-shadow:0 0 0 3px var(--acc-d)}
-.adm-login-err{
-  font-size:.75rem;color:var(--err);
-  margin-top:4px;display:none;
-}
-.adm-login-err.show{display:block}
-
-/* Admin body (after login) */
-.adm-body{padding:20px 22px 24px;display:flex;flex-direction:column;gap:18px}
-
-/* Section */
-.adm-section{
-  background:var(--bg);border:1px solid var(--bd);
-  border-radius:var(--r);padding:16px;
-}
-.adm-section-title{
-  font-size:.68rem;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--txt3);margin-bottom:14px;
-  display:flex;align-items:center;gap:6px;
-}
-
-/* Grid inputs */
-.adm-grid{
-  display:grid;grid-template-columns:1fr 1fr;gap:10px;
-}
-.adm-grid .adm-field{margin-bottom:0}
-.adm-grid-3{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
-}
-.adm-grid-3 .adm-field{margin-bottom:0}
-
-/* Select */
-.adm-sel{
-  font-family:var(--sans);font-size:.85rem;
-  background:var(--bg);border:1px solid var(--bd2);
-  border-radius:var(--r);color:var(--txt);
-  padding:9px 12px;width:100%;outline:none;
-  cursor:pointer;
-  transition:border-color .13s;
-}
-.adm-sel:focus{border-color:var(--acc)}
-
-/* Danger zone */
-.adm-danger{border-color:rgba(198,40,40,.25);background:var(--err-d)}
-.adm-danger .adm-section-title{color:var(--err)}
-
-/* Admin action buttons */
-.adm-btn{
-  font-family:var(--sans);font-size:.82rem;font-weight:500;
-  padding:9px 18px;border-radius:var(--r);border:1px solid var(--bd2);
-  background:var(--surface);color:var(--txt2);cursor:pointer;
-  transition:all .13s;white-space:nowrap;
-}
-.adm-btn:hover{background:var(--s2);color:var(--txt)}
-.adm-btn-dark{background:var(--txt);color:#fff;border-color:var(--txt)}
-.adm-btn-dark:hover{background:#2e2d29}
-.adm-btn-danger{
-  background:var(--err);color:#fff;border-color:var(--err);
-}
-.adm-btn-danger:hover{background:#a82020}
-.adm-btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-
-/* Rank list inside admin */
-.adm-rank-list{
-  max-height:220px;overflow-y:auto;
-  border:1px solid var(--bd);border-radius:var(--r);
-  background:var(--surface);margin-bottom:12px;
-}
-.adm-rank-row{
-  display:flex;align-items:center;gap:8px;
-  padding:8px 12px;border-bottom:1px solid var(--bd);
-  font-size:.8rem;
-}
-.adm-rank-row:last-child{border-bottom:none}
-.adm-rank-row-pos{
-  font-family:var(--mono);font-weight:700;
-  color:var(--txt3);min-width:22px;text-align:center;font-size:.75rem;
-}
-.adm-rank-row-name{flex:1;color:var(--txt);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.adm-rank-row-wpm{font-family:var(--mono);font-weight:700;color:var(--txt);min-width:48px;text-align:right}
-.adm-rank-row-del{
-  width:22px;height:22px;border-radius:4px;
-  background:transparent;border:1px solid transparent;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  font-size:.8rem;color:var(--txt3);transition:all .12s;flex-shrink:0;
-}
-.adm-rank-row-del:hover{background:var(--err-d);border-color:var(--err);color:var(--err)}
-
-/* ────────────────────────────────
-   TOAST
-──────────────────────────────── */
-#toast{
-  position:fixed;bottom:26px;left:50%;
-  transform:translateX(-50%) translateY(14px);
-  background:var(--txt);color:#fff;
-  font-family:var(--mono);font-size:.79rem;font-weight:600;
-  padding:9px 22px;border-radius:99px;
-  box-shadow:var(--shm);
-  opacity:0;pointer-events:none;z-index:600;white-space:nowrap;
-  transition:opacity .2s,transform .22s var(--eout);
-}
-#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* ────────────────────────────────
-   SCROLLBAR
-──────────────────────────────── */
-::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px}
-
-/* ────────────────────────────────
-   RESPONSIVE
-──────────────────────────────── */
-@media(max-width:600px){
-  header,.g-header{padding:0 14px}
-  #s-home .body,#s-end .body{padding:24px 14px 40px}
-  .mode-grid{grid-template-columns:1fr}
-  .mode-card{display:flex;gap:14px;align-items:flex-start;padding:14px}
-  .mc-ico{margin-bottom:0;flex-shrink:0}
-  .score-grid{grid-template-columns:1fr 1fr}
-  .cfg{padding:16px}
-  .word-area{padding:16px 14px 10px}
-  .timer-row{padding:12px 14px 0}
-  .ctrl-row,.kb-wrap{padding-left:10px;padding-right:10px}
-  .keyboard{min-width:476px;padding:9px 10px}
-  .key{min-width:27px;height:26px;font-size:.48rem}
-  .key.w15{min-width:40px}.key.w20{min-width:52px}
-  .key.w25{min-width:66px}.key.w175{min-width:46px}.key.sp{min-width:170px}
-  .g-stats{gap:12px}
-  .g-stat-val{font-size:.9rem}
-}
-@media(max-width:360px){
-  .keyboard{min-width:410px}
-  .key{min-width:22px}.key.sp{min-width:142px}
-}
-
-@keyframes bodyShake{
-  0%,100%{transform:translate(0,0)}
-  20%{transform:translate(-6px,2px)}40%{transform:translate(6px,-3px)}
-  60%{transform:translate(-4px,3px)}80%{transform:translate(4px,-2px)}
-}
-body.shake{animation:bodyShake .22s ease}
-</style>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- OTG trap: inputmode=none blocks virtual keyboard on Android -->
 <textarea id="trap"
   inputmode="none" autocomplete="off" autocorrect="off"
   autocapitalize="none" spellcheck="false"
@@ -959,15 +17,14 @@ body.shake{animation:bodyShake .22s ease}
 
 <div id="toast"></div>
 
-<!-- ═══════════════════════════════════════
-     HOME
-═══════════════════════════════════════ -->
 <div id="s-home" class="screen">
   <header>
     <div class="logo"><span class="logo-dot"></span>TypeFlow</div>
-    <div style="display:flex;gap:6px;align-items:center">
-      <button class="btn btn-sm" id="h-rank" style="display:flex;align-items:center;gap:5px">🏆 Ranking</button>
-      <button class="btn-icon" id="h-mute" title="Som">🔊</button>
+    <div class="hdr-actions">
+      <div class="patent-hud header-hide-sm" id="patent-hud">—</div>
+      <div class="xp-bar header-hide-sm" aria-hidden="true"><div class="xp-bar-fill" id="xp-bar-fill"></div></div>
+      <button type="button" class="btn btn-sm" id="h-stats">Estatísticas</button>
+      <button type="button" class="btn-icon" id="h-mute" title="Som">🔊</button>
     </div>
   </header>
 
@@ -975,63 +32,98 @@ body.shake{animation:bodyShake .22s ease}
 
     <div class="hero">
       <h1>Digite<br>sem <em>olhar.</em></h1>
-      <p>Três modos de treino para construir memória muscular, velocidade e consistência no teclado.</p>
+      <p>Modos de treino para memória muscular, velocidade e consistência — agora com patentes Cynos e análise local.</p>
     </div>
 
-    <!-- MODES -->
     <div class="mode-grid" id="mode-grid">
       <div class="mode-card m1 sel" data-mode="1">
         <span class="mc-ico">🎯</span>
         <div>
           <div class="mc-name">Sem Olhar</div>
-          <div class="mc-desc">Texto visível — treine digitar sem olhar para o teclado. O teclado na tela destaca a próxima tecla.</div>
-          <span class="mc-tag">Memória Muscular</span>
+          <div class="mc-desc">Texto visível; o teclado na tela destaca a próxima tecla.</div>
+          <span class="mc-tag">Memória muscular</span>
         </div>
       </div>
       <div class="mode-card m2" data-mode="2">
         <span class="mc-ico">⚡</span>
         <div>
           <div class="mc-name">Velocidade</div>
-          <div class="mc-desc">Foco em WPM. Sem distrações — só você, o tempo e as palavras. Bata seu recorde.</div>
-          <span class="mc-tag">WPM &amp; Precisão</span>
+          <div class="mc-desc">Foco em WPM e precisão — bata seu recorde.</div>
+          <span class="mc-tag">WPM</span>
         </div>
       </div>
       <div class="mode-card m3" data-mode="3">
         <span class="mc-ico">🔥</span>
         <div>
           <div class="mc-name">Híbrido</div>
-          <div class="mc-desc">Combina velocidade com técnica. Alterna pressão de tempo com foco em digitação correta.</div>
-          <span class="mc-tag">Speed + Técnica</span>
+          <div class="mc-desc">Velocidade com teclado visual e técnica.</div>
+          <span class="mc-tag">Combinado</span>
         </div>
       </div>
     </div>
 
-    <!-- CONFIG -->
     <div class="cfg">
       <div class="cfg-lbl">Duração da sessão</div>
       <div class="pill-row" id="dur-row">
-        <button class="pill"         data-dur="30">30s</button>
-        <button class="pill on"      data-dur="60">60s</button>
-        <button class="pill"         data-dur="120">2 min</button>
-        <button class="pill"         data-dur="300">5 min</button>
-        <button class="pill"         data-dur="0">Sem limite</button>
+        <button type="button" class="pill" data-dur="30">30s</button>
+        <button type="button" class="pill on" data-dur="60">60s</button>
+        <button type="button" class="pill" data-dur="120">2 min</button>
+        <button type="button" class="pill" data-dur="300">5 min</button>
+        <button type="button" class="pill" data-dur="0">Sem limite</button>
       </div>
     </div>
 
     <div class="cfg">
-      <div class="cfg-lbl">Idioma das palavras</div>
-      <div class="pill-row" id="lang-row">
-        <button class="pill on"  data-lang="pt">🇧🇷 Português</button>
-        <button class="pill"     data-lang="en">🇺🇸 English</button>
-        <button class="pill"     data-lang="mix">Mix PT+EN</button>
-        <button class="pill"     data-lang="code">Código</button>
+      <div class="cfg-lbl">Treinamento</div>
+      <div class="pill-row" id="train-row">
+        <button type="button" class="pill on" data-train="common">Palavras comuns</button>
+        <button type="button" class="pill" data-train="javascript">Trechos JavaScript</button>
       </div>
+    </div>
+
+    <div class="cfg">
+      <div class="cfg-lbl">Idioma (palavras comuns)</div>
+      <div class="pill-row" id="lang-row">
+        <button type="button" class="pill on" data-lang="pt">🇧🇷 Português</button>
+        <button type="button" class="pill" data-lang="en">🇺🇸 English</button>
+        <button type="button" class="pill" data-lang="mix">Mix PT+EN</button>
+        <button type="button" class="pill" data-lang="code">Código</button>
+      </div>
+    </div>
+
+    <div class="cfg">
+      <div class="cfg-lbl">Modo hardcore</div>
+      <button type="button" id="hardcore-toggle" aria-pressed="false">Hardcore (sem Backspace)</button>
+    </div>
+
+    <div class="cfg" id="cfg-audio">
+      <div class="cfg-lbl">Áudio e imersão</div>
+      <div class="audio-grid">
+        <label class="chk-lbl"><input type="checkbox" id="tactile-toggle" checked> Click tátil (cada tecla)</label>
+        <label class="chk-lbl"><input type="checkbox" id="focus-ambience-toggle"> Cynos Deep Focus (ambiente)</label>
+        <label class="sel-inline">Modo:
+          <select id="focus-mode-select" class="cfg-select">
+            <option value="industrial">Lofi industrial</option>
+            <option value="binaural">Batida binaural 40 Hz (fone)</option>
+          </select>
+        </label>
+        <label class="sel-inline">Tema:
+          <select id="theme-select" class="cfg-select"></select>
+        </label>
+        <label class="sel-inline">Som:
+          <select id="soundpack-select" class="cfg-select"></select>
+        </label>
+      </div>
+    </div>
+
+    <div class="cfg">
+      <div class="cfg-lbl">Medalhas</div>
+      <div id="badges-row" class="badges-row"><span class="badge-empty">—</span></div>
     </div>
 
     <div class="cfg">
       <div class="cfg-lbl">Identificação <span style="color:var(--err)">*</span></div>
 
-      <!-- Saved-name chip (shown when name is saved) -->
       <div class="name-chip-wrap" id="name-chip" style="display:none">
         <div class="name-chip-avatar" id="name-chip-avatar">?</div>
         <div class="name-chip-info">
@@ -1039,19 +131,18 @@ body.shake{animation:bodyShake .22s ease}
           <div class="name-chip-name" id="name-chip-name">—</div>
         </div>
         <div class="name-chip-actions">
-          <button class="name-chip-btn accent" id="btn-req-name" title="Solicitar mudança de nome">✏ Alterar nome</button>
-          <button class="name-chip-btn" id="btn-clear-name" title="Sair / trocar jogador">Sair</button>
+          <button type="button" class="name-chip-btn accent" id="btn-edit-name">Alterar nome</button>
+          <button type="button" class="name-chip-btn" id="btn-clear-name">Sair</button>
         </div>
       </div>
 
-      <!-- Name input (shown when no name saved) -->
       <div id="name-input-wrap">
         <div class="name-row">
           <input type="text" id="player-name" class="name-inp"
             placeholder="Digite seu nome ou apelido"
             maxlength="20" autocomplete="off" autocorrect="off"
             autocapitalize="none" spellcheck="false">
-          <button class="btn btn-dark btn-lg" id="btn-start">Iniciar →</button>
+          <button type="button" class="btn btn-dark btn-lg" id="btn-start">Iniciar →</button>
         </div>
         <div class="name-req" id="name-req">⚠ Por favor, insira um nome antes de jogar.</div>
       </div>
@@ -1060,22 +151,19 @@ body.shake{animation:bodyShake .22s ease}
     </div>
 
     <div class="note">
-      <strong>📱 Mobile OTG:</strong> Conecte o teclado físico via USB-C. Toque na tela antes de digitar. O teclado virtual não abrirá.
+      <strong>📱 Mobile OTG:</strong> conecte um teclado físico via USB-C. Toque na tela antes de digitar; o teclado virtual não abrirá.
     </div>
 
     <div class="shortcuts">
-      <span><kbd>Space</kbd> próxima palavra</span>
+      <span><kbd>Espaço</kbd> próxima palavra</span>
       <span><kbd>Enter</kbd> confirmar</span>
-      <span><kbd>Backspace</kbd> apagar</span>
+      <span><kbd>Tab</kbd> reiniciar sessão</span>
       <span><kbd>Esc</kbd> encerrar</span>
     </div>
 
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     GAME
-═══════════════════════════════════════ -->
 <div id="s-game" class="screen hidden">
 
   <div class="g-header">
@@ -1098,1791 +186,150 @@ body.shake{animation:bodyShake .22s ease}
       </div>
     </div>
 
-    <div style="display:flex;gap:6px">
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
       <div id="accent-badge" style="
         font-size:.68rem;font-weight:600;
-        background:rgba(37,99,235,.1);color:#2563eb;
+        background:var(--crimson-d);color:var(--crimson);
         border-radius:6px;padding:4px 9px;
         align-self:center;letter-spacing:.02em;
         display:none;
       ">ã = a ✓</div>
-      <button class="btn-icon" id="g-mute">🔊</button>
-      <button class="btn btn-sm" id="g-quit">✕ Sair</button>
+      <button type="button" class="btn btn-sm" id="g-focus" aria-pressed="false">Modo foco</button>
+      <button type="button" class="btn-icon" id="g-mute">🔊</button>
+      <button type="button" class="btn btn-sm" id="g-quit">✕ Encerrar</button>
     </div>
   </div>
 
-  <!-- Timer -->
   <div class="timer-row">
     <div class="timer-num" id="g-timer">60</div>
     <div class="timer-bar"><div class="timer-fill" id="g-progress"></div></div>
   </div>
 
-  <!-- Word display area -->
   <div class="word-area">
-    <!-- Current word with character-level feedback -->
     <div class="cur-word" id="cur-word">—</div>
-
-    <!-- Typed characters feedback -->
     <div class="typed-bar" id="typed-bar"></div>
-
-    <!-- Next words queue -->
     <div class="queue" id="queue"></div>
-
-    <!-- Mode 1 tip -->
     <div class="m1-tip hidden" id="m1-tip">
-      👆 Não olhe para o teclado — a tecla está destacada abaixo
+      Não olhe para o teclado — a próxima tecla está destacada abaixo
     </div>
   </div>
 
-  <!-- Controls -->
   <div class="ctrl-row">
-    <button class="btn btn-sm" id="g-skip">Pular palavra (Tab)</button>
+    <button type="button" class="btn btn-sm" id="g-skip">Pular palavra</button>
   </div>
 
-  <!-- Visual keyboard (shown only in mode 1 + 3) -->
   <div class="kb-wrap" id="kb-wrap">
     <div class="keyboard" id="vkb"></div>
   </div>
 
 </div>
 
-<!-- ═══════════════════════════════════════
-     RESULTS
-═══════════════════════════════════════ -->
 <div id="s-end" class="screen hidden">
   <header>
     <div class="logo"><span class="logo-dot"></span>TypeFlow</div>
-    <button class="btn-icon" id="e-mute">🔊</button>
+    <button type="button" class="btn-icon" id="e-mute">🔊</button>
   </header>
 
   <div class="body">
-    <h2 class="end-title">Sessão <em>Concluída</em></h2>
-    <p class="end-sub">Resultado da sua sessão de treino</p>
+    <h2 class="end-title">Sessão <em>concluída</em></h2>
+    <p class="end-sub">Análise detalhada do treino</p>
 
-    <div id="rec-banner" class="rec-banner hidden">🏆 Novo recorde pessoal!</div>
+    <div id="rec-banner" class="rec-banner hidden">Novo recorde pessoal!</div>
 
-    <div class="score-grid">
+    <div class="score-grid score-grid-compact">
       <div class="score-cell sc-wpm">
         <div class="sc-lbl">WPM</div>
         <div class="sc-val" id="e-wpm">0</div>
-        <div class="sc-sub">palavras por minuto</div>
-      </div>
-      <div class="score-cell sc-acc">
-        <div class="sc-lbl">Precisão</div>
-        <div class="sc-val" id="e-acc">0%</div>
-        <div class="sc-sub">teclas corretas</div>
+        <div class="sc-sub">palavras corretas / min</div>
       </div>
       <div class="score-cell sc-str">
         <div class="sc-lbl">Maior streak</div>
         <div class="sc-val" id="e-streak">0</div>
-        <div class="sc-sub">palavras seguidas</div>
+        <div class="sc-sub">sequência</div>
+      </div>
+      <div class="score-cell sc-xp">
+        <div class="sc-lbl">XP</div>
+        <div class="sc-val" id="e-xp">0</div>
+        <div class="sc-sub">sessão</div>
+      </div>
+      <div class="score-cell sc-patent">
+        <div class="sc-lbl">Patente</div>
+        <div class="sc-val" id="e-patent" style="font-size:clamp(1rem,3.5vw,1.35rem)">—</div>
+        <div class="sc-sub">Cynos</div>
       </div>
       <div class="score-cell sc-words">
         <div class="sc-lbl">Palavras</div>
         <div class="sc-val" id="e-words">0</div>
-        <div class="sc-sub">digitadas no total</div>
+        <div class="sc-sub">total</div>
+      </div>
+      <div class="score-cell sc-acc">
+        <div class="sc-lbl">Precisão</div>
+        <div class="sc-val" id="e-acc">0%</div>
+        <div class="sc-sub">teclas</div>
       </div>
     </div>
 
-    <div class="miss-card">
-      <div class="miss-lbl">Teclas com mais erros</div>
-      <div class="miss-list" id="miss-list"></div>
-    </div>
-
-    <div class="chart-card">
-      <div class="miss-lbl" style="margin-bottom:14px">Histórico de WPM (últimas sessões)</div>
-      <canvas id="chart-cv" height="100"></canvas>
+    <div id="result-tabs-root" class="result-tabs-root">
+      <div class="result-tab-nav" role="tablist">
+        <button type="button" class="result-tab-btn on" data-tab="overview" role="tab" aria-selected="true">Visão geral</button>
+        <button type="button" class="result-tab-btn" data-tab="keys" role="tab" aria-selected="false">Letras</button>
+        <button type="button" class="result-tab-btn" data-tab="words" role="tab" aria-selected="false">Palavras</button>
+        <button type="button" class="result-tab-btn" data-tab="speed" role="tab" aria-selected="false">Velocidade</button>
+      </div>
+      <div id="panel-overview" class="result-tab-panel" data-panel="overview" role="tabpanel"></div>
+      <div id="panel-keys" class="result-tab-panel hidden" data-panel="keys" role="tabpanel"></div>
+      <div id="panel-words" class="result-tab-panel hidden" data-panel="words" role="tabpanel"></div>
+      <div id="panel-speed" class="result-tab-panel hidden" data-panel="speed" role="tabpanel"></div>
     </div>
 
     <div class="end-btns">
-      <button class="btn btn-dark btn-lg" id="e-retry">Tentar novamente</button>
-      <button class="btn btn-lg" id="e-rank" style="display:flex;align-items:center;gap:5px">🏆 Ranking</button>
-      <button class="btn btn-lg" id="e-share">Compartilhar</button>
-      <button class="btn btn-lg" id="e-menu">Menu</button>
+      <button type="button" class="btn btn-dark btn-lg" id="e-retry">Tentar novamente</button>
+      <button type="button" class="btn btn-lg" id="e-stats">Estatísticas</button>
+      <button type="button" class="btn btn-lg" id="e-share">Compartilhar</button>
+      <button type="button" class="btn btn-lg" id="e-menu">Menu</button>
     </div>
 
     <div class="shortcuts" style="margin-top:18px">
-      <span><kbd>Enter</kbd> reiniciar</span>
+      <span><kbd>Enter</kbd> tentar novamente</span>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     SCRIPT
-═══════════════════════════════════════ -->
-<!-- ═══════════════════════════════════════
-     RANKING
-═══════════════════════════════════════ -->
-<div id="s-rank" class="screen hidden">
+<div id="s-stats" class="screen hidden">
   <header>
     <div class="logo"><span class="logo-dot"></span>TypeFlow</div>
-    <button class="btn btn-sm" id="r-back">← Voltar</button>
+    <div class="hdr-actions">
+      <button type="button" class="btn btn-sm" id="st-back">← Menu</button>
+      <button type="button" class="btn-icon" id="st-mute">🔊</button>
+    </div>
   </header>
 
   <div class="body">
-    <h2 class="rank-title">🏆 <em>Ranking</em></h2>
-    <p class="rank-sub">Top jogadores desta máquina · Salvo localmente</p>
-
-    <div class="rank-filters" id="rank-filters">
-      <button class="pill pill-sm on" data-rf="all">Todos</button>
-      <button class="pill pill-sm" data-rf="1">🎯 Sem Olhar</button>
-      <button class="pill pill-sm" data-rf="2">⚡ Velocidade</button>
-      <button class="pill pill-sm" data-rf="3">🔥 Híbrido</button>
+    <div class="stats-hero">
+      <h2>Cynos <em>Analytics</em></h2>
+      <p>Últimas 50 sessões neste dispositivo — gráfico monocromático (WPM por sessão).</p>
     </div>
 
-    <div class="rank-wrap">
-      <table class="rank-table" id="rank-table">
-        <thead>
-          <tr>
-            <th style="width:36px">#</th>
-            <th>Jogador</th>
-            <th class="r">WPM</th>
-            <th class="r">Acc</th>
-            <th class="r">Streak</th>
-            <th class="r">Modo</th>
-            <th class="r">Data</th>
-          </tr>
-        </thead>
-        <tbody id="rank-tbody"></tbody>
-      </table>
+    <div class="stats-chart-wrap">
+      <div class="stats-chart-title">Histórico de WPM</div>
+      <div class="stats-bars" id="stats-bars" role="img" aria-label="Gráfico de barras do histórico de WPM"></div>
     </div>
 
-    <div class="rank-footer">
-      <span class="rank-info" id="rank-info"></span>
+    <p class="stats-summary" id="stats-summary"></p>
+
+    <div class="end-btns">
+      <button type="button" class="btn btn-dark btn-lg" id="st-play">Nova sessão</button>
     </div>
   </div>
 </div>
 
-<!-- ═══════════════════════════════════════
-     NAME-CHANGE REQUEST MODAL
-═══════════════════════════════════════ -->
-<div id="req-overlay">
-  <div id="req-box">
-    <div class="req-hdr">
-      <div class="req-title">✏ Solicitar mudança de nome</div>
-      <button class="req-close" id="req-close">✕</button>
-    </div>
-    <div class="req-body">
-      <div class="req-ok" id="req-ok">
-        ✅ Solicitação enviada! Aguarde a aprovação do admin.
-      </div>
-      <div id="req-form-inner">
-        <div class="req-field">
-          <label>Nome atual</label>
-          <input type="text" id="req-cur-name" readonly>
-        </div>
-        <div class="req-field">
-          <label>Nome desejado <span style="color:var(--err)">*</span></label>
-          <input type="text" id="req-new-name" maxlength="20"
-            autocomplete="off" autocorrect="off"
-            autocapitalize="none" spellcheck="false"
-            placeholder="Como quer ser chamado?">
-        </div>
-        <div class="req-field">
-          <label>Motivo <span style="color:var(--err)">*</span></label>
-          <textarea id="req-reason" rows="3"
-            maxlength="200"
-            placeholder="Por que quer mudar? (máx. 200 caracteres)"></textarea>
-        </div>
-        <div class="req-err" id="req-err"></div>
-        <div class="req-sub-note">
-          Sua solicitação será analisada pelo administrador. Você será notificado aqui assim que for aprovada ou rejeitada.
-        </div>
-        <button class="adm-btn adm-btn-dark" id="req-submit" style="width:100%;margin-top:4px">
-          Enviar solicitação →
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════
-     ADMIN PANEL OVERLAY
-═══════════════════════════════════════ -->
-<div id="admin-overlay">
-  <div id="admin-box">
-
-    <!-- Header -->
-    <div class="adm-hdr">
-      <div class="adm-title">⚙ Painel Admin <span class="adm-badge">Restrito</span></div>
-      <button class="adm-close" id="adm-close" title="Fechar">✕</button>
-    </div>
-
-    <!-- LOGIN -->
-    <div id="adm-login" class="adm-login">
-      <div class="adm-login-title">🔒 Autenticação necessária</div>
-      <div class="adm-field">
-        <label>Usuário</label>
-        <input class="adm-inp" id="adm-user" type="text"
-          autocomplete="off" autocorrect="off"
-          autocapitalize="none" spellcheck="false"
-          placeholder="usuário">
-      </div>
-      <div class="adm-field">
-        <label>Senha</label>
-        <input class="adm-inp" id="adm-pass" type="password"
-          autocomplete="off" placeholder="senha">
-      </div>
-      <div class="adm-login-err" id="adm-err">Usuário ou senha incorretos.</div>
-      <div style="margin-top:16px">
-        <button class="adm-btn adm-btn-dark" id="adm-login-btn" style="width:100%">Entrar →</button>
-      </div>
-    </div>
-
-    <!-- PANEL BODY (hidden until login) -->
-    <div id="adm-panel" class="adm-body" style="display:none">
-
-      <!-- Add custom result -->
-      <div class="adm-section">
-        <div class="adm-section-title">➕ Adicionar resultado manualmente</div>
-        <div class="adm-field" style="margin-bottom:10px">
-          <label>Nome do jogador</label>
-          <input class="adm-inp" id="adm-r-name" type="text"
-            autocomplete="off" autocorrect="off"
-            autocapitalize="none" spellcheck="false"
-            placeholder="Nome ou apelido">
-        </div>
-        <div class="adm-grid" style="margin-bottom:10px">
-          <div class="adm-field">
-            <label>WPM</label>
-            <input class="adm-inp" id="adm-r-wpm" type="number"
-              min="1" max="999" placeholder="ex: 120">
-          </div>
-          <div class="adm-field">
-            <label>Precisão (%)</label>
-            <input class="adm-inp" id="adm-r-acc" type="number"
-              min="1" max="100" placeholder="ex: 98">
-          </div>
-        </div>
-        <div class="adm-grid" style="margin-bottom:14px">
-          <div class="adm-field">
-            <label>Streak</label>
-            <input class="adm-inp" id="adm-r-streak" type="number"
-              min="0" max="9999" placeholder="ex: 25">
-          </div>
-          <div class="adm-field">
-            <label>Modo</label>
-            <select class="adm-sel" id="adm-r-mode">
-              <option value="1">🎯 Sem Olhar</option>
-              <option value="2">⚡ Velocidade</option>
-              <option value="3">🔥 Híbrido</option>
-            </select>
-          </div>
-        </div>
-        <button class="adm-btn adm-btn-dark" id="adm-add-btn" style="width:100%">
-          ➕ Adicionar ao ranking
-        </button>
-        <div id="adm-add-err" style="font-size:.73rem;color:var(--err);margin-top:6px;display:none"></div>
-      </div>
-
-      <!-- Manage entries -->
-      <div class="adm-section">
-        <div class="adm-section-title">📋 Entradas no ranking <span id="adm-count" style="font-weight:400;text-transform:none;letter-spacing:0;margin-left:4px"></span></div>
-        <div class="adm-rank-list" id="adm-rank-list"></div>
-        <div class="adm-btn-row">
-          <button class="adm-btn" id="adm-refresh">↻ Atualizar lista</button>
-        </div>
-      </div>
-
-      <!-- Name change requests -->
-      <div class="adm-section">
-        <div class="adm-section-title">
-          📬 Solicitações de mudança de nome
-          <span class="adm-notif" id="adm-req-notif" style="display:none">0</span>
-        </div>
-        <div class="adm-req-list" id="adm-req-list"></div>
-        <div class="adm-btn-row">
-          <button class="adm-btn" id="adm-req-refresh">↻ Atualizar</button>
-        </div>
-      </div>
-
-      <!-- Danger zone -->
-      <div class="adm-section adm-danger">
-        <div class="adm-section-title">⚠ Zona de Perigo</div>
-        <p style="font-size:.78rem;color:var(--txt2);margin-bottom:14px;line-height:1.6">
-          Apagar o ranking remove <strong>todos</strong> os dados permanentemente. Esta ação não pode ser desfeita.
-        </p>
-        <button class="adm-btn adm-btn-danger" id="adm-clear-btn">🗑 Apagar ranking completo</button>
-      </div>
-
-    </div><!-- /#adm-panel -->
-  </div><!-- /#admin-box -->
-</div><!-- /#admin-overlay -->
-
-<script>
-/* ──────────────────────────────────────
-   WORD BANKS
-────────────────────────────────────── */
-const WORDS = {
-  pt: [
-    // cotidiano
-    'gato','cachorro','casa','carro','mesa','porta','janela','livro','cama','sofá',
-    'prato','faca','garfo','colher','xícara','caneta','papel','lápis','cadeira','chão',
-    'teto','muro','grade','parede','escada','caixa','saco','bolsa','mochila','sapato',
-    'camisa','calça','saia','boné','luva','relógio','óculos','chapéu','cinturão','meias',
-    'café','leite','pão','bolo','arroz','feijão','sopa','maçã','laranja','uva',
-    'banana','manga','abacaxi','goiaba','limão','cenoura','batata','alho','cebola','tomate',
-    'frango','carne','peixe','ovo','queijo','manteiga','sal','açúcar','pimenta','óleo',
-    // ações
-    'comer','beber','correr','andar','falar','ouvir','ver','sentir','pensar','saber',
-    'poder','querer','fazer','ter','ser','estar','ir','vir','trazer','levar',
-    'abrir','fechar','subir','descer','entrar','sair','ligar','desligar','jogar','pegar',
-    'dar','receber','escrever','ler','estudar','trabalhar','dormir','acordar','lavar','secar',
-    // lugares
-    'escola','cidade','bairro','rua','praça','parque','praia','campo','floresta','montanha',
-    'rio','lago','mar','oceano','aeroporto','estação','hospital','mercado','banco','cinema',
-    // descritores
-    'grande','pequeno','alto','baixo','rápido','lento','bonito','feio','novo','velho',
-    'quente','frio','duro','mole','limpo','sujo','cheio','vazio','forte','fraco',
-    'aberto','fechado','claro','escuro','rico','pobre','jovem','idoso','gordo','magro',
-    // tempo
-    'hoje','amanhã','ontem','semana','mês','ano','hora','minuto','segundo','dia',
-    'manhã','tarde','noite','cedo','tarde','sempre','nunca','agora','depois','antes',
-  ],
-
-  en: [
-    'cat','dog','house','car','table','door','window','book','bed','sofa',
-    'plate','knife','fork','spoon','cup','pen','paper','pencil','chair','floor',
-    'roof','wall','fence','stairs','box','bag','wallet','backpack','shoe','shirt',
-    'pants','skirt','hat','glove','watch','glasses','belt','socks','coffee','milk',
-    'bread','cake','rice','beans','soup','apple','orange','grape','banana','mango',
-    'lemon','carrot','potato','garlic','onion','tomato','chicken','meat','fish','egg',
-    'cheese','butter','salt','sugar','pepper','oil','eat','drink','run','walk',
-    'talk','listen','see','feel','think','know','want','make','have','take',
-    'open','close','push','pull','jump','sleep','wake','write','read','study',
-    'work','play','send','give','find','keep','move','stop','start','build',
-    'big','small','tall','short','fast','slow','good','bad','new','old',
-    'hot','cold','hard','soft','clean','dirty','full','empty','strong','weak',
-    'bright','dark','rich','poor','young','old','light','heavy','sharp','dull',
-    'today','tomorrow','yesterday','week','month','year','hour','minute','second',
-    'morning','afternoon','evening','night','early','late','always','never','now',
-  ],
-
-  code: [
-    'git','npm','ssh','curl','grep','sudo','bash','vim','node','yarn',
-    'python','docker','linux','nginx','mysql','redis','react','const','let','var',
-    'return','import','export','function','class','async','await','fetch','null','true',
-    'false','array','object','string','number','boolean','loop','break','switch','case',
-    'commit','branch','merge','clone','build','deploy','debug','error','token','server',
-    'client','router','module','plugin','config','format','filter','search','update','delete',
-  ],
-};
-
-// Note: mix is computed dynamically in buildPool() so it always reflects current WORDS arrays
-// WORDS.mix left as alias for backward compat
-WORDS.mix = null; // will be built on demand
-
-/* ──────────────────────────────────────
-   STATE
-────────────────────────────────────── */
-let G = {
-  screen:  'home',
-  prevScreen: 'home',  // tracks where user came FROM (for rank back button)
-  mode:    1,        // 1=SemOlhar 2=Speed 3=Hybrid
-  dur:     60,       // seconds, 0=unlimited
-  lang:    'pt',
-  muted:   false,
-
-  words:     [],     // shuffled pool
-  idx:       0,      // current word index
-  typed:     '',     // chars typed for current word
-
-  // tracking
-  totalKeys:    0,
-  correctKeys:  0,
-  errKeys:      {},  // char -> count
-  correctWords: 0,
-  wrongWords:   0,
-  streak:       0,
-  maxStreak:    0,
-  wpmSnaps:     [],  // WPM snapshot every 10s
-
-  // timer
-  elapsed:   0,
-  timerID:   null,
-  started:   false,
-};
-
-/* ──────────────────────────────────────
-   AUDIO
-────────────────────────────────────── */
-let _ac = null;
-function ac() { return _ac || (_ac = new (window.AudioContext || window.webkitAudioContext)()); }
-
-function beep(t) {
-  if (G.muted) return;
-  try {
-    const c = ac(), now = c.currentTime;
-    const o = c.createOscillator(), g = c.createGain();
-    o.connect(g); g.connect(c.destination);
-    if (t === 'ok')  { o.frequency.setValueAtTime(660,now); o.frequency.setValueAtTime(880,now+.07); g.gain.setValueAtTime(.1,now); g.gain.exponentialRampToValueAtTime(.001,now+.18); o.start(now); o.stop(now+.18); }
-    if (t === 'err') { o.type='sawtooth'; o.frequency.setValueAtTime(220,now); g.gain.setValueAtTime(.08,now); g.gain.exponentialRampToValueAtTime(.001,now+.22); o.start(now); o.stop(now+.22); }
-    if (t === 'tick'){ o.frequency.value=1100; g.gain.setValueAtTime(.03,now); g.gain.exponentialRampToValueAtTime(.001,now+.05); o.start(now); o.stop(now+.05); }
-    if (t === 'end') { o.frequency.setValueAtTime(440,now); o.frequency.setValueAtTime(330,now+.2); g.gain.setValueAtTime(.1,now); g.gain.exponentialRampToValueAtTime(.001,now+.4); o.start(now); o.stop(now+.4); }
-    if (t === 'streak') {
-      [440,554,659,880].forEach((f,i)=>{
-        const o2=c.createOscillator(),g2=c.createGain();
-        o2.connect(g2);g2.connect(c.destination);
-        const tt=now+i*.08; o2.frequency.value=f;
-        g2.gain.setValueAtTime(.08,tt); g2.gain.exponentialRampToValueAtTime(.001,tt+.16);
-        o2.start(tt); o2.stop(tt+.16);
-      });
-    }
-  } catch(_){}
-}
-
-/* ──────────────────────────────────────
-   KEYBOARD MAP  (for visual keyboard)
-────────────────────────────────────── */
-const KB_ROWS = [
-  ['`','1','2','3','4','5','6','7','8','9','0','-','=','⌫|w20'],
-  ['Tab|w15','q','w','e','r','t','y','u','i','o','p','[',']','\\|w15'],
-  ['Caps|w20','a','s','d','f','g','h','j','k','l',';',"'",'↵|w20'],
-  ['Shift|w25','z','x','c','v','b','n','m',',','.','/','Shift|w175'],
-  ['Ctrl|w15','Alt|w15','Space|sp','Alt|w15','Ctrl|w15'],
-];
-const KM = {}; // key char → array of key elements
-
-function buildKb() {
-  const vkb = document.getElementById('vkb');
-  vkb.innerHTML = '';
-  KB_ROWS.forEach(row => {
-    const rowEl = document.createElement('div');
-    rowEl.className = 'kb-row';
-    row.forEach(k => {
-      const [lbl, cls] = k.split('|');
-      const el = document.createElement('div');
-      el.className = 'key' + (cls ? ' ' + cls : '');
-      el.textContent = lbl;
-      const key = lbl.toLowerCase();
-      if (!KM[key]) KM[key] = [];
-      KM[key].push(el);
-      rowEl.appendChild(el);
-    });
-    vkb.appendChild(rowEl);
-  });
-}
-
-function hlKey(k, on) {
-  const map = {' ':'space','Backspace':'⌫','Enter':'↵','Shift':'shift','Control':'ctrl','Alt':'alt','Tab':'tab','CapsLock':'caps'};
-  const key = map[k] || k.toLowerCase();
-  (KM[key] || []).forEach(el => el.classList.toggle('hit', on));
-}
-
-function showNextKey(word, pos) {
-  // Remove highlight from previous next-key (O(1), not O(n))
-  if (_nextKeyEl) {
-    _nextKeyEl.forEach(el => el.classList.remove('next-key'));
-    _nextKeyEl = null;
-  }
-  if (!word || pos >= word.length) return;
-  const ch  = norm(word[pos]);
-  const key = ch === ' ' ? 'space' : ch;
-  const els = KM[key];
-  if (els && els.length) {
-    els.forEach(el => el.classList.add('next-key'));
-    _nextKeyEl = els;
-  }
-}
-
-/* ──────────────────────────────────────
-   WORD POOL
-────────────────────────────────────── */
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function buildPool() {
-  let base;
-  if (G.lang === 'mix') {
-    // Interleave PT and EN for a true bilingual pool
-    const pt = shuffle([...WORDS.pt]);
-    const en = shuffle([...WORDS.en]);
-    base = [];
-    const len = Math.max(pt.length, en.length);
-    for (let i = 0; i < len; i++) {
-      if (i < pt.length) base.push(pt[i]);
-      if (i < en.length) base.push(en[i]);
-    }
-  } else {
-    base = [...(WORDS[G.lang] || WORDS.pt)];
-  }
-  let pool = [];
-  while (pool.length < 300) pool = pool.concat(shuffle(base));
-  return pool.slice(0, 300);
-}
-
-/* ──────────────────────────────────────
-   TIMER
-────────────────────────────────────── */
-function startTimer() {
-  G.started = true;
-  G.timerID = setInterval(() => {
-    G.elapsed++;
-
-    // WPM snapshot every 10s
-    if (G.elapsed % 10 === 0) G.wpmSnaps.push(calcWPM());
-
-    // Last-5-seconds tick
-    if (G.dur > 0) {
-      const rem = G.dur - G.elapsed;
-      if (rem <= 5 && rem > 0) beep('tick');
-      if (rem <= 0) { endSession(); return; }
-    }
-
-    renderTimer();
-    renderLiveStats();
-  }, 1000);
-}
-
-function stopTimer() {
-  clearInterval(G.timerID);
-  G.timerID = null;
-}
-
-function renderTimer() {
-  const el  = document.getElementById('g-timer');
-  const bar = document.getElementById('g-progress');
-
-  if (G.dur > 0) {
-    const rem = Math.max(0, G.dur - G.elapsed);
-    el.textContent = rem;
-    const pct = rem / G.dur * 100;
-    bar.style.width = pct + '%';
-    el.className  = 'timer-num' + (rem <= 5 ? ' warn' : '');
-    bar.className = 'timer-fill' + (rem <= 10 ? ' warn' : '');
-  } else {
-    el.textContent = G.elapsed;
-    bar.style.width = '0%';
-    el.className = 'timer-num';
-  }
-}
-
-/* ──────────────────────────────────────
-   METRICS
-────────────────────────────────────── */
-function calcWPM() {
-  if (G.elapsed < 1) return 0;
-  return Math.round(G.correctWords / (G.elapsed / 60));
-}
-
-function calcAcc() {
-  if (!G.totalKeys) return 100;
-  return Math.round(G.correctKeys / G.totalKeys * 100);
-}
-
-function renderLiveStats() {
-  document.getElementById('g-wpm').textContent    = calcWPM() || '—';
-  document.getElementById('g-acc').textContent    = G.totalKeys ? calcAcc() + '%' : '—';
-  document.getElementById('g-streak').textContent = G.streak;
-}
-
-/* ──────────────────────────────────────
-   ACCENT NORMALISATION
-   Strips diacritics so 'ã'='a', 'é'='e', etc.
-   Both typed char and expected char are normalised
-   before comparison — the original accented char
-   is still displayed in the word display.
-────────────────────────────────────── */
-function norm(s) {
-  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-// Track which key element is currently highlighted as "next"
-let _nextKeyEl = null;
-
-/* ──────────────────────────────────────
-   WORD RENDERING
-   loadNewWord  — called when moving to a new word (plays animation, rebuilds queue)
-   updateDisplay — called on every keystroke (only updates char colors + caret)
-────────────────────────────────────── */
-function loadNewWord() {
-  const word    = G.words[G.idx] || '';
-  const wordEl  = document.getElementById('cur-word');
-  const queueEl = document.getElementById('queue');
-
-  // Entrance animation: reset class so animation replays
-  wordEl.className = 'cur-word';
-  void wordEl.offsetWidth; // force reflow so animation resets
-  wordEl.className = 'cur-word word-in';
-
-  // Build char spans (all untyped initially)
-  wordEl.innerHTML = '';
-  for (const ch of word) {
-    const s = document.createElement('span');
-    s.textContent = ch;
-    wordEl.appendChild(s);
-  }
-
-  // Rebuild queue
-  queueEl.innerHTML = '';
-  for (let i = G.idx + 1; i <= G.idx + 5 && i < G.words.length; i++) {
-    const s = document.createElement('span');
-    s.className = 'q-word';
-    s.textContent = G.words[i];
-    queueEl.appendChild(s);
-  }
-
-  // Reset typed bar
-  const typedEl = document.getElementById('typed-bar');
-  typedEl.innerHTML = '';
-  const caret = document.createElement('span');
-  caret.className = 'caret';
-  caret.style.height = 'clamp(1.8rem,3vw,2.2rem)';
-  typedEl.appendChild(caret);
-
-  // Keyboard next-key highlight
-  if (G.mode === 1 || G.mode === 3) showNextKey(word, 0);
-}
-
-function updateDisplay() {
-  const word    = G.words[G.idx] || '';
-  const wordEl  = document.getElementById('cur-word');
-  const typedEl = document.getElementById('typed-bar');
-  const chars   = wordEl.querySelectorAll('span');
-
-  // Update char colors in the word display
-  chars.forEach((s, i) => {
-    if (i < G.typed.length) {
-      // Use normalised comparison so 'a' matches 'ã', etc.
-      s.className = norm(G.typed[i]) === norm(word[i]) ? 'c-ok' : 'c-err';
-    } else {
-      s.className = (i === G.typed.length) ? '' : 'c-dim';
-    }
-  });
-
-  // Extra chars typed beyond word length
-  const extras = wordEl.querySelectorAll('.c-extra');
-  extras.forEach(e => e.remove());
-  for (let i = word.length; i < G.typed.length; i++) {
-    const s = document.createElement('span');
-    s.className = 'c-err c-extra';
-    s.textContent = G.typed[i];
-    wordEl.appendChild(s);
-  }
-
-  // Typed bar
-  typedEl.innerHTML = '';
-  for (let i = 0; i < G.typed.length; i++) {
-    const s = document.createElement('span');
-    const isOk = i < word.length && norm(G.typed[i]) === norm(word[i]);
-    s.className = 'c ' + (isOk ? 'ok' : 'err');
-    s.textContent = G.typed[i];
-    typedEl.appendChild(s);
-  }
-  const caret = document.createElement('span');
-  caret.className = 'caret';
-  caret.style.height = 'clamp(1.8rem,3vw,2.2rem)';
-  typedEl.appendChild(caret);
-
-  // Keyboard next-key highlight
-  if (G.mode === 1 || G.mode === 3) showNextKey(word, G.typed.length);
-}
-
-// Alias for backward compat (startSession calls renderWord)
-function renderWord() { loadNewWord(); }
-
-/* ──────────────────────────────────────
-   KEY HANDLER
-────────────────────────────────────── */
-function handleKey(key) {
-  // Start timer on first printable key
-  if (!G.started && key.length === 1) startTimer();
-
-  const word = G.words[G.idx] || '';
-
-  if (key === 'Escape')    { endSession(); return; }
-  if (key === 'Tab')       { skipWord(); return; }
-  if (key === ' ' || key === 'Enter') {
-    if (G.typed.length > 0) submitWord();
-    return;
-  }
-  if (key === 'Backspace') {
-    if (G.typed.length > 0) {
-      G.typed = G.typed.slice(0, -1);
-      updateDisplay();   // ← only update colors, no animation
-    }
-    return;
-  }
-  if (key.length !== 1) return;
-
-  // Record keystroke accuracy — compare normalised so 'a' counts for 'ã'
-  const pos      = G.typed.length;
-  const expected = pos < word.length ? word[pos] : null;
-  // ok = typed key matches the expected char (accent-insensitive)
-  const ok = expected !== null && norm(key) === norm(expected);
-  G.totalKeys++;
-  if (ok) G.correctKeys++;
-  else {
-    // Track errors on the PLAIN (no-accent) key the user should have pressed
-    const errKey = expected ? norm(expected) : '?';
-    G.errKeys[errKey] = (G.errKeys[errKey] || 0) + 1;
-  }
-
-  G.typed += key;
-  updateDisplay();   // ← only update colors, no animation
-  renderLiveStats();
-}
-
-function submitWord() {
-  const word = G.words[G.idx];
-  // Accent-insensitive full-word comparison
-  const correct = norm(G.typed.trim()) === norm(word);
-
-  const wordEl = document.getElementById('cur-word');
-
-  if (correct) {
-    G.correctWords++;
-    G.streak++;
-    if (G.streak > G.maxStreak) G.maxStreak = G.streak;
-    beep('ok');
-    if (G.streak > 0 && G.streak % 10 === 0) {
-      beep('streak');
-      toast('🔥 ' + G.streak + ' em sequência!');
-    }
-    wordEl.classList.add('ok'); // flash green
-  } else {
-    G.wrongWords++;
-    G.streak = 0;
-    beep('err');
-    shakeBody();
-    wordEl.classList.add('err'); // flash red + shake
-  }
-
-  // Clear typed, advance index
-  G.typed = '';
-  G.idx++;
-
-  // Pre-load more words if pool running low
-  if (G.idx >= G.words.length - 20) {
-    G.words.push(...buildPool().slice(0, 80));
-  }
-
-  renderLiveStats();
-
-  // Wait for flash animation to finish BEFORE loading next word.
-  // ok animation = 0.35s, err animation = 0.4s → use 420ms for both.
-  setTimeout(() => {
-    wordEl.classList.remove('ok', 'err');
-    loadNewWord(); // ← plays entrance animation for new word
-  }, 420);
-}
-
-function skipWord() {
-  // Silently advance — skip does not count as a mistake nor break streak
-  G.typed = '';
-  G.idx++;
-  if (G.idx >= G.words.length - 20) G.words.push(...buildPool().slice(0, 80));
-  loadNewWord();
-  renderLiveStats();
-}
-
-/* ──────────────────────────────────────
-   SESSION MANAGEMENT
-────────────────────────────────────── */
-function startSession() {
-  // Check if there's an approved name change to notify
-  const reqs   = getRequests();
-  const approved = reqs.find(r => r.from === getSavedName() && r.status === 'approved');
-  if (approved) {
-    const msg = `✅ Seu nome foi alterado para "${approved.to}" pelo admin!`;
-    // Apply change
-    setSavedName(approved.to);
-    // Remove from requests
-    const updated = reqs.filter(r => !(r.from === approved.from && r.status === 'approved'));
-    saveRequests(updated);
-    updateNameUI();
-    toast(msg);
-    return; // let user see the notification before starting
-  }
-
-  // Name is required
-  const nameInp = document.getElementById('player-name');
-  const nameReq = document.getElementById('name-req');
-  const nameVal = nameInp.value.trim();
-
-  if (!nameVal) {
-    nameInp.classList.remove('error');
-    void nameInp.offsetWidth;
-    nameInp.classList.add('error');
-    nameReq.classList.add('show');
-    nameInp.focus();
-    return;
-  }
-  // Clear any error state
-  nameInp.classList.remove('error');
-  nameReq.classList.remove('show');
-
-  // Save name for next time
-  setSavedName(nameVal);
-  updateNameUI();
-  // Reset state
-  Object.assign(G, {
-    words:        buildPool(),
-    idx:          0,
-    typed:        '',
-    totalKeys:    0,
-    correctKeys:  0,
-    errKeys:      {},
-    correctWords: 0,
-    wrongWords:   0,
-    streak:       0,
-    maxStreak:    0,
-    wpmSnaps:     [],
-    elapsed:      0,
-    started:      false,
-  });
-  stopTimer();
-
-  // Update badge
-  const badge = document.getElementById('g-badge');
-  const badgeMap = {
-    1: ['m1', '🎯 Sem Olhar'],
-    2: ['m2', '⚡ Velocidade'],
-    3: ['m3', '🔥 Híbrido'],
-  };
-  const [cls, lbl] = badgeMap[G.mode];
-  badge.className = 'g-badge ' + cls;
-  badge.textContent = lbl;
-
-  // Show/hide keyboard based on mode
-  const kbWrap = document.getElementById('kb-wrap');
-  const m1tip  = document.getElementById('m1-tip');
-  kbWrap.style.display = (G.mode === 1 || G.mode === 3) ? '' : 'none';
-  m1tip.classList.toggle('hidden', G.mode === 2);
-
-  // Reset timer display
-  document.getElementById('g-timer').textContent = G.dur > 0 ? G.dur : '0';
-  document.getElementById('g-timer').className   = 'timer-num';
-  document.getElementById('g-progress').style.width = '100%';
-  document.getElementById('g-wpm').textContent    = '—';
-  document.getElementById('g-acc').textContent    = '—';
-  document.getElementById('g-streak').textContent = '0';
-
-  // Show accent badge only for langs that have accented chars
-  const accentBadge = document.getElementById('accent-badge');
-  accentBadge.style.display = (G.lang === 'pt' || G.lang === 'mix') ? '' : 'none';
-
-  showScreen('game');
-  loadNewWord();  // ← entrance animation for first word
-  refocus();
-}
-
-function endSession() {
-  stopTimer();
-  if (!G.wpmSnaps.length || G.wpmSnaps[G.wpmSnaps.length-1] !== calcWPM()) {
-    G.wpmSnaps.push(calcWPM());
-  }
-  beep('end');
-  showResults();
-}
-
-/* ──────────────────────────────────────
-   RESULTS
-────────────────────────────────────── */
-async function showResults() {
-  const wpm    = calcWPM();
-  const acc    = calcAcc();
-  const words  = G.correctWords + G.wrongWords;
-  const missed = Object.entries(G.errKeys).sort((a,b) => b[1]-a[1]).slice(0,8);
-
-  document.getElementById('e-wpm').textContent    = wpm;
-  document.getElementById('e-acc').textContent    = acc + '%';
-  document.getElementById('e-streak').textContent = G.maxStreak;
-  document.getElementById('e-words').textContent  = words;
-
-  // Save & check record
-  const name = document.getElementById('player-name').value.trim() || 'ANON';
-  saveSession({ name, wpm, acc, mode: G.mode, ts: Date.now() });
-
-  // Always save to rank leaderboard (async — fire and don't block UI)
-  saveRankEntry({ name, wpm, acc, streak: G.maxStreak, mode: G.mode, ts: Date.now() });
-
-  const rec = getRec();
-  if (wpm > (rec.wpm || 0)) {
-    saveRec({ name, wpm, acc });
-    document.getElementById('rec-banner').classList.remove('hidden');
-  } else {
-    document.getElementById('rec-banner').classList.add('hidden');
-  }
-
-  // Missed keys
-  const ml = document.getElementById('miss-list');
-  if (missed.length) {
-    ml.innerHTML = missed.map(([k,n]) =>
-      `<span class="miss-key">${k} <span class="miss-key-n">×${n}</span></span>`
-    ).join('');
-  } else {
-    ml.innerHTML = '<span class="miss-none">✓ Perfeito — sem erros de tecla!</span>';
-  }
-
-  // History chart
-  renderChart();
-
-  showScreen('end');
-}
-
-/* ──────────────────────────────────────
-   HISTORY CHART
-────────────────────────────────────── */
-function renderChart() {
-  const cv   = document.getElementById('chart-cv');
-  const wrap = cv.parentElement;
-  const W    = wrap.clientWidth || 320;
-  const H    = 100;
-  const dpr  = window.devicePixelRatio || 1;
-  cv.width   = W * dpr;
-  cv.height  = H * dpr;
-  cv.style.width  = W + 'px';
-  cv.style.height = H + 'px';
-  const ctx  = cv.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  const history = getHistory().slice(-20);
-  ctx.clearRect(0, 0, W, H);
-
-  if (history.length < 2) {
-    ctx.fillStyle = '#aaa79f';
-    ctx.font = '12px DM Sans, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('Complete mais sessões para ver o histórico.', W/2, H/2);
-    return;
-  }
-
-  const data = history.map(s => s.wpm);
-  const maxV = Math.max(...data, 10);
-  const pL = 32, pR = 10, pT = 10, pB = 22;
-  const cw = W - pL - pR, ch = H - pT - pB;
-
-  // Grid
-  ctx.strokeStyle = '#e4e1da'; ctx.lineWidth = 1;
-  [0, .5, 1].forEach(f => {
-    const y = pT + ch - f * ch;
-    ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(pL + cw, y); ctx.stroke();
-    ctx.fillStyle = '#aaa79f';
-    ctx.font = '9px JetBrains Mono, monospace';
-    ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-    ctx.fillText(Math.round(f * maxV), pL - 4, y);
-  });
-
-  const pts = data.map((v, i) => ({
-    x: pL + (i / (data.length - 1)) * cw,
-    y: pT + ch - (v / maxV) * ch,
-  }));
-
-  // Fill
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pT + ch);
-  pts.forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.lineTo(pts[pts.length-1].x, pT + ch);
-  ctx.closePath();
-  ctx.fillStyle = 'rgba(232,96,10,.08)'; ctx.fill();
-
-  // Line
-  ctx.beginPath();
-  ctx.strokeStyle = '#e8600a'; ctx.lineWidth = 2;
-  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-  pts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
-  ctx.stroke();
-
-  // Dots
-  pts.forEach(p => {
-    ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
-    ctx.fillStyle = '#e8600a'; ctx.fill();
-  });
-
-  // X axis
-  ctx.fillStyle = '#aaa79f'; ctx.font = '9px DM Sans, sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-  data.forEach((_, i) => {
-    if (i === 0 || i === data.length-1 || i % Math.ceil(data.length/4) === 0) {
-      ctx.fillText('#' + (i+1), pts[i].x, pT + ch + 4);
-    }
-  });
-}
-
-/* ──────────────────────────────────────
-   STORAGE
-────────────────────────────────────── */
-function getHistory() { try { return JSON.parse(localStorage.getItem('tf_hist') || '[]'); } catch(_) { return []; } }
-function saveSession(d) {
-  try {
-    const h = getHistory(); h.push(d);
-    if (h.length > 30) h.splice(0, h.length - 30);
-    localStorage.setItem('tf_hist', JSON.stringify(h));
-  } catch(_) {}
-}
-function getRec() { try { return JSON.parse(localStorage.getItem('tf_rec') || '{}'); } catch(_) { return {}; } }
-function saveRec(d) { try { localStorage.setItem('tf_rec', JSON.stringify(d)); } catch(_) {} }
-
-/* ── NAME PERSISTENCE ── */
-function getSavedName()     { try { return localStorage.getItem('tf_name') || ''; } catch(_) { return ''; } }
-function setSavedName(name) { try { localStorage.setItem('tf_name', name); } catch(_) {} }
-function clearSavedName()   { try { localStorage.removeItem('tf_name'); } catch(_) {} }
-
-/* Sync visible name field from saved value */
-function updateNameUI() {
-  const saved = getSavedName();
-  const chip       = document.getElementById('name-chip');
-  const inputWrap  = document.getElementById('name-input-wrap');
-  const chipName   = document.getElementById('name-chip-name');
-  const chipAvatar = document.getElementById('name-chip-avatar');
-  const nameInp    = document.getElementById('player-name');
-
-  if (saved) {
-    chip.style.display      = '';
-    inputWrap.style.display = 'none';
-    chipName.textContent    = saved;
-    chipAvatar.textContent  = saved.charAt(0).toUpperCase();
-    nameInp.value           = saved;
-  } else {
-    chip.style.display      = 'none';
-    inputWrap.style.display = '';
-    nameInp.value           = '';
-  }
-}
-
-/* ── NAME-CHANGE REQUESTS STORAGE ── */
-function getRequests()      { try { return JSON.parse(localStorage.getItem('tf_reqs') || '[]'); } catch(_) { return []; } }
-function saveRequests(data) { try { localStorage.setItem('tf_reqs', JSON.stringify(data)); } catch(_) {} }
-function addRequest(req)    {
-  const data = getRequests();
-  // Prevent duplicate pending from same user
-  const existing = data.findIndex(r => r.from === req.from && r.status === 'pending');
-  if (existing !== -1) data.splice(existing, 1); // replace old pending
-  data.push(req);
-  saveRequests(data);
-}
-
-function loadRecDisplay() {
-  const r = getRec();
-  const row = document.getElementById('rec-row');
-  row.innerHTML = r.wpm
-    ? `<div class="rec-chip" style="display:inline-flex;margin-top:8px"><span class="star">★</span>${r.name || 'ANON'} — ${r.wpm} WPM, ${r.acc}% precisão</div>`
-    : '';
-  updateNameUI();
-}
-
-/* ──────────────────────────────────────
-   SHARE
-────────────────────────────────────── */
-function share() {
-  const name = document.getElementById('player-name').value.trim() || 'ANON';
-  const modeNames = { 1:'Sem Olhar', 2:'Velocidade', 3:'Híbrido' };
-  const txt =
-    `⌨️ TypeFlow\n👤 ${name} | Modo: ${modeNames[G.mode]}\n` +
-    `⚡ ${document.getElementById('e-wpm').textContent} WPM\n` +
-    `🎯 ${document.getElementById('e-acc').textContent} Precisão\n` +
-    `🔥 Streak ${document.getElementById('e-streak').textContent}\n#TypeFlow`;
-  if (navigator.share) navigator.share({ title:'TypeFlow', text:txt }).catch(()=>{});
-  else navigator.clipboard?.writeText(txt).then(() => {
-    const b = document.getElementById('e-share');
-    const prev = b.textContent;
-    b.textContent = 'Copiado ✓';
-    setTimeout(() => b.textContent = prev, 2200);
-  }).catch(() => prompt('Copie:', txt));
-}
-
-/* ──────────────────────────────────────
-   RANK STORAGE  — Supabase (global) with localStorage fallback
-   Table: rankings (id uuid pk, name text, wpm int, acc int,
-                    streak int, mode int, created_at timestamptz)
-────────────────────────────────────── */
-const SB_TABLE = 'rank';
-
-// ── READ ──
-async function getRankData() {
-  if (window._sb) {
-    try {
-      const { data, error } = await window._sb
-        .from(SB_TABLE)
-        .select('name,wpm,acc,streak,mode,created_at')
-        .order('wpm', { ascending: false })
-        .limit(100);
-      if (!error && data) {
-        return data.map(r => ({
-          name:   r.name,
-          wpm:    r.wpm,
-          acc:    r.acc,
-          streak: r.streak ?? 0,
-          mode:   r.mode,
-          ts:     new Date(r.created_at).getTime(),
-        }));
-      }
-    } catch(_) {}
-  }
-  // fallback: localStorage
-  try { return JSON.parse(localStorage.getItem('tf_rank') || '[]'); } catch(_) { return []; }
-}
-
-// ── WRITE ──
-async function saveRankEntry(entry) {
-  if (window._sb) {
-    try {
-      await window._sb.from(SB_TABLE).insert({
-        name:   entry.name,
-        wpm:    entry.wpm,
-        acc:    entry.acc,
-        streak: entry.streak ?? 0,
-        mode:   entry.mode,
-      });
-      return;
-    } catch(_) {}
-  }
-  // fallback: localStorage
-  try {
-    const h = JSON.parse(localStorage.getItem('tf_rank') || '[]');
-    h.push(entry);
-    h.sort((a,b) => b.wpm - a.wpm);
-    if (h.length > 100) h.splice(100);
-    localStorage.setItem('tf_rank', JSON.stringify(h));
-  } catch(_) {}
-}
-
-// ── DELETE ALL ──
-async function clearRankData() {
-  if (window._sb) {
-    try {
-      // Delete all rows — requires DELETE policy on anon role in Supabase
-      await window._sb.from(SB_TABLE).delete().neq('wpm', -99999);
-      return;
-    } catch(_) {}
-  }
-  try { localStorage.removeItem('tf_rank'); } catch(_) {}
-}
-
-// ── DELETE ONE (by name+wpm+ts approximation) ──
-async function deleteRankEntry(entry) {
-  if (window._sb) {
-    try {
-      // Match by name + wpm + created_at approximation (within 60s)
-      const tsIso = new Date(entry.ts).toISOString();
-      const tsFrom = new Date(entry.ts - 60000).toISOString();
-      await window._sb.from(SB_TABLE).delete()
-        .eq('name', entry.name)
-        .eq('wpm',  entry.wpm)
-        .gte('created_at', tsFrom)
-        .lte('created_at', tsIso);
-      return;
-    } catch(_) {}
-  }
-  // fallback localStorage
-  try {
-    const h = JSON.parse(localStorage.getItem('tf_rank') || '[]');
-    const idx = h.findIndex(r => r.name === entry.name && r.wpm === entry.wpm && r.ts === entry.ts);
-    if (idx !== -1) { h.splice(idx, 1); localStorage.setItem('tf_rank', JSON.stringify(h)); }
-  } catch(_) {}
-}
-
-/* ──────────────────────────────────────
-   RANK RENDER  (async — fetches from Supabase)
-────────────────────────────────────── */
-let _rankFilter = 'all';
-
-const MEDALS   = { 1:'🥇', 2:'🥈', 3:'🥉' };
-const MODE_LBL = { 1:'Sem Olhar', 2:'Velocidade', 3:'Híbrido' };
-const MODE_CLS = { 1:'m1', 2:'m2', 3:'m3' };
-
-function fmtDate(ts) {
-  const d = new Date(ts);
-  return d.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
-}
-
-async function renderRank() {
-  const tbody  = document.getElementById('rank-tbody');
-  const infoEl = document.getElementById('rank-info');
-  const currentName = (document.getElementById('player-name').value.trim() || getSavedName() || 'ANON').toUpperCase();
-
-  // Loading state
-  tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--txt3);font-size:.85rem">
-    Carregando ranking... ⏳
-  </td></tr>`;
-  infoEl.textContent = '';
-
-  const all = await getRankData();
-
-  // Filter by mode
-  const filtered = _rankFilter === 'all'
-    ? all
-    : all.filter(e => String(e.mode) === String(_rankFilter));
-
-  tbody.innerHTML = '';
-
-  if (!filtered.length) {
-    tbody.innerHTML = `
-      <tr><td colspan="7">
-        <div class="rank-empty">
-          <span class="rank-empty-ico">🎮</span>
-          Nenhuma sessão salva ainda.<br>
-          Complete uma sessão para aparecer aqui!
-        </div>
-      </td></tr>`;
-    infoEl.textContent = '';
-    return;
-  }
-
-  filtered.forEach((entry, i) => {
-    const pos    = i + 1;
-    const isYou  = entry.name.toUpperCase() === currentName;
-    const tr     = document.createElement('tr');
-    tr.className = 'rank-row';
-    tr.style.animationDelay = Math.min(i * 25, 300) + 'ms';
-    if (isYou) tr.style.background = 'rgba(232,96,10,.04)';
-
-    const posCls = pos <= 3 ? ` p${pos}` : '';
-    const medal  = MEDALS[pos] || pos;
-
-    tr.innerHTML = `
-      <td><div class="rk-pos${posCls}">${medal}</div></td>
-      <td><div class="rk-name">${escHtml(entry.name)}${isYou ? '<span class="rk-you">você</span>' : ''}</div></td>
-      <td><div class="rk-wpm">${entry.wpm}<sup>wpm</sup></div></td>
-      <td><div class="rk-acc">${entry.acc}%</div></td>
-      <td><div class="rk-streak">${entry.streak ?? '—'}</div></td>
-      <td><div class="rk-mode ${MODE_CLS[entry.mode] || ''}">${MODE_LBL[entry.mode] || '—'}</div></td>
-      <td><div class="rk-date">${fmtDate(entry.ts)}</div></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  infoEl.textContent = `${filtered.length} entrada${filtered.length !== 1 ? 's' : ''}`;
-}
-
-function escHtml(str) {
-  return String(str)
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* ──────────────────────────────────────
-   SCREEN ROUTER  (updated)
-────────────────────────────────────── */
-function showScreen(name) {
-  // Track where we came FROM so back button knows where to return
-  if (name === 'rank') G.prevScreen = G.screen;
-  G.screen = name;
-  ['home','game','end','rank'].forEach(id => {
-    document.getElementById('s-' + id).classList.toggle('hidden', id !== name);
-  });
-  if (name === 'game') refocus();
-  if (name === 'home') loadRecDisplay();
-  if (name === 'rank') renderRank();
-}
-
-/* ──────────────────────────────────────
-   OTG FOCUS
-────────────────────────────────────── */
-const trap = document.getElementById('trap');
-function refocus() { setTimeout(() => trap.focus({ preventScroll: true }), 50); }
-
-document.addEventListener('click', e => {
-  const t = e.target;
-  if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
-  if (G.screen === 'game') refocus();
-});
-setInterval(() => {
-  if (G.screen === 'game' && document.activeElement !== trap) {
-    const ae = document.activeElement;
-    if (ae && ae.tagName !== 'BUTTON' && ae.tagName !== 'INPUT') refocus();
-  }
-}, 700);
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && G.screen === 'game') refocus();
-});
-
-/* ──────────────────────────────────────
-   KEYBOARD EVENTS
-────────────────────────────────────── */
-let _lastSig = '';
-function onKD(e) {
-  // Block copy/paste/cut during game
-  if (G.screen === 'game') {
-    if (['Space','Tab','Enter'].includes(e.code)) e.preventDefault();
-    if (e.ctrlKey && 'cvxaz'.includes(e.key.toLowerCase())) e.preventDefault();
-  }
-
-  hlKey(e.key, true);
-
-  // Deduplicate (trap + document both fire on some browsers)
-  const sig = e.key + Math.round(e.timeStamp / 4);
-  if (sig === _lastSig) return;
-  _lastSig = sig;
-
-  if (G.screen === 'game') handleKey(e.key);
-  if (G.screen === 'home' && e.key === 'Enter') document.getElementById('btn-start').click();
-  if (G.screen === 'end'  && e.key === 'Enter') document.getElementById('e-retry').click();
-}
-function onKU(e) { hlKey(e.key, false); }
-
-trap.addEventListener('keydown', onKD);
-trap.addEventListener('keyup',   onKU);
-document.addEventListener('keydown', e => { if (e.target !== trap) onKD(e); });
-document.addEventListener('keyup',   e => { if (e.target !== trap) hlKey(e.key, false); });
-
-/* ──────────────────────────────────────
-   TOAST & SHAKE
-────────────────────────────────────── */
-let _toastTid = null;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  clearTimeout(_toastTid);
-  _toastTid = setTimeout(() => el.classList.remove('show'), 2000);
-}
-function shakeBody() {
-  document.body.classList.remove('shake');
-  void document.body.offsetWidth;
-  document.body.classList.add('shake');
-  setTimeout(() => document.body.classList.remove('shake'), 240);
-}
-
-/* ──────────────────────────────────────
-   MUTE TOGGLE
-────────────────────────────────────── */
-function toggleMute() {
-  G.muted = !G.muted;
-  const icon = G.muted ? '🔇' : '🔊';
-  ['h-mute','g-mute','e-mute'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = icon;
-  });
-  if (G.screen === 'game') refocus();
-}
-
-/* ──────────────────────────────────────
-   HOME UI BINDINGS
-────────────────────────────────────── */
-// Mode cards
-document.getElementById('mode-grid').addEventListener('click', e => {
-  const card = e.target.closest('.mode-card');
-  if (!card) return;
-  G.mode = parseInt(card.dataset.mode, 10);
-  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('sel'));
-  card.classList.add('sel');
-});
-
-// Duration pills
-document.getElementById('dur-row').addEventListener('click', e => {
-  const pill = e.target.closest('[data-dur]');
-  if (!pill) return;
-  G.dur = parseInt(pill.dataset.dur, 10);
-  document.querySelectorAll('#dur-row .pill').forEach(p => p.classList.remove('on'));
-  pill.classList.add('on');
-});
-
-// Language pills
-document.getElementById('lang-row').addEventListener('click', e => {
-  const pill = e.target.closest('[data-lang]');
-  if (!pill) return;
-  G.lang = pill.dataset.lang;
-  document.querySelectorAll('#lang-row .pill').forEach(p => p.classList.remove('on'));
-  pill.classList.add('on');
-});
-
-// Start
-document.getElementById('btn-start').addEventListener('click', startSession);
-
-// Clear name error on typing
-document.getElementById('player-name').addEventListener('input', () => {
-  document.getElementById('player-name').classList.remove('error');
-  document.getElementById('name-req').classList.remove('show');
-});
-
-// Header mute
-document.getElementById('h-mute').addEventListener('click', toggleMute);
-
-// Home → Rank
-document.getElementById('h-rank').addEventListener('click', () => showScreen('rank'));
-
-/* ──────────────────────────────────────
-   GAME UI BINDINGS
-────────────────────────────────────── */
-document.getElementById('g-quit').addEventListener('click', endSession);
-document.getElementById('g-mute').addEventListener('click', toggleMute);
-document.getElementById('g-skip').addEventListener('click', () => { skipWord(); refocus(); });
-
-/* ──────────────────────────────────────
-   END UI BINDINGS
-────────────────────────────────────── */
-document.getElementById('e-retry').addEventListener('click', startSession);
-document.getElementById('e-rank').addEventListener('click',  () => showScreen('rank'));
-document.getElementById('e-share').addEventListener('click', share);
-document.getElementById('e-menu').addEventListener('click',  () => showScreen('home'));
-document.getElementById('e-mute').addEventListener('click',  toggleMute);
-
-/* ──────────────────────────────────────
-   RANK UI BINDINGS
-────────────────────────────────────── */
-document.getElementById('r-back').addEventListener('click', () => {
-  // Return to wherever the user came from (home or end screen)
-  showScreen(G.prevScreen || 'home');
-});
-
-document.getElementById('rank-filters').addEventListener('click', e => {
-  const pill = e.target.closest('[data-rf]');
-  if (!pill) return;
-  _rankFilter = pill.dataset.rf;
-  document.querySelectorAll('#rank-filters .pill').forEach(p => p.classList.remove('on'));
-  pill.classList.add('on');
-  renderRank();
-});
-
-/* ──────────────────────────────────────
-   INIT
-────────────────────────────────────── */
-buildKb();
-loadRecDisplay(); // also calls updateNameUI()
-showScreen('home');
-setTimeout(refocus, 150);
-
-/* ─── Name chip bindings ─── */
-
-// "Sair" — clear saved name, show input
-document.getElementById('btn-clear-name').addEventListener('click', () => {
-  clearSavedName();
-  updateNameUI();
-});
-
-// "Alterar nome" — open request modal
-document.getElementById('btn-req-name').addEventListener('click', () => {
-  openRequestModal();
-});
-
-/* ─── Request modal ─── */
-function openRequestModal() {
-  const saved = getSavedName();
-  document.getElementById('req-cur-name').value = saved;
-  document.getElementById('req-new-name').value = '';
-  document.getElementById('req-reason').value   = '';
-  document.getElementById('req-err').classList.remove('show');
-  document.getElementById('req-ok').classList.remove('show');
-  document.getElementById('req-form-inner').style.opacity = '1';
-  document.getElementById('req-overlay').classList.add('open');
-  setTimeout(() => document.getElementById('req-new-name').focus(), 80);
-}
-
-function closeRequestModal() {
-  document.getElementById('req-overlay').classList.remove('open');
-}
-
-document.getElementById('req-close').addEventListener('click', closeRequestModal);
-document.getElementById('req-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('req-overlay')) closeRequestModal();
-});
-
-document.getElementById('req-submit').addEventListener('click', () => {
-  const from   = getSavedName();
-  const to     = document.getElementById('req-new-name').value.trim();
-  const reason = document.getElementById('req-reason').value.trim();
-  const errEl  = document.getElementById('req-err');
-
-  if (!to)     { showReqErr(errEl, 'Por favor, preencha o nome desejado.'); return; }
-  if (to.length < 2) { showReqErr(errEl, 'O nome deve ter pelo menos 2 caracteres.'); return; }
-  if (to === from)   { showReqErr(errEl, 'O nome desejado é igual ao atual.'); return; }
-  if (!reason) { showReqErr(errEl, 'Por favor, informe o motivo da mudança.'); return; }
-
-  errEl.classList.remove('show');
-
-  addRequest({ from, to, reason, status: 'pending', ts: Date.now() });
-
-  // Show success, hide form fields
-  document.getElementById('req-ok').classList.add('show');
-  document.getElementById('req-form-inner').style.opacity = '0.4';
-  document.getElementById('req-form-inner').style.pointerEvents = 'none';
-
-  setTimeout(closeRequestModal, 2200);
-  toast('Solicitação enviada ao admin!');
-});
-
-function showReqErr(el, msg) {
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 3000);
-}
-
-/* ─── Admin requests ─── */
-function loadAdminRequests() {
-  const reqs   = getRequests().filter(r => r.status === 'pending');
-  const list   = document.getElementById('adm-req-list');
-  const notif  = document.getElementById('adm-req-notif');
-
-  // Update notification badge
-  if (reqs.length > 0) {
-    notif.textContent = reqs.length;
-    notif.style.display = '';
-  } else {
-    notif.style.display = 'none';
-  }
-
-  if (!reqs.length) {
-    list.innerHTML = '<div class="adm-req-empty">Nenhuma solicitação pendente. ✓</div>';
-    return;
-  }
-
-  list.innerHTML = '';
-  reqs.forEach((req, i) => {
-    const allReqs = getRequests();
-    // Find original index
-    const origIdx = allReqs.findIndex(r => r.ts === req.ts && r.from === req.from);
-
-    const row = document.createElement('div');
-    row.className = 'adm-req-row';
-    row.innerHTML = `
-      <div class="adm-req-top">
-        <span class="adm-req-from">${escHtml(req.from)}</span>
-        <span class="adm-req-arrow">→</span>
-        <span class="adm-req-to">${escHtml(req.to)}</span>
-        <span class="adm-req-date">${fmtDate(req.ts)}</span>
-      </div>
-      <div class="adm-req-reason">"${escHtml(req.reason)}"</div>
-      <div class="adm-req-btns">
-        <button class="adm-req-approve" data-ts="${req.ts}">✓ Aprovar</button>
-        <button class="adm-req-reject"  data-ts="${req.ts}">✕ Rejeitar</button>
-      </div>
-    `;
-    list.appendChild(row);
-  });
-
-  // Approve
-  list.querySelectorAll('.adm-req-approve').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const ts   = parseInt(btn.dataset.ts, 10);
-      const all  = getRequests();
-      const idx  = all.findIndex(r => r.ts === ts);
-      if (idx === -1) return;
-      all[idx].status = 'approved';
-      saveRequests(all);
-      loadAdminRequests();
-      toast(`✅ Mudança para "${all[idx].to}" aprovada!`);
-    });
-  });
-
-  // Reject
-  list.querySelectorAll('.adm-req-reject').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const ts  = parseInt(btn.dataset.ts, 10);
-      const all = getRequests();
-      const idx = all.findIndex(r => r.ts === ts);
-      if (idx === -1) return;
-      all[idx].status = 'rejected';
-      saveRequests(all);
-      loadAdminRequests();
-      toast('Solicitação rejeitada.');
-    });
-  });
-}
-
-document.getElementById('adm-req-refresh').addEventListener('click', loadAdminRequests);
-
-/* ══════════════════════════════════════
-   ADMIN PANEL
-══════════════════════════════════════ */
-const ADMIN_USER = '00';
-const ADMIN_PASS = '2503katy';
-
-let _adminOpen      = false;
-let _adminLoggedIn  = false;
-
-// ── Secret key sequence: 1 → 6 → v → v ──
-// Must be typed within 3 seconds of starting the sequence
-const SECRET_SEQ = ['1','6','v','v'];
-let _seqBuf = [];
-let _seqTid  = null;
-
-function checkSecretSeq(key) {
-  if (G.screen === 'game') return; // don't trigger during play
-  const k = key.toLowerCase();
-  if (!SECRET_SEQ.includes(k) && _seqBuf.length === 0) return;
-
-  _seqBuf.push(k);
-
-  // Reset timer on each key
-  clearTimeout(_seqTid);
-  _seqTid = setTimeout(() => { _seqBuf = []; }, 3000);
-
-  // Check if sequence matches
-  const needed = SECRET_SEQ.slice(0, _seqBuf.length);
-  if (JSON.stringify(_seqBuf) !== JSON.stringify(needed)) {
-    _seqBuf = []; clearTimeout(_seqTid); return;
-  }
-
-  if (_seqBuf.length === SECRET_SEQ.length) {
-    _seqBuf = []; clearTimeout(_seqTid);
-    openAdmin();
-  }
-}
-
-function openAdmin() {
-  _adminOpen = true;
-  document.getElementById('admin-overlay').classList.add('open');
-  if (!_adminLoggedIn) {
-    document.getElementById('adm-login').style.display = '';
-    document.getElementById('adm-panel').style.display = 'none';
-    setTimeout(() => document.getElementById('adm-user').focus(), 80);
-  } else {
-    document.getElementById('adm-login').style.display = 'none';
-    document.getElementById('adm-panel').style.display = '';
-    loadAdminList();
-    loadAdminRequests();
-  }
-}
-
-function closeAdmin() {
-  _adminOpen = false;
-  document.getElementById('admin-overlay').classList.remove('open');
-  if (G.screen === 'game') refocus();
-}
-
-function tryAdminLogin() {
-  const u = document.getElementById('adm-user').value.trim();
-  const p = document.getElementById('adm-pass').value;
-  const errEl = document.getElementById('adm-err');
-
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
-    _adminLoggedIn = true;
-    errEl.classList.remove('show');
-    document.getElementById('adm-login').style.display = 'none';
-    document.getElementById('adm-panel').style.display = '';
-    loadAdminList();
-    loadAdminRequests();
-  } else {
-    errEl.classList.add('show');
-    document.getElementById('adm-pass').value = '';
-    document.getElementById('adm-pass').focus();
-  }
-}
-
-// ── Load rank list inside admin ──
-async function loadAdminList() {
-  const list  = document.getElementById('adm-rank-list');
-  const count = document.getElementById('adm-count');
-
-  list.innerHTML = '<div style="padding:16px;text-align:center;font-size:.8rem;color:var(--txt3)">Carregando... ⏳</div>';
-
-  const data = await getRankData();
-  count.textContent = `(${data.length})`;
-
-  if (!data.length) {
-    list.innerHTML = '<div style="padding:16px;text-align:center;font-size:.8rem;color:var(--txt3)">Nenhuma entrada no ranking.</div>';
-    return;
-  }
-
-  list.innerHTML = '';
-  data.forEach((entry, i) => {
-    const row = document.createElement('div');
-    row.className = 'adm-rank-row';
-    row.innerHTML = `
-      <div class="adm-rank-row-pos">${i+1}</div>
-      <div class="adm-rank-row-name">${escHtml(entry.name)}</div>
-      <div class="adm-rank-row-wpm">${entry.wpm} <span style="font-size:.6rem;color:var(--txt3)">wpm</span></div>
-      <div style="font-size:.72rem;color:var(--txt3);min-width:36px;text-align:right">${entry.acc}%</div>
-      <button class="adm-rank-row-del" title="Remover entrada">✕</button>
-    `;
-    // Attach delete to the specific entry object
-    const btn = row.querySelector('.adm-rank-row-del');
-    btn.addEventListener('click', async () => {
-      btn.disabled = true;
-      btn.textContent = '...';
-      await deleteRankEntry(entry);
-      await loadAdminList();
-      if (G.screen === 'rank') renderRank();
-      toast('Entrada removida.');
-    });
-    list.appendChild(row);
-  });
-}
-
-// ── Add custom entry ──
-async function addCustomEntry() {
-  const nameEl   = document.getElementById('adm-r-name');
-  const wpmEl    = document.getElementById('adm-r-wpm');
-  const accEl    = document.getElementById('adm-r-acc');
-  const streakEl = document.getElementById('adm-r-streak');
-  const modeEl   = document.getElementById('adm-r-mode');
-  const errEl    = document.getElementById('adm-add-err');
-
-  const name   = nameEl.value.trim();
-  const wpm    = parseInt(wpmEl.value, 10);
-  const acc    = parseInt(accEl.value, 10);
-  const streak = parseInt(streakEl.value, 10) || 0;
-  const mode   = parseInt(modeEl.value, 10);
-
-  // Validate
-  if (!name) { showAdmErr(errEl, 'Nome é obrigatório.'); return; }
-  if (!wpm || wpm < 1 || wpm > 999) { showAdmErr(errEl, 'WPM inválido (1–999).'); return; }
-  if (!acc || acc < 1 || acc > 100) { showAdmErr(errEl, 'Precisão inválida (1–100).'); return; }
-
-  errEl.style.display = 'none';
-
-  const addBtn = document.getElementById('adm-add-btn');
-  addBtn.disabled = true;
-  addBtn.textContent = 'Salvando...';
-
-  await saveRankEntry({ name, wpm, acc, streak, mode, ts: Date.now() });
-
-  addBtn.disabled = false;
-  addBtn.textContent = '➕ Adicionar ao ranking';
-
-  await loadAdminList();
-  if (G.screen === 'rank') renderRank();
-
-  // Clear fields
-  nameEl.value = ''; wpmEl.value = ''; accEl.value = '';
-  streakEl.value = ''; modeEl.selectedIndex = 0;
-
-  toast(`✅ "${name}" adicionado ao ranking com ${wpm} WPM.`);
-}
-
-function showAdmErr(el, msg) {
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 3000);
-}
-
-// ── Admin bindings ──
-document.getElementById('adm-close').addEventListener('click', closeAdmin);
-
-// Close on overlay backdrop click
-document.getElementById('admin-overlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('admin-overlay')) closeAdmin();
-});
-
-document.getElementById('adm-login-btn').addEventListener('click', tryAdminLogin);
-
-// Enter key in login inputs
-['adm-user','adm-pass'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', e => {
-    if (e.key === 'Enter') { e.preventDefault(); tryAdminLogin(); }
-  });
-});
-
-document.getElementById('adm-add-btn').addEventListener('click', addCustomEntry);
-
-document.getElementById('adm-refresh').addEventListener('click', loadAdminList);
-
-document.getElementById('adm-clear-btn').addEventListener('click', async () => {
-  if (!confirm('Apagar TODOS os dados do ranking? Isso é permanente.')) return;
-  const btn = document.getElementById('adm-clear-btn');
-  btn.disabled = true; btn.textContent = 'Apagando...';
-  await clearRankData();
-  btn.disabled = false; btn.textContent = '🗑 Apagar ranking completo';
-  await loadAdminList();
-  if (G.screen === 'rank') renderRank();
-  toast('Ranking apagado pelo admin.');
-});
-
-// Hook secret sequence into existing keydown handler
-const _origOnKD = onKD;
-document.addEventListener('keydown', e => {
-  checkSecretSeq(e.key);
-  // Close admin with Escape
-  if (e.key === 'Escape' && _adminOpen) { e.stopPropagation(); closeAdmin(); }
-});
-</script>
+<script src="js/storage.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/components/results-overview.js"></script>
+<script src="js/components/results-keys.js"></script>
+<script src="js/components/results-words.js"></script>
+<script src="js/components/results-speed.js"></script>
+<script src="js/components/results-shell.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
